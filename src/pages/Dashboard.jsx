@@ -174,7 +174,7 @@ export default function Dashboard() {
           title="Total Revenue" 
           value={memoizedStats.totalRevenue} 
           icon={DollarSign} 
-          color="bg-petron-blue"
+          color="bg-mkc-blue"
           trend={12.5}
           trendValue="vs last month"
         />

@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Lock, Mail, User, Phone, Loader2, ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
-import petronLogo from '../assets/images/petron-logo.png';
+import mkcLogo from '../assets/images/mkc-logo.png';
+import bgImage from '../assets/images/background-image.jpg';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -66,7 +67,8 @@ export default function Register() {
         options: {
           data: {
             full_name: formData.fullName,
-            phone_number: formData.phone
+            phone_number: formData.phone,
+            role: 'admin'
           }
         }
       });
@@ -74,18 +76,6 @@ export default function Register() {
       if (authError) throw authError;
 
       if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: authData.user.id,
-            full_name: formData.fullName,
-            phone_number: formData.phone,
-            role: 'admin',
-            updated_at: new Date().toISOString()
-          });
-
-        if (profileError) throw profileError;
-        
         setSuccess(true);
         
         setTimeout(() => {
@@ -101,23 +91,23 @@ export default function Register() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-petron-blue flex items-center justify-center p-4">
-        <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center">
+      <div className="min-h-screen bg-mkc-red flex items-center justify-center p-4">
+        <div className="bg-mkc-blue w-full max-w-md rounded-2xl shadow-2xl p-8 text-center border border-white/20">
           <div className="flex justify-center mb-4">
             <div className="w-20 h-20 bg-white rounded-xl overflow-hidden shadow-lg flex items-center justify-center mx-auto">
-              <img src={petronLogo} alt="Petron Logo" className="w-full h-full object-contain p-2 rounded-xl" />
+              <img src={mkcLogo} alt="MKC Logo" className="w-full h-full object-contain p-2 rounded-xl" />
             </div>
           </div>
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="text-green-600" size={40} />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Admin Account Created!</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold text-white mb-2">Admin Account Created!</h2>
+          <p className="text-white/80 mb-6">
             Your admin account has been successfully created. Proceed to login with your credentials.
           </p>
           <Link 
             to="/login"
-            className="inline-block bg-petron-blue text-white px-6 py-3 rounded-lg hover:opacity-90"
+            className="inline-block bg-mkc-red text-[#1A1A1A] px-6 py-3 rounded-lg hover:bg-mkc-red-dark"
           >
             Go to Login
           </Link>
@@ -127,17 +117,39 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-petron-blue flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
-        <div className="bg-petron-red p-8 text-center relative">
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundImage: `url(${bgImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.28,
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0,0,0,0.55)',
+          pointerEvents: 'none',
+          zIndex: 5,
+        }}
+      />
+      <div className="relative z-10 bg-mkc-blue w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+        <div className="bg-mkc-blue-dark p-8 text-center relative">
           <Link to="/login" className="absolute top-6 left-6 text-white/80 hover:text-white transition">
             <ArrowLeft size={24} />
           </Link>
           <div className="flex justify-center mb-4">
             <div className="w-24 h-24 bg-white rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
               <img 
-                src={petronLogo} 
-                alt="Petron Logo" 
+                src={mkcLogo} 
+                alt="MKC Logo" 
                 className="w-full h-full object-contain p-2 rounded-xl"
               />
             </div>
@@ -157,7 +169,7 @@ export default function Register() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-white/90 mb-1">
               Full Name <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -175,7 +187,7 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-white/90 mb-1">
               Phone Number <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -193,7 +205,7 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-white/90 mb-1">
               Email Address <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -203,7 +215,7 @@ export default function Register() {
                 type="email"
                 required
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none"
-                placeholder="admin@petron.com"
+                placeholder="admin@mkcfoods.com"
                 value={formData.email}
                 onChange={handleChange}
               />
@@ -212,7 +224,7 @@ export default function Register() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-white/90 mb-1">
                 Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -229,7 +241,7 @@ export default function Register() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-white/90 mb-1">
                 Confirm <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -256,7 +268,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-petron-blue hover:opacity-90 text-white font-bold py-3 rounded-lg transition duration-200 flex items-center justify-center shadow-lg"
+            className="w-full bg-mkc-red hover:bg-mkc-red-dark text-[#1A1A1A] font-bold py-3 rounded-lg transition duration-200 flex items-center justify-center shadow-lg"
           >
             {loading ? (
               <>
@@ -269,9 +281,9 @@ export default function Register() {
           </button>
           
           <div className="text-center mt-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-white/80">
               Already have an account?{' '}
-              <Link to="/login" className="text-[#0033A0] font-bold hover:text-[#ED1C24] hover:underline">
+              <Link to="/login" className="text-mkc-red font-bold hover:text-white hover:underline">
                 Sign In
               </Link>
             </p>

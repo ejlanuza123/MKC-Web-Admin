@@ -135,7 +135,7 @@ const EditCustomerModal = React.memo(({ isOpen, onClose, customer, onUpdate }) =
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
       <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
-        <div className="bg-petron-blue p-6 flex justify-between items-center">
+        <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white">Edit Customer</h3>
           <button 
             onClick={onClose}
@@ -206,7 +206,7 @@ const EditCustomerModal = React.memo(({ isOpen, onClose, customer, onUpdate }) =
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 bg-petron-blue text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 bg-mkc-blue text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 'Saving...'
@@ -249,7 +249,7 @@ const CustomerDetailsModal = React.memo(({ customer, onClose, onAvatarClick }) =
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
       <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="bg-petron-blue p-6 flex justify-between items-center">
+        <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white">Customer Details</h3>
           <button 
             onClick={onClose}
@@ -277,7 +277,7 @@ const CustomerDetailsModal = React.memo(({ customer, onClose, onAvatarClick }) =
                   />
                 </button>
               ) : (
-                <div className="w-16 h-16 bg-petron-blue rounded-xl flex items-center justify-center text-white font-bold text-2xl mr-4 shadow-lg">
+                <div className="w-16 h-16 bg-mkc-blue rounded-xl flex items-center justify-center text-white font-bold text-2xl mr-4 shadow-lg">
                   {customer.full_name?.charAt(0)?.toUpperCase()}
                 </div>
               )}
@@ -685,7 +685,7 @@ export default function Customers() {
                               />
                             </button>
                           ) : (
-                            <div className="w-10 h-10 bg-petron-blue rounded-lg flex items-center justify-center text-white font-bold mr-3 shadow-sm">
+                            <div className="w-10 h-10 bg-mkc-blue rounded-lg flex items-center justify-center text-white font-bold mr-3 shadow-sm">
                               {customer.full_name?.charAt(0)?.toUpperCase() || '?'}
                             </div>
                           )}

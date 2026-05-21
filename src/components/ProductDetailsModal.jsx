@@ -31,7 +31,7 @@ export default function ProductDetailsModal({ isOpen, onClose, product, onEdit }
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
-        <div className="bg-petron-blue p-5 flex items-center justify-between">
+        <div className="bg-mkc-blue p-5 flex items-center justify-between">
           <div>
             <h3 className="text-xl font-bold text-white">Product Details</h3>
             <p className="text-sm text-white/80">{product.name || 'Unnamed Product'}</p>
@@ -117,7 +117,7 @@ export default function ProductDetailsModal({ isOpen, onClose, product, onEdit }
           </button>
           <button
             onClick={() => onEdit(product)}
-            className="px-4 py-2 rounded-lg bg-petron-blue text-white hover:opacity-90 inline-flex items-center gap-2"
+            className="px-4 py-2 rounded-lg bg-mkc-blue text-white hover:opacity-90 inline-flex items-center gap-2"
           >
             <Edit2 size={16} />
             Edit Product

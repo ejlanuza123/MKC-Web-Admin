@@ -133,7 +133,7 @@ export default function PasswordRecovery() {
   };
 
   return (
-    <div className="min-h-screen bg-petron-blue flex items-center justify-center p-4">
+    <div className="min-h-screen bg-mkc-blue flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8">
         <h1 className="text-2xl font-bold text-[#0033A0] mb-2">Reset Admin Password</h1>
         <p className="text-sm text-gray-600 mb-6">Set a new password for your admin account.</p>
@@ -189,7 +189,7 @@ export default function PasswordRecovery() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-petron-red hover:opacity-90 text-white font-bold py-3 rounded-lg transition-all duration-200 flex items-center justify-center"
+              className="w-full bg-mkc-red hover:opacity-90 text-white font-bold py-3 rounded-lg transition-all duration-200 flex items-center justify-center"
             >
               {submitting ? (
                 <>

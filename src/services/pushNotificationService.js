@@ -41,8 +41,8 @@ export const pushNotificationService = {
 
     try {
       new Notification(title, {
-        icon: '/petron-logo.png',
-        badge: '/petron-logo.png',
+        icon: '/icon.png',
+        badge: '/icon.png',
         ...options
       });
       return true;

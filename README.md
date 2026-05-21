@@ -1,6 +1,6 @@
 # Admin Web Dashboard
 
-React + Vite admin dashboard for managing orders, riders, products, reports, audit logs, and operational settings for the Petron San Pedro delivery system.
+React + Vite admin dashboard for managing orders, riders, products, reports, audit logs, and operational settings for the MKC Foods delivery system.
 
 ## Documentation
 
@@ -208,4 +208,4 @@ For production, set in deployment platform dashboard.
 
 ## License
 
-Internal - Petron San Pedro Delivery System
+Internal - MKC Foods Delivery System

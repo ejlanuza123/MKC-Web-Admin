@@ -47,9 +47,9 @@ describe('useProducts', () => {
     vi.clearAllMocks();
     realtimeCallback = undefined;
 
-    mocks.productService.getAll.mockResolvedValue([{ id: 'p-1', name: 'Oil A' }]);
-    mocks.productService.create.mockResolvedValue({ id: 'p-2', name: 'Oil B' });
-    mocks.productService.update.mockResolvedValue({ id: 'p-1', name: 'Oil A+', stock: 10 });
+    mocks.productService.getAll.mockResolvedValue([{ id: 'p-1', name: 'MKC Chicken Breast' }]);
+    mocks.productService.create.mockResolvedValue({ id: 'p-2', name: 'MKC Chicken Wings' });
+    mocks.productService.update.mockResolvedValue({ id: 'p-1', name: 'MKC Chicken Breast+', stock: 10 });
     mocks.productService.delete.mockResolvedValue(undefined);
     mocks.productService.getLowStock.mockResolvedValue([{ id: 'p-3', stock: 2 }]);
     mocks.productService.subscribeToChanges.mockImplementation((cb) => {
@@ -66,7 +66,7 @@ describe('useProducts', () => {
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
-      expect(result.current.products).toEqual([{ id: 'p-1', name: 'Oil A' }]);
+      expect(result.current.products).toEqual([{ id: 'p-1', name: 'MKC Chicken Breast' }]);
     });
 
     expect(mocks.productService.getAll).toHaveBeenCalledTimes(1);
@@ -80,12 +80,12 @@ describe('useProducts', () => {
     });
 
     await act(async () => {
-      await result.current.addProduct({ name: 'Oil B' });
+      await result.current.addProduct({ name: 'MKC Chicken Wings' });
     });
 
-    expect(mocks.productService.create).toHaveBeenCalledWith({ name: 'Oil B' });
-    expect(mocks.logProductAction).toHaveBeenCalledWith('p-2', 'create_product', { name: 'Oil B' });
-    expect(mocks.notifySuccess).toHaveBeenCalledWith('Created product: Oil B');
+    expect(mocks.productService.create).toHaveBeenCalledWith({ name: 'MKC Chicken Wings' });
+    expect(mocks.logProductAction).toHaveBeenCalledWith('p-2', 'create_product', { name: 'MKC Chicken Wings' });
+    expect(mocks.notifySuccess).toHaveBeenCalledWith('Created product: MKC Chicken Wings');
     expect(result.current.products.some((p) => p.id === 'p-2')).toBe(true);
   });
 
@@ -97,10 +97,10 @@ describe('useProducts', () => {
     });
 
     await act(async () => {
-      await result.current.updateProduct('p-1', { name: 'Oil A+' });
+      await result.current.updateProduct('p-1', { name: 'MKC Chicken Breast+' });
     });
 
-    expect(mocks.productService.update).toHaveBeenCalledWith('p-1', { name: 'Oil A+' });
+    expect(mocks.productService.update).toHaveBeenCalledWith('p-1', { name: 'MKC Chicken Breast+' });
     expect(mocks.logProductAction).toHaveBeenCalledWith(
       'p-1',
       'update_product',
@@ -128,11 +128,11 @@ describe('useProducts', () => {
     act(() => {
       realtimeCallback({
         eventType: 'UPDATE',
-        new: { id: 'p-1', name: 'Oil A Updated' },
+        new: { id: 'p-1', name: 'MKC Chicken Breast Updated' },
       });
     });
 
-    expect(result.current.products[0].name).toBe('Oil A Updated');
+    expect(result.current.products[0].name).toBe('MKC Chicken Breast Updated');
 
     act(() => {
       realtimeCallback({

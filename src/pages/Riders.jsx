@@ -206,7 +206,7 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm overflow-y-auto">
       <div className="bg-white rounded-xl max-w-2xl w-full shadow-2xl my-8">
-        <div className="bg-petron-blue p-6 flex justify-between items-center sticky top-0">
+        <div className="bg-mkc-blue p-6 flex justify-between items-center sticky top-0">
           <h3 className="text-xl font-bold text-white">Add New Rider</h3>
           <button 
             onClick={onClose}
@@ -393,7 +393,7 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 bg-petron-blue text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center"
+              className="flex-1 py-2.5 bg-mkc-blue text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center"
             >
               {loading ? (
                 <>
@@ -509,7 +509,7 @@ const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
       <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
-        <div className="bg-petron-blue p-6 flex justify-between items-center">
+        <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white">Edit Rider</h3>
           <button 
             onClick={onClose}
@@ -625,7 +625,7 @@ const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 bg-petron-blue text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center"
+              className="flex-1 py-2.5 bg-mkc-blue text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center"
             >
               {loading ? (
                 <>
@@ -703,7 +703,7 @@ const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
       <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
-        <div className="bg-petron-blue p-6 flex justify-between items-center">
+        <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white">Reset Password</h3>
           <button 
             onClick={onClose}
@@ -793,7 +793,7 @@ const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 bg-petron-blue text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center"
+              className="flex-1 py-2.5 bg-mkc-blue text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center"
             >
               {loading ? (
                 <>
@@ -837,7 +837,7 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
       <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="bg-petron-blue p-6 flex justify-between items-center">
+        <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white">Rider Details</h3>
           <button 
             onClick={onClose}
@@ -865,7 +865,7 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
                   />
                 </button>
               ) : (
-                <div className="w-20 h-20 bg-petron-blue rounded-xl flex items-center justify-center text-white font-bold text-3xl mr-4 shadow-lg">
+                <div className="w-20 h-20 bg-mkc-blue rounded-xl flex items-center justify-center text-white font-bold text-3xl mr-4 shadow-lg">
                   {rider.full_name?.charAt(0)?.toUpperCase()}
                 </div>
               )}
@@ -1309,7 +1309,7 @@ export default function Riders() {
         <h2 className="text-2xl font-bold text-gray-800">Rider Management</h2>
         <button
           onClick={() => setShowAddModal(true)}
-          className="bg-petron-blue text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
+          className="bg-mkc-blue text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
         >
           <Plus size={18} />
           Add Rider
@@ -1358,7 +1358,7 @@ export default function Riders() {
           {!searchQuery && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="mt-4 bg-petron-blue text-white px-6 py-2 rounded-lg hover:opacity-90"
+              className="mt-4 bg-mkc-blue text-white px-6 py-2 rounded-lg hover:opacity-90"
             >
               Add Your First Rider
             </button>
@@ -1387,7 +1387,7 @@ export default function Riders() {
                         />
                       </button>
                     ) : (
-                      <div className="w-12 h-12 bg-petron-blue rounded-xl flex items-center justify-center text-white font-bold text-xl mr-3 shadow-md">
+                      <div className="w-12 h-12 bg-mkc-blue rounded-xl flex items-center justify-center text-white font-bold text-xl mr-3 shadow-md">
                         {rider.full_name?.charAt(0)?.toUpperCase() || '?'}
                       </div>
                     )}

@@ -462,7 +462,7 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
       <div className="bg-white rounded-xl w-full max-w-6xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="bg-petron-blue p-6 flex justify-between items-center">
+        <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white flex items-center">
             <Navigation className="mr-2" size={24} />
             Live Rider Tracking - {rider?.full_name || 'Rider'}
@@ -502,7 +502,7 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider }) {
           <div className="w-96 bg-white border-l border-gray-200 overflow-y-auto">
             <div className="p-6 border-b border-gray-200">
               <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                <User size={18} className="mr-2 text-petron-blue" />
+                <User size={18} className="mr-2 text-mkc-blue" />
                 Rider Information
               </h4>
               <div className="space-y-3 text-sm">
@@ -532,7 +532,7 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider }) {
 
             <div className="p-6 border-b border-gray-200">
               <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                <Route size={18} className="mr-2 text-petron-blue" />
+                <Route size={18} className="mr-2 text-mkc-blue" />
                 Focused Route
               </h4>
               {selectedDeliveryId ? (
@@ -554,7 +554,7 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider }) {
 
             <div className="p-6">
               <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                <Truck size={18} className="mr-2 text-petron-blue" />
+                <Truck size={18} className="mr-2 text-mkc-blue" />
                 Active Deliveries ({activeDeliveries?.length || 0})
               </h4>
 

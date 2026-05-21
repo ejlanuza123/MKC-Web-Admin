@@ -287,7 +287,7 @@ export default function Reports() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `petron-report-${dateRange}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `mkc-report-${dateRange}-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   }, [reportData, dateRange]);
@@ -368,7 +368,7 @@ export default function Reports() {
           <button
             onClick={exportToCSV}
             disabled={!reportData || refreshing}
-            className="bg-petron-blue text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="bg-mkc-blue text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             <Download size={18} />
             Export
@@ -461,7 +461,7 @@ export default function Reports() {
                         <div className="flex-1">
                           <div className="h-8 bg-gray-100 rounded-lg relative group">
                             <div 
-                              className="h-full bg-petron-blue rounded-lg transition-all duration-300"
+                              className="h-full bg-mkc-blue rounded-lg transition-all duration-300"
                               style={{ width: `${percentage}%` }}
                             >
                               <div className="opacity-0 group-hover:opacity-100 absolute right-0 -top-8 bg-gray-800 text-white text-xs px-2 py-1 rounded transition-opacity">
@@ -506,7 +506,7 @@ export default function Reports() {
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2.5">
                           <div 
-                            className="bg-petron-blue h-2.5 rounded-full transition-all duration-300"
+                            className="bg-mkc-blue h-2.5 rounded-full transition-all duration-300"
                             style={{ 
                               width: `${getPercentage(data.revenue, reportData.summary.totalRevenue)}%` 
                             }}
@@ -534,7 +534,7 @@ export default function Reports() {
                 {reportData.topCustomers.map((customer, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-petron-blue rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                      <div className="w-8 h-8 bg-mkc-blue rounded-lg flex items-center justify-center text-white font-bold text-sm">
                         {customer.name?.charAt(0)?.toUpperCase() || '?'}
                       </div>
                       <div>

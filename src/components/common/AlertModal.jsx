@@ -132,7 +132,7 @@ const AlertModal = ({
                   ${type === 'success' ? 'bg-green-600 hover:bg-green-700' : ''}
                   ${type === 'error' ? 'bg-red-600 hover:bg-red-700' : ''}
                   ${type === 'warning' ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
-                  ${type === 'info' || type === 'confirm' ? 'bg-petron-blue hover:bg-petron-blue-dark' : ''}
+                  ${type === 'info' || type === 'confirm' ? 'bg-mkc-blue hover:bg-mkc-blue-dark' : ''}
                   text-white disabled:opacity-50 flex items-center justify-center
                 `}
               >

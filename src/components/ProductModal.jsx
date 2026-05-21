@@ -9,7 +9,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
-    category: PRODUCT_CATEGORIES.MOTOR_OIL,
+    category: PRODUCT_CATEGORIES.WHOLE_CHICKEN,
     current_price: '',
     stock_quantity: '',
     unit: 'pcs',
@@ -28,7 +28,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
       setFormData({
         name: product.name || '',
         sku: product.sku || '',
-        category: product.category || PRODUCT_CATEGORIES.MOTOR_OIL,
+        category: product.category || PRODUCT_CATEGORIES.WHOLE_CHICKEN,
         current_price: product.current_price || '',
         stock_quantity: product.stock_quantity || '',
         unit: product.unit || 'pcs',
@@ -42,7 +42,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
       setFormData({
         name: '',
         sku: '',
-        category: PRODUCT_CATEGORIES.MOTOR_OIL,
+        category: PRODUCT_CATEGORIES.WHOLE_CHICKEN,
         current_price: '',
         stock_quantity: '',
         unit: 'pcs',
@@ -106,7 +106,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
   return createPortal(
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm w-screen h-screen">
       <div className="bg-white rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden">
-        <div className="bg-petron-blue p-6">
+        <div className="bg-mkc-blue p-6">
           <h3 className="text-xl font-bold text-white">
             {product ? 'Edit Product' : 'Add New Product'}
           </h3>
@@ -127,7 +127,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
                   value={formData.name}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  placeholder="e.g. Petron Xtra Unleaded"
+                  placeholder="e.g. Magnolia Whole Chicken"
                 />
                 {errors.name && (
                   <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -164,7 +164,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
                     value={formData.sku}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    placeholder="e.g. PET-EO-001"
+                    placeholder="e.g. MKC-WC-001"
                   />
                   {errors.sku && (
                     <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -186,7 +186,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
                   value={formData.unit}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  placeholder="pcs / liters"
+                  placeholder="kg / bag / tub / pack"
                 />
               </div>
 
@@ -307,7 +307,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 bg-petron-blue text-white font-medium rounded-lg hover:opacity-90 transition flex items-center justify-center disabled:opacity-50"
+              className="flex-1 py-2.5 bg-mkc-blue text-white font-medium rounded-lg hover:opacity-90 transition flex items-center justify-center disabled:opacity-50"
             >
               {loading ? (
                 <>

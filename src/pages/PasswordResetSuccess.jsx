@@ -4,7 +4,7 @@ import { CheckCircle2 } from 'lucide-react';
 
 export default function PasswordResetSuccess() {
   return (
-    <div className="min-h-screen bg-petron-blue flex items-center justify-center p-4">
+    <div className="min-h-screen bg-mkc-blue flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center">
         <div className="flex justify-center mb-4">
           <CheckCircle2 className="text-green-600" size={56} />
@@ -17,7 +17,7 @@ export default function PasswordResetSuccess() {
 
         <Link
           to="/login"
-          className="inline-block mt-6 bg-petron-red hover:opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200"
+          className="inline-block mt-6 bg-mkc-red hover:opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200"
         >
           Back to Login
         </Link>

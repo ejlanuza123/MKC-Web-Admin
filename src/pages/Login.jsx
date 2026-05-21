@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
-import petronLogo from '../assets/images/petron-logo.png';
+import mkcLogo from '../assets/images/mkc-logo.png';
+import bgImage from '../assets/images/background-image.jpg';
 import { supabase } from '../lib/supabase';
 
 const ADMIN_ROLE = 'admin';
@@ -186,15 +187,37 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-petron-blue flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
-        {/* Header with Petron colors */}
-        <div className="bg-petron-red p-8 text-center">
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundImage: `url(${bgImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.28,
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0,0,0,0.55)',
+          pointerEvents: 'none',
+          zIndex: 5,
+        }}
+      />
+      <div className="relative z-10 bg-mkc-blue w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+        {/* Header with MKC colors */}
+        <div className="bg-mkc-blue-dark p-8 text-center">
           <div className="flex justify-center mb-4">
             <div className="w-24 h-24 bg-white rounded-xl overflow-hidden flex items-center justify-center shadow-lg">
               <img 
-                src={petronLogo} 
-                alt="Petron Logo" 
+                src={mkcLogo} 
+                alt="MKC Logo" 
                 className="w-full h-full object-contain p-2 rounded-xl"
               />
             </div>
@@ -220,7 +243,7 @@ export default function Login() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-white/90 mb-1">
               Email Address
             </label>
             <div className="relative">
@@ -229,7 +252,7 @@ export default function Login() {
                 type="email"
                 required
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] focus:border-transparent outline-none transition"
-                placeholder="admin@petron.com"
+                placeholder="admin@mkcfoods.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -237,7 +260,7 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-white/90 mb-1">
               Password
             </label>
             <div className="relative">
@@ -259,11 +282,11 @@ export default function Login() {
                 type="checkbox" 
                 className="rounded border-gray-300 text-[#0033A0] focus:ring-[#0033A0] focus:ring-2" 
               />
-              <span className="ml-2 text-sm text-gray-600">Remember me</span>
+              <span className="ml-2 text-sm text-white/80">Remember me</span>
             </label>
             <button 
               type="button" 
-              className="text-sm text-[#0033A0] hover:text-[#ED1C24] font-medium transition-colors duration-200"
+              className="text-sm text-mkc-red hover:text-white font-medium transition-colors duration-200"
               onClick={() => {
                 setError('');
                 setSuccessMessage('');
@@ -278,7 +301,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-petron-red hover:opacity-90 text-white font-bold py-3 rounded-lg transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+            className="w-full bg-mkc-red hover:bg-mkc-red-dark text-[#1A1A1A] font-bold py-3 rounded-lg transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
           >
             {loading ? (
               <>
@@ -291,11 +314,11 @@ export default function Login() {
           </button>
 
           <div className="text-center mt-6">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-white/80">
               Need an admin account?{' '}
               <Link 
                 to="/register" 
-                className="text-[#0033A0] font-bold hover:text-[#ED1C24] hover:underline transition-colors duration-200"
+                className="text-mkc-red font-bold hover:text-white hover:underline transition-colors duration-200"
               >
                 Register here
               </Link>
@@ -330,7 +353,7 @@ export default function Login() {
                     type="email"
                     required
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] focus:border-transparent outline-none transition"
-                    placeholder="admin@petron.com"
+                    placeholder="admin@mkcfoods.com"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                   />
@@ -351,7 +374,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={resetLoading}
-                  className="px-4 py-2 rounded-lg bg-petron-red text-white font-semibold hover:opacity-90 disabled:opacity-60"
+                  className="px-4 py-2 rounded-lg bg-mkc-red text-white font-semibold hover:opacity-90 disabled:opacity-60"
                 >
                   {resetLoading ? 'Sending...' : 'Send Reset Link'}
                 </button>
@@ -417,7 +440,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={updatePasswordLoading}
-                  className="px-4 py-2 rounded-lg bg-petron-red text-white font-semibold hover:opacity-90 disabled:opacity-60"
+                  className="px-4 py-2 rounded-lg bg-mkc-red text-white font-semibold hover:opacity-90 disabled:opacity-60"
                 >
                   {updatePasswordLoading ? 'Updating...' : 'Update Password'}
                 </button>

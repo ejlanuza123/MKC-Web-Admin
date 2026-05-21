@@ -185,7 +185,7 @@ export default function Settings() {
   };
 
   const handleTestNotification = () => {
-    const sent = pushNotificationService.sendNotification('Petron Admin Notification', {
+    const sent = pushNotificationService.sendNotification('MKC Admin Notification', {
       body: 'Push notifications are enabled for this admin panel.',
       tag: 'admin-settings-test',
     });

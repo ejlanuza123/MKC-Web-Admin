@@ -69,7 +69,7 @@ describe('filteringService', () => {
   });
 
   it('getFilteredProducts applies search and returns data', async () => {
-    const q = createQuery({ data: [{ id: 'p1', name: 'Oil' }], error: null, count: 1 });
+    const q = createQuery({ data: [{ id: 'p1', name: 'MKC Chicken Breast' }], error: null, count: 1 });
     const select = vi.fn(() => q);
     mocks.from.mockImplementation((table) => {
       if (table === 'products') return { select };
@@ -77,7 +77,7 @@ describe('filteringService', () => {
     });
 
     const result = await filteringService.getFilteredProducts({
-      search: 'oil',
+      search: 'chicken',
       isActive: true,
       pageSize: 50,
       page: 0,
@@ -85,8 +85,8 @@ describe('filteringService', () => {
 
     expect(result.success).toBe(true);
     expect(q.eq).toHaveBeenCalledWith('is_active', true);
-    expect(q.ilike).toHaveBeenCalledWith('name', '%oil%');
-    expect(result.data).toEqual([{ id: 'p1', name: 'Oil' }]);
+    expect(q.ilike).toHaveBeenCalledWith('name', '%chicken%');
+    expect(result.data).toEqual([{ id: 'p1', name: 'MKC Chicken Breast' }]);
   });
 
   it('getFilterOptions returns de-duplicated options', async () => {
@@ -97,7 +97,7 @@ describe('filteringService', () => {
       ],
     });
     const productsSelect = vi.fn().mockResolvedValue({
-      data: [{ category: 'Fuel' }, { category: 'Fuel' }, { category: 'Oil' }],
+      data: [{ category: 'Whole Chicken' }, { category: 'Whole Chicken' }, { category: 'Cut-Ups & Portions' }],
     });
     const ridersEq = vi.fn().mockResolvedValue({
       data: [{ id: 'r1', full_name: 'Rider One' }],
@@ -116,7 +116,7 @@ describe('filteringService', () => {
     expect(result.success).toBe(true);
     expect(result.options.statuses).toEqual(['Pending']);
     expect(result.options.paymentMethods).toEqual(['COD', 'GCash']);
-    expect(result.options.categories).toEqual(['Fuel', 'Oil']);
+    expect(result.options.categories).toEqual(['Cut-Ups & Portions', 'Whole Chicken']);
     expect(result.options.riders).toEqual([{ id: 'r1', name: 'Rider One' }]);
   });
 
@@ -180,7 +180,7 @@ describe('filteringService', () => {
   it('getFilterOptions returns error when query fails', async () => {
     const ordersSelect = vi.fn().mockRejectedValue(new Error('orders query failed'));
     const productsSelect = vi.fn().mockResolvedValue({
-      data: [{ category: 'Fuel' }],
+      data: [{ category: 'Whole Chicken' }],
     });
     const ridersEq = vi.fn().mockResolvedValue({
       data: [],

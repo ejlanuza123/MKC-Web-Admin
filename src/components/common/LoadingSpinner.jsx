@@ -18,7 +18,7 @@ export default function LoadingSpinner({ size = 'md', fullPage = false, error = 
           <p className="text-red-600 font-medium">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-petron-blue text-white rounded-lg hover:opacity-90"
+            className="mt-4 px-4 py-2 bg-mkc-blue text-white rounded-lg hover:opacity-90"
           >
             Refresh Page
           </button>

@@ -25,7 +25,7 @@ describe('productService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockSingle.mockResolvedValue({ data: { id: 'p-1', name: 'Oil A' }, error: null });
+    mockSingle.mockResolvedValue({ data: { id: 'p-1', name: 'MKC Chicken Breast' }, error: null });
     mockSelect.mockReturnValue({ single: mockSingle });
     mockInsert.mockReturnValue({ select: mockSelect });
     mockUpdate.mockReturnValue({ eq: mockEq, select: mockSelect });
@@ -80,33 +80,33 @@ describe('productService', () => {
   });
 
   it('create returns inserted product', async () => {
-    const created = { id: 'p-2', name: 'Oil B' };
+    const created = { id: 'p-2', name: 'MKC Chicken Wings' };
     const localSingle = vi.fn().mockResolvedValue({ data: created, error: null });
     const localSelect = vi.fn().mockReturnValue({ single: localSingle });
     const localInsert = vi.fn().mockReturnValue({ select: localSelect });
     mockFrom.mockReturnValue({ insert: localInsert });
 
-    const data = await productService.create({ name: 'Oil B' });
+    const data = await productService.create({ name: 'MKC Chicken Wings' });
 
     expect(localInsert).toHaveBeenCalledWith([
-      expect.objectContaining({ name: 'Oil B', created_at: expect.any(String), updated_at: expect.any(String) }),
+      expect.objectContaining({ name: 'MKC Chicken Wings', created_at: expect.any(String), updated_at: expect.any(String) }),
     ]);
     expect(data).toEqual(created);
   });
 
   it('update returns updated product', async () => {
-    const updated = { id: 'p-2', name: 'Updated Oil' };
+    const updated = { id: 'p-2', name: 'Updated MKC Chicken Wings' };
     const localSingle = vi.fn().mockResolvedValue({ data: updated, error: null });
     const localSelect = vi.fn().mockReturnValue({ single: localSingle });
     const localEq = vi.fn().mockReturnValue({ select: localSelect });
     const localUpdate = vi.fn().mockReturnValue({ eq: localEq });
     mockFrom.mockReturnValue({ update: localUpdate });
 
-    const data = await productService.update('p-2', { name: 'Updated Oil' });
+    const data = await productService.update('p-2', { name: 'Updated MKC Chicken Wings' });
 
     expect(data).toEqual(updated);
     expect(localUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Updated Oil', updated_at: expect.any(String) })
+      expect.objectContaining({ name: 'Updated MKC Chicken Wings', updated_at: expect.any(String) })
     );
   });
 
@@ -117,7 +117,7 @@ describe('productService', () => {
     const localUpdate = vi.fn().mockReturnValue({ eq: localEq });
     mockFrom.mockReturnValue({ update: localUpdate });
 
-    await expect(productService.update('p-2', { name: 'Updated Oil' })).rejects.toThrow('update failed');
+    await expect(productService.update('p-2', { name: 'Updated MKC Chicken Wings' })).rejects.toThrow('update failed');
   });
 
   it('delete succeeds and throws on query error', async () => {

@@ -175,7 +175,7 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
       <div className="bg-white rounded-xl w-full max-w-md shadow-2xl">
-        <div className="bg-petron-blue p-6 flex justify-between items-center">
+        <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white flex items-center">
             <Truck className="mr-2" size={24} />
             Assign Rider
@@ -288,7 +288,7 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
                 <button
                   onClick={handleAssign}
                   disabled={loading || !selectedRider || riders.length === 0}
-                  className="flex-1 py-2.5 bg-petron-blue text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center"
+                  className="flex-1 py-2.5 bg-mkc-blue text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center"
                 >
                   {loading ? (
                     <>

@@ -23,7 +23,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import petronLogo from '../assets/images/petron-logo.png';
+import mkcLogo from '../assets/images/mkc-logo.png';
 import PageTransition from './PageTransition';
 import SettingsModal from './SettingsModal';
 import FloatingChatBubble from './common/FloatingChatBubble';
@@ -40,7 +40,7 @@ const NavItem = memo(({ to, icon: Icon, label, isActive, onClick }) => {
         relative flex items-center w-full px-4 py-3 rounded-lg 
         transition-all duration-300 ease-in-out
         ${isActive 
-          ? 'bg-petron-blue text-white shadow-lg' 
+          ? 'bg-mkc-blue text-white shadow-lg' 
           : 'text-gray-600 hover:bg-[#E5EEFF] hover:text-[#0033A0]'
         }
       `}
@@ -48,7 +48,7 @@ const NavItem = memo(({ to, icon: Icon, label, isActive, onClick }) => {
       {/* Animated background for active state */}
       {isActive && (
         <motion.div 
-          className="absolute inset-0 bg-petron-blue rounded-lg opacity-50"
+          className="absolute inset-0 bg-mkc-blue rounded-lg opacity-50"
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
@@ -282,7 +282,7 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
     >
       {/* Logo Section */}
       <motion.div 
-        className="p-6 border-b bg-petron-blue"
+        className="p-6 border-b bg-mkc-blue"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -290,8 +290,8 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center space-x-3 min-w-0">
             <motion.img 
-              src={petronLogo} 
-              alt="Petron Logo" 
+              src={mkcLogo} 
+              alt="MKC Logo" 
               className="h-12 w-auto object-contain bg-white rounded-lg p-1"
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.5 }}
@@ -364,7 +364,7 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
                 className="w-8 h-8 rounded-lg object-cover mr-3 flex-shrink-0 border border-gray-200"
               />
             ) : (
-              <div className="w-8 h-8 bg-petron-blue rounded-lg flex items-center justify-center text-white font-bold mr-3 flex-shrink-0">
+              <div className="w-8 h-8 bg-mkc-blue rounded-lg flex items-center justify-center text-white font-bold mr-3 flex-shrink-0">
                 {profile?.full_name?.charAt(0)?.toUpperCase() || 'A'}
               </div>
             )}
@@ -372,7 +372,7 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
               <p className="text-sm font-medium text-gray-900 truncate">
                 {profile?.full_name || 'Admin'}
               </p>
-              <p className="text-xs text-gray-500 truncate">{profile?.email || 'admin@petron.com'}</p>
+              <p className="text-xs text-gray-500 truncate">{profile?.email || 'admin@mkcfoods.com'}</p>
             </div>
             <motion.div
               animate={{ rotate: isProfileMenuOpen ? 180 : 0 }}
@@ -460,15 +460,15 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
   return (
                   { to: '/reservations', icon: CalendarDays, label: 'Reservations' },
     <>
-      <header className="md:hidden bg-petron-blue border-b border-white/20 px-4 py-3 flex justify-between items-center z-20">
+      <header className="md:hidden bg-mkc-blue border-b border-white/20 px-4 py-3 flex justify-between items-center z-20">
         <motion.div 
           className="flex items-center min-w-0 flex-1"
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
         >
           <motion.img 
-            src={petronLogo} 
-            alt="Petron Logo" 
+            src={mkcLogo} 
+            alt="MKC Logo" 
             className="h-12 w-auto object-contain bg-white rounded-lg p-1 border border-white/60 mr-3 shrink-0"
             whileHover={{ rotate: 360 }}
             transition={{ duration: 0.5 }}
@@ -557,13 +557,13 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
                       className="w-10 h-10 rounded-lg object-cover mr-3 border border-gray-200"
                     />
                   ) : (
-                    <div className="w-10 h-10 bg-petron-blue rounded-lg flex items-center justify-center text-white font-bold mr-3">
+                    <div className="w-10 h-10 bg-mkc-blue rounded-lg flex items-center justify-center text-white font-bold mr-3">
                       {profile?.full_name?.charAt(0)?.toUpperCase() || 'A'}
                     </div>
                   )}
                   <div className="min-w-0 text-left flex-1">
                     <p className="font-medium text-gray-900 truncate">{profile?.full_name || 'Admin'}</p>
-                    <p className="text-sm text-gray-500 truncate">{profile?.email || 'admin@petron.com'}</p>
+                    <p className="text-sm text-gray-500 truncate">{profile?.email || 'admin@mkcfoods.com'}</p>
                   </div>
                   <motion.div
                     animate={{ rotate: isMobileProfileMenuOpen ? 180 : 0 }}

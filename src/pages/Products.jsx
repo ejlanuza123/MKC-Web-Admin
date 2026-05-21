@@ -16,14 +16,18 @@ import { useLocation, useNavigate } from 'react-router-dom';
 // Default placeholder images based on category
 const getPlaceholderImage = (category) => {
   switch(category) {
-    case PRODUCT_CATEGORIES.FUEL:
+    case PRODUCT_CATEGORIES.WHOLE_CHICKEN:
       return 'https://images.unsplash.com/photo-1588707631731-9627b1e4cd2a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
-    case PRODUCT_CATEGORIES.MOTOR_OIL:
-      return 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
-    case PRODUCT_CATEGORIES.ENGINE_OIL:
-      return 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+    case PRODUCT_CATEGORIES.CUT_UPS:
+      return 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+    case PRODUCT_CATEGORIES.READY_TO_COOK:
+      return 'https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+    case PRODUCT_CATEGORIES.GIBLETS:
+      return 'https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+    case PRODUCT_CATEGORIES.CLASS_B:
+      return 'https://images.unsplash.com/photo-1513639776629-7b61b0ac49cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
     default:
-      return 'https://images.unsplash.com/photo-1588707631731-9627b1e4cd2a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+      return 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
   }
 };
 
@@ -240,11 +244,11 @@ export default function Products() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-800">Inventory Management</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Product Catalog</h2>
         
         <button 
           onClick={openAdd}
-          className="bg-petron-blue text-white px-6 py-2.5 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity duration-150 shadow-lg"
+          className="bg-mkc-blue text-white px-6 py-2.5 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity duration-150 shadow-lg"
         >
           <Plus size={18} />
           Add New Product
@@ -257,7 +261,7 @@ export default function Products() {
       <div className="flex flex-col sm:flex-row gap-4">
         <SearchBar 
           onSearch={handleSearch}
-          placeholder="Search products..."
+          placeholder="Search MKC products..."
           className="flex-1"
         />
         
@@ -327,22 +331,10 @@ export default function Products() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                      {product.category === PRODUCT_CATEGORIES.FUEL ? (
-                        <div className="text-center">
-                          <div className="text-6xl mb-2">⛽</div>
-                          <p className="text-sm text-gray-400">Fuel Product</p>
-                        </div>
-                      ) : product.category === PRODUCT_CATEGORIES.MOTOR_OIL ? (
-                        <div className="text-center">
-                          <div className="text-6xl mb-2">🛢️</div>
-                          <p className="text-sm text-gray-400">Motor Oil</p>
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          <div className="text-6xl mb-2">🔧</div>
-                          <p className="text-sm text-gray-400">Engine Oil</p>
-                        </div>
-                      )}
+                      <div className="text-center">
+                        <div className="text-6xl mb-2">🍗</div>
+                        <p className="text-sm text-gray-400">MKC Product</p>
+                      </div>
                     </div>
                   )}
                   

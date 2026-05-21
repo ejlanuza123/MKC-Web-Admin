@@ -1,6 +1,6 @@
 # Admin Web Developer Setup Guide
 
-This guide helps new developers set up the Petron San Pedro admin web application locally.
+This guide helps new developers set up the MKC Foods admin web application locally.
 
 ## Overview
 

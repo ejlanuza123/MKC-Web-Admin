@@ -354,7 +354,7 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
       <div className="bg-white rounded-xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="bg-petron-blue p-4 flex justify-between items-center">
+        <div className="bg-mkc-blue p-4 flex justify-between items-center">
           <div className="flex items-center">
             <Navigation className="text-white mr-2" size={24} />
             <div>
