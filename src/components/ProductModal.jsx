@@ -5,6 +5,24 @@ import { X, Save, Loader2, AlertCircle, Image as ImageIcon } from 'lucide-react'
 import { PRODUCT_CATEGORIES } from '../utils/constants';
 import { validateProduct } from '../utils/validation';
 
+const UNIT_OPTIONS = [
+  'pcs',
+  'pack',
+  'box',
+  'bottle',
+  'can',
+  'sachet',
+  'tray',
+  'tub',
+  'bag',
+  'kg',
+  'g',
+  'l',
+  'ml',
+  'liter',
+  'dozen'
+];
+
 export default function ProductModal({ isOpen, onClose, product, onSave }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -22,6 +40,9 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
+  const unitOptions = product?.unit && !UNIT_OPTIONS.includes(product.unit)
+    ? [product.unit, ...UNIT_OPTIONS]
+    : UNIT_OPTIONS;
 
   useEffect(() => {
     if (product) {
@@ -179,15 +200,20 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Unit
                 </label>
-                <input
-                  type="text"
+                <select
                   name="unit"
                   className={`w-full border ${errors.unit ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
                   value={formData.unit}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  placeholder="kg / bag / tub / pack"
-                />
+                >
+                  <option value="">Select a unit</option>
+                  {unitOptions.map((unit) => (
+                    <option key={unit} value={unit}>
+                      {unit}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-2">

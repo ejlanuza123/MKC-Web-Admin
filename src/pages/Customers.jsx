@@ -9,6 +9,7 @@ import { formatCurrency, formatDate } from '../utils/formatters';
 import { diffObjects, formatChangesDescription } from '../utils/diff';
 import { notifySuccess } from '../utils/successNotifier';
 import { useAdminLog } from '../hooks/useAdminLog';
+import { useAuth } from '../hooks/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // Skeleton Components (keep as is)
@@ -379,6 +380,7 @@ CustomerDetailsModal.displayName = 'CustomerDetailsModal';
 export default function Customers() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const handledFocusNonceRef = useRef(null);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -437,11 +439,16 @@ export default function Customers() {
             created_at
           )
         `)
-        .eq('role', 'customer')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setCustomers(data || []);
+
+      const customerRows = (data || []).filter((profile) => {
+        const role = String(profile.role || '').toLowerCase().trim();
+        return role !== 'admin' && role !== 'rider';
+      });
+
+      setCustomers(customerRows);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -450,11 +457,19 @@ export default function Customers() {
   }, []);
 
   useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      setCustomers([]);
+      setLoading(false);
+      return;
+    }
+
     fetchCustomers();
 
     const subscription = supabase
       .channel('customers-channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: 'role=eq.customer' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
         fetchCustomers(true);
       })
       .subscribe();
@@ -462,7 +477,7 @@ export default function Customers() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchCustomers]);
+  }, [authLoading, fetchCustomers, user]);
 
   // Memoized filtered customers
   const filteredCustomers = useMemo(() => {

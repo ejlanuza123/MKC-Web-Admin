@@ -118,6 +118,9 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
     setError('');
 
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const adminSession = sessionData?.session;
+
       // 1. Create auth user with custom password
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -154,6 +157,15 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
           .eq('id', authData.user.id);
 
         if (profileError) throw profileError;
+
+        if (authData.session && adminSession?.access_token && adminSession?.refresh_token) {
+          const { error: restoreError } = await supabase.auth.setSession({
+            access_token: adminSession.access_token,
+            refresh_token: adminSession.refresh_token
+          });
+
+          if (restoreError) throw restoreError;
+        }
 
         // 3. Show success and close modal
         notifySuccess(`Created rider ${formData.full_name}`);
@@ -1009,7 +1021,7 @@ RiderDetailsModal.displayName = 'RiderDetailsModal';
 export default function Riders() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const handledFocusNonceRef = useRef(null);
   const { logRiderAction } = useAdminLog();
   const [riders, setRiders] = useState([]);
@@ -1074,12 +1086,16 @@ export default function Riders() {
             order_id
           )
         `)
-        .eq('role', 'rider')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      setRiders(data || []);
+
+      const riderRows = (data || []).filter((profile) => {
+        const role = String(profile.role || '').toLowerCase().trim();
+        return role === 'rider';
+      });
+
+      setRiders(riderRows);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -1088,11 +1104,19 @@ export default function Riders() {
   }, []);
 
   useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      setRiders([]);
+      setLoading(false);
+      return;
+    }
+
     fetchRiders();
 
     const ridersSubscription = supabase
       .channel('riders-channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: 'role=eq.rider' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
         fetchRiders(true);
       })
       .subscribe();
@@ -1108,7 +1132,7 @@ export default function Riders() {
       ridersSubscription.unsubscribe();
       deliveriesSubscription.unsubscribe();
     };
-  }, [fetchRiders]);
+  }, [authLoading, fetchRiders, user]);
 
   const updateRiderStatus = useCallback(async (riderId, isActive) => {
     try {
