@@ -2,12 +2,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
 import mkcLogo from '../assets/images/mkc-logo.png';
 import bgImage from '../assets/images/background-image.jpg';
 import { supabase } from '../lib/supabase';
 
 const ADMIN_ROLE = 'admin';
+const PERSONNEL_VERIFICATION_CODE = import.meta.env.VITE_ADMIN_VERIFICATION_CODE || '';
+const PERSONNEL_VERIFICATION_STORAGE_KEY = 'mkc-admin-personnel-verified';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -23,6 +25,18 @@ export default function Login() {
   const [resetEmail, setResetEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationError, setVerificationError] = useState('');
+  const [isVerified, setIsVerified] = useState(() => {
+    if (!PERSONNEL_VERIFICATION_CODE) return true;
+
+    try {
+      return window.sessionStorage.getItem(PERSONNEL_VERIFICATION_STORAGE_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -55,6 +69,37 @@ export default function Login() {
       subscription.unsubscribe();
     };
   }, []);
+
+  const handleVerificationSubmit = (e) => {
+    e.preventDefault();
+
+    if (!PERSONNEL_VERIFICATION_CODE) {
+      setIsVerified(true);
+      return;
+    }
+
+    const enteredCode = verificationCode.trim();
+
+    if (!enteredCode) {
+      setVerificationError('Please enter the verification code.');
+      return;
+    }
+
+    if (enteredCode !== PERSONNEL_VERIFICATION_CODE) {
+      setVerificationError('Invalid verification code.');
+      return;
+    }
+
+    try {
+      window.sessionStorage.setItem(PERSONNEL_VERIFICATION_STORAGE_KEY, 'true');
+    } catch {
+      // Ignore storage failures and continue with this session.
+    }
+
+    setVerificationError('');
+    setVerificationCode('');
+    setIsVerified(true);
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -186,6 +231,78 @@ export default function Login() {
     }
   };
 
+  if (!isVerified) {
+    return (
+      <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundImage: `url(${bgImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.28,
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.55)',
+            pointerEvents: 'none',
+            zIndex: 5,
+          }}
+        />
+        <div className="relative z-10 bg-mkc-blue w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+          <div className="bg-mkc-blue-dark p-8 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-20 h-20 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                <ShieldCheck className="text-[#0033A0]" size={38} />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-white">Personnel Verification</h2>
+            <p className="text-white/80 mt-2">Enter the access code before signing in.</p>
+          </div>
+
+          <form onSubmit={handleVerificationSubmit} className="p-8 space-y-5">
+            {verificationError && (
+              <div className="bg-red-50 border-l-4 border-[#ED1C24] p-4 rounded">
+                <p className="text-sm text-red-700">{verificationError}</p>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-white/90 mb-1">
+                Verification Code
+              </label>
+              <div className="relative">
+                <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="password"
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] focus:border-transparent outline-none transition"
+                  placeholder="Enter code"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-mkc-red hover:bg-mkc-red-dark text-[#1A1A1A] font-bold py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              Continue
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
       <div
@@ -266,13 +383,21 @@ export default function Login() {
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] focus:border-transparent outline-none transition"
+                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] focus:border-transparent outline-none transition"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
           </div>
 
