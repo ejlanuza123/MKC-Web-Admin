@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Save, Loader2, AlertCircle, Image as ImageIcon } from 'lucide-react';
-import { PRODUCT_CATEGORIES } from '../utils/constants';
 import { validateProduct } from '../utils/validation';
+
+const DEFAULT_PRODUCT_CATEGORY = 'MKC Foods';
 
 const UNIT_OPTIONS = [
   'pcs',
@@ -27,7 +28,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
-    category: PRODUCT_CATEGORIES.WHOLE_CHICKEN,
+    category: DEFAULT_PRODUCT_CATEGORY,
     current_price: '',
     stock_quantity: '',
     unit: 'pcs',
@@ -49,7 +50,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
       setFormData({
         name: product.name || '',
         sku: product.sku || '',
-        category: product.category || PRODUCT_CATEGORIES.WHOLE_CHICKEN,
+        category: product.category || DEFAULT_PRODUCT_CATEGORY,
         current_price: product.current_price || '',
         stock_quantity: product.stock_quantity || '',
         unit: product.unit || 'pcs',
@@ -63,7 +64,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
       setFormData({
         name: '',
         sku: '',
-        category: PRODUCT_CATEGORIES.WHOLE_CHICKEN,
+        category: DEFAULT_PRODUCT_CATEGORY,
         current_price: '',
         stock_quantity: '',
         unit: 'pcs',
@@ -118,7 +119,13 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
     if (!validation.isValid) return;
     
     setLoading(true);
-    await onSave(formData);
+    const payload = {
+      ...formData,
+      // Category is no longer editable in MKC; keep a stable value for new products.
+      category: product?.category || DEFAULT_PRODUCT_CATEGORY,
+    };
+
+    await onSave(payload);
     setLoading(false);
   };
 
@@ -158,42 +165,25 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
-                  </label>
-                  <select
-                    name="category"
-                    className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none"
-                    value={formData.category}
-                    onChange={handleChange}
-                  >
-                    {Object.values(PRODUCT_CATEGORIES).map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    SKU
-                  </label>
-                  <input
-                    type="text"
-                    name="sku"
-                    className={`w-full border ${errors.sku ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
-                    value={formData.sku}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="e.g. MKC-WC-001"
-                  />
-                  {errors.sku && (
-                    <p className="mt-1 text-sm text-red-600 flex items-center">
-                      <AlertCircle size={14} className="mr-1" />
-                      {errors.sku}
-                    </p>
-                  )}
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  SKU
+                </label>
+                <input
+                  type="text"
+                  name="sku"
+                  className={`w-full border ${errors.sku ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
+                  value={formData.sku}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="e.g. MKC-WC-001"
+                />
+                {errors.sku && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                    <AlertCircle size={14} className="mr-1" />
+                    {errors.sku}
+                  </p>
+                )}
               </div>
 
               <div>
