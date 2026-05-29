@@ -1,6 +1,8 @@
 // src/components/OrderModal.jsx
 import React, { useCallback, useEffect, useState } from 'react';
 import { X, MapPin, Phone, User, CreditCard, Package, Calendar, Hash, Store, Image as ImageIcon, Truck } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import mkcLogo from '../assets/images/mkc-logo.png';
 import { ORDER_STATUS_COLORS } from '../utils/constants';
 import { formatCurrency, formatDate, formatPhoneNumber, formatOrderNumber } from '../utils/formatters';
 import { supabase } from '../lib/supabase';
@@ -15,6 +17,161 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange }) {
   const orderItems = order?.order_items || [];
   const totalItemTypes = orderItems.length;
   const totalQuantity = orderItems.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+  const grandTotal = (Number(order?.total_amount) || 0) + (Number(order?.delivery_fee) || 0);
+
+  const formatPdfMoney = useCallback((value) => {
+    const numericValue = Number(value) || 0;
+    return `PHP ${numericValue.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  }, []);
+
+  const handlePrintOrder = useCallback(async () => {
+    if (!order) return;
+
+    const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 40;
+    const contentWidth = pageWidth - margin * 2;
+    let cursorY = 48;
+
+    const ensureSpace = (neededHeight = 24) => {
+      if (cursorY + neededHeight < pageHeight - 60) return;
+      pdf.addPage();
+      cursorY = 48;
+      drawHeader(false);
+    };
+
+    const writeLine = (text, x, y, options = {}) => {
+      pdf.text(String(text), x, y, options);
+    };
+
+    const loadImageData = async (imageSrc) => {
+      try {
+        const response = await fetch(imageSrc);
+        const blob = await response.blob();
+
+        return await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch {
+        return null;
+      }
+    };
+
+    const logoData = await loadImageData(mkcLogo);
+
+    const drawHeader = (withTitle = true) => {
+      pdf.setFillColor(0, 51, 160);
+      pdf.rect(0, 0, pageWidth, 92, 'F');
+      if (logoData) {
+        pdf.addImage(logoData, 'PNG', margin, 14, 44, 44);
+      }
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(20);
+      if (withTitle) {
+        writeLine('Order Printout', margin + 58, 34);
+      }
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      writeLine(`Order ${formatOrderNumber(order.order_number, order.id)}`, margin + 58, 56);
+      writeLine(`Printed ${formatDate(new Date().toISOString())}`, margin + 58, 72);
+      pdf.setTextColor(34, 34, 34);
+      cursorY = 120;
+    };
+
+    const writeSectionTitle = (text) => {
+      ensureSpace(46);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.setTextColor(0, 51, 160);
+      writeLine(text, margin, cursorY);
+      cursorY += 18;
+      pdf.setDrawColor(210);
+      pdf.line(margin, cursorY, pageWidth - margin, cursorY);
+      cursorY += 18;
+      pdf.setTextColor(34, 34, 34);
+    };
+
+    const writeLabelValue = (label, value) => {
+      ensureSpace(24);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(10);
+      writeLine(label, margin, cursorY);
+      pdf.setFont('helvetica', 'normal');
+      const valueText = Array.isArray(value) ? value.join(', ') : String(value ?? '-');
+      const wrapped = pdf.splitTextToSize(valueText, contentWidth * 0.68);
+      pdf.text(wrapped, margin + 150, cursorY);
+      cursorY += Math.max(wrapped.length * 12, 14);
+    };
+
+    const drawSummaryCard = (x, y, width, title, value, accent = [0, 51, 160]) => {
+      pdf.setFillColor(248, 250, 255);
+      pdf.roundedRect(x, y, width, 58, 10, 10, 'F');
+      pdf.setDrawColor(224, 232, 255);
+      pdf.roundedRect(x, y, width, 58, 10, 10, 'S');
+      pdf.setTextColor(...accent);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(10);
+      pdf.text(title, x + 14, y + 20);
+      pdf.setTextColor(25, 28, 36);
+      pdf.setFontSize(13);
+      pdf.text(String(value), x + 14, y + 40);
+    };
+
+    drawHeader();
+
+    const summaryCardWidth = (contentWidth - 16) / 2;
+    drawSummaryCard(margin, cursorY, summaryCardWidth, 'Product Lines', totalItemTypes);
+    drawSummaryCard(margin + summaryCardWidth + 16, cursorY, summaryCardWidth, 'Total Items', totalQuantity, [16, 185, 129]);
+    cursorY += 78;
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(18);
+    pdf.setTextColor(25, 28, 36);
+    writeLine('Customer and Order Details', margin, cursorY);
+    cursorY += 14;
+
+    writeSectionTitle('Customer Information');
+    writeLabelValue('Name', order.profiles?.full_name || 'Guest');
+    writeLabelValue('Phone', formatPhoneNumber(order.profiles?.phone_number));
+    writeLabelValue('Address', order.delivery_address || '-');
+    writeLabelValue('Payment Method', order.payment_method || '-');
+    writeLabelValue('Status', order.status || '-');
+
+    cursorY += 10;
+    writeSectionTitle('Order Totals');
+    writeLabelValue('Product Lines', totalItemTypes);
+    writeLabelValue('Total Items', totalQuantity);
+    writeLabelValue('Subtotal', formatPdfMoney(order.total_amount || 0));
+    writeLabelValue('Delivery Fee', formatPdfMoney(order.delivery_fee || 0));
+    writeLabelValue('Grand Total', formatPdfMoney(grandTotal));
+
+    cursorY += 10;
+    writeSectionTitle('Notes');
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    const notes = [
+      'This PDF is generated for printing.',
+      'Order item lines are summarized to keep the printout paper-friendly.',
+    ];
+    pdf.text(pdf.splitTextToSize(notes.join(' '), contentWidth), margin, cursorY);
+
+    pdf.setDrawColor(210);
+    pdf.line(margin, pageHeight - 48, pageWidth - margin, pageHeight - 48);
+    pdf.setFontSize(9);
+    pdf.setTextColor(90, 98, 110);
+    pdf.text('Generated by admin web print tool', margin, pageHeight - 28);
+
+    const fileName = `Order-${formatOrderNumber(order.order_number, order.id)}.pdf`;
+    pdf.save(fileName);
+  }, [order, totalItemTypes, totalQuantity, grandTotal, formatPdfMoney]);
 
   const fetchCancellerName = useCallback(async () => {
     if (!order?.cancelled_by) {
@@ -445,7 +602,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange }) {
               Close
             </button>
             <button
-              onClick={() => window.print()}
+              onClick={handlePrintOrder}
               className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition"
             >
               Print Order
