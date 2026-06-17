@@ -11,7 +11,6 @@ import {
   Menu, 
   X,
   User,
-  Settings,
   ChevronDown,
   Users,
   Truck,
@@ -423,18 +422,7 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
                   }}
                 >
                   <User size={16} className="mr-2" />
-                  Profile
-                </motion.button>
-                <motion.button 
-                  whileHover={{ x: 5 }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0] flex items-center"
-                  onClick={() => {
-                    onSettingsClick();
-                    setIsProfileMenuOpen(false);
-                  }}
-                >
-                  <Settings size={16} className="mr-2" />
-                  Settings
+                  Profile and settings
                 </motion.button>
                 <div className="border-t my-2"></div>
                 <motion.button 
@@ -480,7 +468,6 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
   };
 
   return (
-                  { to: '/reservations', icon: CalendarDays, label: 'Reservations' },
     <>
       <header className="md:hidden bg-mkc-blue border-b border-white/20 px-4 py-3 flex justify-between items-center z-20">
         <motion.div 
@@ -598,36 +585,25 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
 
                 <AnimatePresence>
                   {isMobileProfileMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      transition={{ duration: 0.15 }}
-                      className="mb-3 bg-gray-50 border border-gray-200 rounded-lg p-2"
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.15 }}
+                    className="mb-3 bg-gray-50 border border-gray-200 rounded-lg p-2"
+                  >
+                    <button
+                      onClick={() => {
+                        onProfileClick();
+                        setIsMobileProfileMenuOpen(false);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0] rounded-md flex items-center"
                     >
-                      <button
-                        onClick={() => {
-                          onProfileClick();
-                          setIsMobileProfileMenuOpen(false);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0] rounded-md flex items-center"
-                      >
-                        <User size={16} className="mr-2" />
-                        Profile
-                      </button>
-                      <button
-                        onClick={() => {
-                          onSettingsClick();
-                          setIsMobileProfileMenuOpen(false);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0] rounded-md flex items-center"
-                      >
-                        <Settings size={16} className="mr-2" />
-                        Settings
-                      </button>
-                    </motion.div>
+                      <User size={16} className="mr-2" />
+                      Profile and settings
+                    </button>
+                  </motion.div>
                   )}
                 </AnimatePresence>
 
