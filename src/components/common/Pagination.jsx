@@ -1,7 +1,10 @@
 // src/components/common/Pagination.jsx
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function Pagination({ currentPage, totalPages, onPageChange }) {
+  const { isDarkMode } = useTheme();
+
   if (totalPages <= 1) return null;
 
   const getPageNumbers = () => {
@@ -36,7 +39,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        className={`p-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300 ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
       >
         <ChevronLeft size={18} />
       </button>
@@ -48,7 +51,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
           className={`w-10 h-10 rounded-lg ${
             currentPage === page
               ? 'bg-blue-600 text-white'
-              : 'border border-gray-300 hover:bg-gray-50'
+              : `border transition-colors duration-300 ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`
           }`}
         >
           {page}
@@ -58,7 +61,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        className={`p-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300 ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
       >
         <ChevronRight size={18} />
       </button>

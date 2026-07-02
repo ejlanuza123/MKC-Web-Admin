@@ -4,6 +4,8 @@ import ErrorAlert from '../components/common/ErrorAlert';
 import { notifySuccess } from '../utils/successNotifier';
 import { pushNotificationService } from '../services/pushNotificationService';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../context/ThemeContext';
+import DarkModeToggle from '../components/DarkModeToggle';
 import { supabase } from '../lib/supabase';
 
 const ADMIN_MANUAL_SECTIONS = [
@@ -105,6 +107,7 @@ const ADMIN_MANUAL_SECTIONS = [
 
 export default function Settings() {
   const { profile, updateProfile } = useAuth();
+  const { isDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [permissionState, setPermissionState] = useState('default');
@@ -325,31 +328,31 @@ export default function Settings() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className={`max-w-4xl mx-auto transition-colors duration-300 ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <SettingsIcon size={28} className="text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+            <h1 className="text-3xl font-bold text-theme-primary">Settings</h1>
           </div>
-          <p className="text-gray-600">Configure application-wide settings</p>
+          <p className="text-theme-secondary">Configure application-wide settings</p>
         </div>
 
         {/* Error Alert */}
         {error && <ErrorAlert message={error} onDismiss={() => setError(null)} />}
 
         {/* Settings Card */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+        <div className="bg-card-theme rounded-lg border border-theme shadow-sm p-6 transition-colors duration-300">
           <div className="space-y-6">
             {/* Profile Section */}
-            <div className="border-b border-gray-200 pb-6">
+            <div className="border-b border-theme pb-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-theme-primary flex items-center gap-2">
                     <User size={18} className="text-blue-600" />
                     Profile
                   </h2>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-theme-secondary mt-1">
                     Update your admin profile information.
                   </p>
                 </div>
@@ -357,41 +360,41 @@ export default function Settings() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-theme-primary mb-1">Email</label>
                   <input
                     type="text"
                     value={profile?.email || ''}
                     disabled
-                    className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600"
+                    className="w-full px-4 py-2 bg-input-theme border border-theme rounded-lg text-theme-secondary"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <label className="block text-sm font-medium text-theme-primary mb-1">Full Name</label>
                   <input
                     type="text"
                     name="full_name"
                     value={profileForm.full_name}
                     onChange={handleProfileInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-2 border border-theme rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-input-theme text-theme-primary"
                     placeholder="Enter your full name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                  <label className="block text-sm font-medium text-theme-primary mb-1">Phone Number</label>
                   <input
                     type="text"
                     name="phone_number"
                     value={profileForm.phone_number}
                     onChange={handleProfileInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-2 border border-theme rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-input-theme text-theme-primary"
                     placeholder="09xxxxxxxxx"
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
+                  <label className="block text-sm font-medium text-theme-primary mb-2">Profile Photo</label>
                   <div className="flex items-center gap-4">
                     {profileForm.avatar_url ? (
                       <button
@@ -434,7 +437,14 @@ export default function Settings() {
                 </div>
               </div>
 
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center justify-between gap-4 rounded-lg border border-theme bg-theme-secondary px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-theme-primary">Appearance</p>
+                    <p className="text-xs text-theme-secondary">Switch between light and dark mode.</p>
+                  </div>
+                  <DarkModeToggle showLabel />
+                </div>
                 <button
                   onClick={handleSaveProfile}
                   disabled={savingProfile}
@@ -447,11 +457,11 @@ export default function Settings() {
             </div>
 
             {/* Push Notification Section */}
-            <div className="border-b border-gray-200 pb-6">
+            <div className="border-b border-theme pb-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Push Notifications</h2>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h2 className="text-lg font-semibold text-theme-primary">Push Notifications</h2>
+                  <p className="text-sm text-theme-secondary mt-1">
                     Manage browser notification permission for admin alerts and updates.
                   </p>
                 </div>
@@ -459,8 +469,8 @@ export default function Settings() {
 
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Current Permission</p>
-                  <p className={`text-xl font-bold ${isNotificationsEnabled ? 'text-green-600' : 'text-gray-700'}`}>
+                  <p className="text-sm text-theme-secondary">Current Permission</p>
+                  <p className={`text-xl font-bold ${isNotificationsEnabled ? 'text-green-400' : 'text-theme-primary'}`}>
                     {isNotificationsEnabled ? 'Enabled' : permissionState === 'denied' ? 'Blocked' : permissionState === 'unsupported' ? 'Unsupported' : 'Not Enabled'}
                   </p>
                 </div>
@@ -488,9 +498,9 @@ export default function Settings() {
             </div>
 
             {/* Additional Settings Info */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h3 className="font-semibold text-gray-900 mb-2">How It Works</h3>
-              <ul className="space-y-2 text-sm text-gray-600">
+            <div className="bg-theme-secondary rounded-lg p-4 border border-theme">
+              <h3 className="font-semibold text-theme-primary mb-2">How It Works</h3>
+              <ul className="space-y-2 text-sm text-theme-secondary">
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 font-bold mt-0.5">1.</span>
                   <span>Click Enable Notifications to request browser permission.</span>
@@ -507,33 +517,33 @@ export default function Settings() {
             </div>
 
             {/* In-App Admin User Manual */}
-            <div className="border-t border-gray-200 pt-6">
+            <div className="border-t border-theme pt-6">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-theme-primary flex items-center gap-2">
                     <BookOpen size={18} className="text-blue-600" />
                     Admin User Manual
                   </h2>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-theme-secondary mt-1">
                     Detailed in-app guide for daily operations, workflows, and troubleshooting.
                   </p>
                 </div>
               </div>
 
               <div className="mb-4 relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-secondary" />
                 <input
                   type="text"
                   value={manualQuery}
                   onChange={(e) => setManualQuery(e.target.value)}
                   placeholder="Search manual topics or steps"
-                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full pl-9 pr-3 py-2 border border-theme rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-input-theme text-theme-primary"
                 />
               </div>
 
               <div className="space-y-3">
                 {filteredManualSections.length === 0 ? (
-                  <div className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="text-sm text-theme-secondary bg-theme-secondary border border-theme rounded-lg p-4">
                     No manual sections matched your search.
                   </div>
                 ) : (
@@ -541,21 +551,21 @@ export default function Settings() {
                     const isOpen = !!openManualSections[section.id];
 
                     return (
-                      <div key={section.id} className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                      <div key={section.id} className="border border-theme rounded-lg overflow-hidden bg-card-theme">
                         <button
                           type="button"
                           onClick={() => toggleManualSection(section.id)}
-                          className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition"
+                          className="w-full px-4 py-3 flex items-center justify-between hover:bg-theme-secondary transition"
                         >
-                          <span className="text-left text-sm font-semibold text-gray-900">{section.heading}</span>
-                          {isOpen ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
+                          <span className="text-left text-sm font-semibold text-theme-primary">{section.heading}</span>
+                          {isOpen ? <ChevronUp size={16} className="text-theme-secondary" /> : <ChevronDown size={16} className="text-theme-secondary" />}
                         </button>
 
                         {isOpen && (
                           <div className="px-4 pb-4">
                             <ol className="space-y-2 mt-1">
                               {section.steps.map((step, index) => (
-                                <li key={`${section.id}-${index}`} className="flex items-start gap-2 text-sm text-gray-700">
+                                <li key={`${section.id}-${index}`} className="flex items-start gap-2 text-sm text-theme-primary">
                                   <span className="mt-0.5 text-blue-600 font-semibold min-w-5">{index + 1}.</span>
                                   <span>{step}</span>
                                 </li>

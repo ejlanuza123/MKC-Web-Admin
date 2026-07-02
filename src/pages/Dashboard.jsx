@@ -15,11 +15,12 @@ import { productService } from '../services/productService';
 import { supabase } from '../lib/supabase';
 import { formatCurrency } from '../utils/formatters';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 
 // Skeleton Components
 const StatsCardSkeleton = () => (
-  <div className="bg-white p-6 rounded-xl border border-gray-200 animate-pulse">
+  <div className="bg-card-theme p-6 rounded-xl border border-theme animate-pulse">
     <div className="flex justify-between items-start mb-4">
       <div className="space-y-2">
         <div className="h-4 w-24 bg-gray-200 rounded"></div>
@@ -31,7 +32,7 @@ const StatsCardSkeleton = () => (
 );
 
 const RecentOrdersSkeleton = () => (
-  <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
+  <div className="lg:col-span-2 bg-card-theme rounded-xl border border-theme p-6">
     <div className="flex justify-between items-center mb-4">
       <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
       <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
@@ -54,7 +55,7 @@ const RecentOrdersSkeleton = () => (
 );
 
 const LowStockSkeleton = () => (
-  <div className="bg-white rounded-xl border border-gray-200 p-6">
+  <div className="bg-card-theme rounded-xl border border-theme p-6">
     <div className="h-6 w-32 bg-gray-200 rounded mb-4 animate-pulse"></div>
     <div className="space-y-3">
       {[1,2,3].map(i => (
@@ -74,6 +75,7 @@ const LowStockSkeleton = () => (
 );
 
 export default function Dashboard() {
+  const { isDarkMode } = useTheme();
   const [stats, setStats] = useState({
     totalRevenue: 0,
     todayRevenue: 0,
@@ -156,11 +158,11 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
+        <h2 className="text-2xl font-bold text-theme-primary">Dashboard Overview</h2>
         <button
           onClick={fetchDashboardData}
           disabled={loading}
-          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-150 disabled:opacity-50"
+          className={`px-4 py-2 rounded-lg transition-colors duration-150 disabled:opacity-50 ${isDarkMode ? 'bg-slate-800 text-slate-100 hover:bg-slate-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
         >
           Refresh
         </button>
@@ -203,9 +205,9 @@ export default function Dashboard() {
       {/* Charts and Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Orders */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="lg:col-span-2 bg-card-theme rounded-xl shadow-sm border border-theme p-6 transition-colors duration-300">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Recent Orders</h3>
+            <h3 className="text-lg font-semibold text-theme-primary">Recent Orders</h3>
             <Link to="/orders" className="text-sm text-[#0033A0] hover:text-[#ED1C24] transition-colors duration-150">
               View All
             </Link>
@@ -213,10 +215,10 @@ export default function Dashboard() {
           
           <div className="space-y-3">
             {recentOrders.map((order) => (
-              <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-150">
+              <div key={order.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors duration-150 ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-gray-50 hover:bg-gray-100'}`}>
                 <div>
-                  <p className="font-medium text-gray-900">#{order.id}</p>
-                  <p className="text-sm text-gray-500">{order.profiles?.full_name || 'Guest'}</p>
+                  <p className="font-medium text-theme-primary">#{order.id}</p>
+                  <p className="text-sm text-theme-secondary">{order.profiles?.full_name || 'Guest'}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-[#0033A0]">{formatCurrency(order.total_amount)}</p>
@@ -235,16 +237,16 @@ export default function Dashboard() {
         </div>
 
         {/* Low Stock Alert */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Low Stock Alert</h3>
+        <div className="bg-card-theme rounded-xl shadow-sm border border-theme p-6 transition-colors duration-300">
+          <h3 className="text-lg font-semibold text-theme-primary mb-4">Low Stock Alert</h3>
           
           {lowStockProducts.length > 0 ? (
             <div className="space-y-3">
               {lowStockProducts.map((product) => (
-                <div key={product.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors duration-150">
+                <div key={product.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors duration-150 ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-red-50 hover:bg-red-100'}`}>
                   <div>
-                    <p className="font-medium text-gray-900">{product.name}</p>
-                    <p className="text-sm text-gray-500">{product.category}</p>
+                    <p className="font-medium text-theme-primary">{product.name}</p>
+                    <p className="text-sm text-theme-secondary">{product.category}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-red-600">{product.stock_quantity} {product.unit}</p>
@@ -257,8 +259,8 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <Package className="mx-auto text-gray-400 mb-2" size={48} />
-              <p className="text-gray-500">No low stock items</p>
+              <Package className="mx-auto text-theme-secondary mb-2" size={48} />
+              <p className="text-theme-secondary">No low stock items</p>
             </div>
           )}
         </div>

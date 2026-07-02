@@ -3,12 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { X, MapPin, Phone, User, Truck, Clock, CheckCircle, AlertCircle, Navigation } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatDate, formatPhoneNumber, formatOrderNumber } from '../utils/formatters';
+import { useTheme } from '../context/ThemeContext';
 
 export default function RiderTrackingModal({ isOpen, onClose, order, delivery }) {
-  const [currentLocation, setCurrentLocation] = useState(null);
+  const { isDarkMode } = useTheme();
   const [timeline, setTimeline] = useState([]);
-  const [loading, setLoading] = useState(false);
 
+  // The live delivery state is handled via the delivery subscription.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isOpen && delivery) {
       fetchDeliveryTimeline();
@@ -44,7 +46,7 @@ export default function RiderTrackingModal({ isOpen, onClose, order, delivery })
           table: 'deliveries',
           filter: `id=eq.${delivery.id}`
         },
-        (payload) => {
+        () => {
           // Update delivery info
           fetchDeliveryTimeline();
         }
@@ -70,7 +72,7 @@ export default function RiderTrackingModal({ isOpen, onClose, order, delivery })
       case 'failed':
         return <AlertCircle className="text-red-500" size={20} />;
       default:
-        return <MapPin className="text-gray-500" size={20} />;
+        return <MapPin className={isDarkMode ? 'text-slate-400' : 'text-gray-500'} size={20} />;
     }
   };
 
@@ -97,7 +99,7 @@ export default function RiderTrackingModal({ isOpen, onClose, order, delivery })
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-hidden">
+      <div className={`rounded-xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900'}`}>
         <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white flex items-center">
             <Navigation className="mr-2" size={24} />
@@ -114,27 +116,27 @@ export default function RiderTrackingModal({ isOpen, onClose, order, delivery })
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
           {/* Rider Info */}
           {delivery?.rider && (
-            <div className="bg-blue-50 p-4 rounded-lg mb-6">
-              <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+            <div className={`p-4 rounded-lg mb-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-blue-50'}`}>
+              <h4 className="font-semibold text-theme-primary mb-3 flex items-center">
                 <User size={18} className="mr-2 text-[#0033A0]" />
                 Rider Information
               </h4>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Name</p>
-                  <p className="font-medium text-gray-900">{delivery.rider.full_name}</p>
+                  <p className="text-sm text-theme-secondary">Name</p>
+                  <p className="font-medium text-theme-primary">{delivery.rider.full_name}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Contact</p>
-                  <p className="font-medium text-gray-900 flex items-center">
+                  <p className="text-sm text-theme-secondary">Contact</p>
+                  <p className="font-medium text-theme-primary flex items-center">
                     <Phone size={14} className="mr-1" />
                     {formatPhoneNumber(delivery.rider.phone_number)}
                   </p>
                 </div>
                 {delivery.rider.vehicle_type && (
                   <div className="col-span-2">
-                    <p className="text-sm text-gray-500">Vehicle</p>
-                    <p className="font-medium text-gray-900">
+                    <p className="text-sm text-theme-secondary">Vehicle</p>
+                    <p className="font-medium text-theme-primary">
                       {delivery.rider.vehicle_type} {delivery.rider.vehicle_plate && `(${delivery.rider.vehicle_plate})`}
                     </p>
                   </div>
@@ -144,8 +146,8 @@ export default function RiderTrackingModal({ isOpen, onClose, order, delivery })
           )}
 
           {/* Current Status */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6">
-            <h4 className="font-semibold text-gray-900 mb-3">Current Status</h4>
+          <div className={`p-4 rounded-lg border mb-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+            <h4 className="font-semibold text-theme-primary mb-3">Current Status</h4>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 {getStatusIcon(delivery?.status)}
@@ -153,7 +155,7 @@ export default function RiderTrackingModal({ isOpen, onClose, order, delivery })
                   {getStatusText(delivery?.status)}
                 </span>
               </div>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-theme-secondary">
                 {delivery?.delivered_at 
                   ? formatDate(delivery.delivered_at)
                   : delivery?.assigned_at 
@@ -164,13 +166,13 @@ export default function RiderTrackingModal({ isOpen, onClose, order, delivery })
           </div>
 
           {/* Delivery Timeline */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6">
-            <h4 className="font-semibold text-gray-900 mb-4">Delivery Timeline</h4>
+          <div className={`p-4 rounded-lg border mb-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+            <h4 className="font-semibold text-theme-primary mb-4">Delivery Timeline</h4>
             <div className="space-y-4">
               {timeline.map((item, index) => (
                 <div key={index} className="flex items-start">
                   <div className="relative">
-                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-slate-700' : 'bg-gray-100'}`}>
                       {getStatusIcon(item.status)}
                     </div>
                     {index < timeline.length - 1 && (
@@ -178,13 +180,13 @@ export default function RiderTrackingModal({ isOpen, onClose, order, delivery })
                     )}
                   </div>
                   <div className="ml-4 flex-1">
-                    <p className="font-medium text-gray-900">{getStatusText(item.status)}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-theme-primary">{getStatusText(item.status)}</p>
+                    <p className="text-sm text-theme-secondary">
                       {item.assigned_at && formatDate(item.assigned_at)}
                       {item.delivered_at && formatDate(item.delivered_at)}
                     </p>
                     {item.notes && (
-                      <p className="text-sm text-gray-600 mt-1 bg-gray-50 p-2 rounded">
+                      <p className={`text-sm mt-1 p-2 rounded ${isDarkMode ? 'text-slate-100 bg-slate-900' : 'text-gray-600 bg-gray-50'}`}>
                         Note: {item.notes}
                       </p>
                     )}
@@ -195,12 +197,12 @@ export default function RiderTrackingModal({ isOpen, onClose, order, delivery })
           </div>
 
           {/* Delivery Address */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+          <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+            <h4 className="font-semibold text-theme-primary mb-3 flex items-center">
               <MapPin size={18} className="mr-2 text-[#0033A0]" />
               Delivery Address
             </h4>
-            <p className="text-gray-700 mb-2">{order?.delivery_address}</p>
+            <p className="text-theme-primary mb-2">{order?.delivery_address}</p>
             {order?.delivery_lat && order?.delivery_lng && (
               <a
                 href={`https://www.google.com/maps?q=${order.delivery_lat},${order.delivery_lng}`}
@@ -218,7 +220,7 @@ export default function RiderTrackingModal({ isOpen, onClose, order, delivery })
         <div className="p-6 border-t bg-gray-50">
           <button
             onClick={onClose}
-            className="w-full py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            className={`w-full py-2.5 border rounded-lg hover:bg-gray-50 transition-colors font-medium ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700'}`}
           >
             Close
           </button>

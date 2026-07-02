@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import { ThemeProvider } from './context/ThemeContext';
 
 const isDev = import.meta.env.DEV;
 
@@ -14,7 +15,9 @@ if (!rootElement) {
 } else {
   try {
     ReactDOM.createRoot(rootElement).render(
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     );
 
   } catch (error) {

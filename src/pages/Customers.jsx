@@ -10,6 +10,7 @@ import { diffObjects, formatChangesDescription } from '../utils/diff';
 import { notifySuccess } from '../utils/successNotifier';
 import { useAdminLog } from '../hooks/useAdminLog';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../context/ThemeContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // Skeleton Components (keep as is)
@@ -55,7 +56,7 @@ const TableRowSkeleton = () => (
 );
 
 const StatCardSkeleton = () => (
-  <div className="bg-white p-4 rounded-lg border border-gray-200 animate-pulse">
+  <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 animate-pulse">
     <div className="h-4 w-20 bg-gray-200 rounded mb-2"></div>
     <div className="h-8 w-16 bg-gray-300 rounded"></div>
   </div>
@@ -64,6 +65,7 @@ const StatCardSkeleton = () => (
 // Edit Customer Modal Component
 const EditCustomerModal = React.memo(({ isOpen, onClose, customer, onUpdate }) => {
   const { logCustomerAction } = useAdminLog();
+  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     full_name: '',
     phone_number: '',
@@ -135,7 +137,7 @@ const EditCustomerModal = React.memo(({ isOpen, onClose, customer, onUpdate }) =
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
+      <div className={`rounded-xl max-w-md w-full shadow-2xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900'}`}>
         <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white">Edit Customer</h3>
           <button 
@@ -154,7 +156,7 @@ const EditCustomerModal = React.memo(({ isOpen, onClose, customer, onUpdate }) =
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               Full Name *
             </label>
             <input
@@ -163,13 +165,13 @@ const EditCustomerModal = React.memo(({ isOpen, onClose, customer, onUpdate }) =
               required
               value={formData.full_name}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
               placeholder="Juan Dela Cruz"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               Phone Number
             </label>
             <input
@@ -177,20 +179,20 @@ const EditCustomerModal = React.memo(({ isOpen, onClose, customer, onUpdate }) =
               name="phone_number"
               value={formData.phone_number}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
               placeholder="0912 345 6789"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               Address
             </label>
             <textarea
               name="address"
               value={formData.address}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none resize-none"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none resize-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
               rows="3"
               placeholder="Customer's address"
             />
@@ -200,7 +202,7 @@ const EditCustomerModal = React.memo(({ isOpen, onClose, customer, onUpdate }) =
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className={`flex-1 py-2.5 border rounded-lg transition-colors ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
             >
               Cancel
             </button>
@@ -229,6 +231,7 @@ EditCustomerModal.displayName = 'EditCustomerModal';
 
 // Customer Details Modal Component
 const CustomerDetailsModal = React.memo(({ customer, onClose, onAvatarClick }) => {
+  const { isDarkMode } = useTheme();
   const stats = useMemo(() => {
     const orders = customer.orders || [];
     const totalSpent = orders.reduce((sum, order) => 
@@ -249,7 +252,7 @@ const CustomerDetailsModal = React.memo(({ customer, onClose, onAvatarClick }) =
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+      <div className={`rounded-xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900'}`}>
         <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white">Customer Details</h3>
           <button 
@@ -283,8 +286,8 @@ const CustomerDetailsModal = React.memo(({ customer, onClose, onAvatarClick }) =
                 </div>
               )}
               <div>
-                <h4 className="text-xl font-bold text-gray-900">{customer.full_name}</h4>
-                <p className="text-gray-500 flex items-center mt-1">
+                <h4 className="text-xl font-bold text-theme-primary">{customer.full_name}</h4>
+                <p className="text-theme-secondary flex items-center mt-1">
                   <Mail size={14} className="mr-1" />
                   {customer.email}
                 </p>
@@ -312,40 +315,40 @@ const CustomerDetailsModal = React.memo(({ customer, onClose, onAvatarClick }) =
 
             {/* Contact Information */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 flex items-center">
+              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                <p className="text-sm text-theme-secondary flex items-center">
                   <Phone size={14} className="mr-1" /> Phone Number
                 </p>
-                <p className="font-medium text-gray-900 mt-1">{customer.phone_number || 'N/A'}</p>
+                <p className="font-medium text-theme-primary mt-1">{customer.phone_number || 'N/A'}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 flex items-center">
+              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                <p className="text-sm text-theme-secondary flex items-center">
                   <Calendar size={14} className="mr-1" /> Member Since
                 </p>
-                <p className="font-medium text-gray-900 mt-1">
+                <p className="font-medium text-theme-primary mt-1">
                   {customer.created_at ? formatDate(customer.created_at) : 'N/A'}
                 </p>
               </div>
               {customer.address && (
-                <div className="col-span-2 bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500 flex items-center">
+                <div className={`col-span-2 p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                  <p className="text-sm text-theme-secondary flex items-center">
                     <MapPin size={14} className="mr-1" /> Address
                   </p>
-                  <p className="font-medium text-gray-900 mt-1">{customer.address}</p>
+                  <p className="font-medium text-theme-primary mt-1">{customer.address}</p>
                 </div>
               )}
             </div>
 
             {/* Order History */}
             <div>
-              <h5 className="font-semibold text-gray-900 mb-3">Recent Orders</h5>
+              <h5 className="font-semibold text-theme-primary mb-3">Recent Orders</h5>
               {customer.orders && customer.orders.length > 0 ? (
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
                   {customer.orders.slice(0, 5).map(order => (
-                    <div key={order.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div key={order.id} className={`flex justify-between items-center p-3 rounded-lg transition-colors ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-gray-50 hover:bg-gray-100'}`}>
                       <div>
-                        <p className="font-medium text-gray-900">Order #{order.id}</p>
-                        <p className="text-xs text-gray-500">{formatDate(order.created_at)}</p>
+                        <p className="font-medium text-theme-primary">Order #{order.id}</p>
+                        <p className="text-xs text-theme-secondary">{formatDate(order.created_at)}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-[#0033A0]">{formatCurrency(order.total_amount)}</p>
@@ -362,9 +365,9 @@ const CustomerDetailsModal = React.memo(({ customer, onClose, onAvatarClick }) =
                   ))}
                 </div>
               ) : (
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <div className={`p-4 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
                   <Package size={24} className="mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500">No orders yet</p>
+                  <p className="text-sm text-theme-secondary">No orders yet</p>
                 </div>
               )}
             </div>
@@ -380,6 +383,7 @@ CustomerDetailsModal.displayName = 'CustomerDetailsModal';
 export default function Customers() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
   const { user, loading: authLoading } = useAuth();
   const handledFocusNonceRef = useRef(null);
   const [customers, setCustomers] = useState([]);
@@ -582,11 +586,11 @@ export default function Customers() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse"></div>
+        <div className={`h-8 w-48 rounded animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
 
         {/* Filters Skeleton */}
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 h-12 bg-gray-200 rounded animate-pulse"></div>
+          <div className={`flex-1 h-12 rounded animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
         </div>
 
         {/* Stats Summary Skeleton */}
@@ -595,9 +599,9 @@ export default function Customers() {
         </div>
 
         {/* Table Skeleton */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+        <div className={`rounded-xl border overflow-x-auto ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
           <table className="w-full min-w-[900px]">
-            <thead className="bg-gray-50">
+            <thead className={isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}>
               <tr>
                 {[1,2,3,4,5,6].map(i => (
                   <th key={i} className="px-6 py-4">
@@ -618,7 +622,7 @@ export default function Customers() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Customer Management</h2>
+        <h2 className="text-2xl font-bold text-theme-primary">Customer Management</h2>
       </div>
 
       {error && <ErrorAlert message={error} onDismiss={() => setError(null)} />}
@@ -634,22 +638,22 @@ export default function Customers() {
 
       {/* Stats Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Total Customers</p>
+        <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Total Customers</p>
           <p className="text-2xl font-bold text-[#0033A0]">{summaryStats.total}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Active This Month</p>
+        <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Active This Month</p>
           <p className="text-2xl font-bold text-green-600">{summaryStats.active}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Total Revenue</p>
+        <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Total Revenue</p>
           <p className="text-2xl font-bold text-[#ED1C24]">
             {formatCurrency(summaryStats.revenue)}
           </p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Avg Order Value</p>
+        <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Avg Order Value</p>
           <p className="text-2xl font-bold text-purple-600">
             {formatCurrency(summaryStats.avgOrderValue)}
           </p>
@@ -658,25 +662,25 @@ export default function Customers() {
 
       {/* Customers Table */}
       {filteredCustomers.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+        <div className={`rounded-xl border p-12 text-center transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
           <Users size={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No customers found</h3>
-          <p className="text-gray-500">
+          <h3 className="text-lg font-medium text-theme-primary mb-2">No customers found</h3>
+          <p className="text-theme-secondary">
             {searchQuery ? "Try adjusting your search" : "No customers have registered yet"}
           </p>
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
+          <div className={`rounded-xl shadow-sm border overflow-x-auto transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
             <table className="w-full min-w-[900px]">
-              <thead className="bg-gray-50 border-b">
+              <thead className={isDarkMode ? 'bg-slate-800 border-b border-slate-700' : 'bg-gray-50 border-b'}>
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Total Spent</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Last Order</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Customer</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Contact</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Orders</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Total Spent</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Last Order</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">

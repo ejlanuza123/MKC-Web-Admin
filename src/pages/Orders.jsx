@@ -32,6 +32,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { settingsService } from '../services/settingsService';
 import { notifySuccess } from '../utils/successNotifier';
+import { useTheme } from '../context/ThemeContext';
 
 // Skeleton Components
 const TableRowSkeleton = () => (
@@ -47,6 +48,7 @@ const TableRowSkeleton = () => (
 );
 
 export default function Orders() {
+  const { isDarkMode } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const handledFocusNonceRef = useRef(null);
@@ -77,6 +79,11 @@ export default function Orders() {
   const [defaultDeliveryFee, setDefaultDeliveryFee] = useState(50);
   const [defaultFeeInput, setDefaultFeeInput] = useState('50');
   const [savingDefaultFee, setSavingDefaultFee] = useState(false);
+
+  const pageCardClass = isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200';
+  const surfaceClass = isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900';
+  const mutedTextClass = isDarkMode ? 'text-slate-400' : 'text-gray-500';
+  const inputClass = isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400';
 
   useEffect(() => {
     const focusOrderId = Number(location.state?.focusOrderId);
@@ -447,7 +454,7 @@ export default function Orders() {
         {/* Stats Cards Skeleton */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[1,2,3,4,5].map(i => (
-            <div key={i} className="bg-white p-4 rounded-lg border border-gray-200 animate-pulse">
+            <div key={i} className={`p-4 rounded-lg border animate-pulse ${pageCardClass}`}>
               <div className="h-4 w-20 bg-gray-200 rounded mb-2"></div>
               <div className="h-8 w-16 bg-gray-300 rounded"></div>
             </div>
@@ -462,16 +469,16 @@ export default function Orders() {
         </div>
 
         {/* Table Skeleton */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className={`rounded-xl border overflow-hidden ${pageCardClass}`}>
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className={isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}>
               <tr>
                 {[1,2,3,4,5,6,7].map(i => (
                   <th key={i} className="px-6 py-4"><div className="h-4 w-20 bg-gray-200 rounded"></div></th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className={isDarkMode ? 'divide-y divide-slate-700' : 'divide-y divide-gray-200'}>
               {[1,2,3,4,5].map(i => <TableRowSkeleton key={i} />)}
             </tbody>
           </table>
@@ -483,7 +490,7 @@ export default function Orders() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-800">Order Management</h2>
+        <h2 className="text-2xl font-bold text-theme-primary">Order Management</h2>
 
         <div className="flex items-center gap-2">
           <button
@@ -495,7 +502,7 @@ export default function Orders() {
 
           <button
             onClick={() => window.location.reload()}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${isDarkMode ? 'bg-slate-800 text-slate-100 hover:bg-slate-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
           >
             <RefreshCw size={18} />
             Refresh
@@ -507,28 +514,28 @@ export default function Orders() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Total Orders</p>
+        <div className={`p-4 rounded-lg border ${pageCardClass}`}>
+          <p className={`text-sm ${mutedTextClass}`}>Total Orders</p>
           <p className="text-2xl font-bold text-[#0033A0]">{stats.total}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Pending</p>
+        <div className={`p-4 rounded-lg border ${pageCardClass}`}>
+          <p className={`text-sm ${mutedTextClass}`}>Pending</p>
           <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Processing</p>
+        <div className={`p-4 rounded-lg border ${pageCardClass}`}>
+          <p className={`text-sm ${mutedTextClass}`}>Processing</p>
           <p className="text-2xl font-bold text-blue-600">{stats.processing}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Rider Picked Up</p>
+        <div className={`p-4 rounded-lg border ${pageCardClass}`}>
+          <p className={`text-sm ${mutedTextClass}`}>Rider Picked Up</p>
           <p className="text-2xl font-bold text-sky-600">{stats.riderPickedUp}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Out for Delivery</p>
+        <div className={`p-4 rounded-lg border ${pageCardClass}`}>
+          <p className={`text-sm ${mutedTextClass}`}>Out for Delivery</p>
           <p className="text-2xl font-bold text-purple-600">{stats.outForDelivery}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Completed</p>
+        <div className={`p-4 rounded-lg border ${pageCardClass}`}>
+          <p className={`text-sm ${mutedTextClass}`}>Completed</p>
           <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
         </div>
       </div>
@@ -544,7 +551,7 @@ export default function Orders() {
         <select
           value={filter}
           onChange={handleFilterChange}
-          className="bg-white border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#0033A0] outline-none"
+          className={`rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${inputClass}`}
         >
           <option value="All">All Status</option>
           {Object.values(ORDER_STATUS).map(status => (
@@ -554,7 +561,7 @@ export default function Orders() {
 
         <button
           onClick={() => setShowRiderFilter(!showRiderFilter)}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors duration-300 ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
         >
           <Filter size={18} />
           Filter by Rider
@@ -563,11 +570,11 @@ export default function Orders() {
 
       {/* Rider Filter Dropdown */}
       {showRiderFilter && (
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
+        <div className={`p-4 rounded-lg border ${surfaceClass}`}>
           <select
             value={selectedRider}
             onChange={handleRiderFilterChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#0033A0] outline-none"
+            className={`w-full rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${inputClass}`}
           >
             <option value="all">All Riders</option>
             {availableRiders.map(rider => (
@@ -591,39 +598,39 @@ export default function Orders() {
       ) : (
         <>
           {/* Orders Table */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
+          <div className={`rounded-xl shadow-sm border overflow-x-auto ${pageCardClass}`}>
             <table className="w-full min-w-[900px]">
-              <thead className="bg-gray-50 border-b">
+              <thead className={isDarkMode ? 'bg-slate-800 border-b border-slate-700' : 'bg-gray-50 border-b'}>
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Rider</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Order #</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Customer</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Amount</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Rider</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Date</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className={isDarkMode ? 'divide-y divide-slate-700' : 'divide-y divide-gray-200'}>
                 {paginatedOrders.map((order) => {
                   const deliveryInfo = deliveryInfoMap[order.id];
 
                   return (
-                    <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={order.id} className={`transition-colors ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-gray-50'}`}>
                       <td className="px-6 py-4">
-                        <span className="font-medium text-gray-900">{formatOrderNumber(order.order_number, order.id)}</span>
+                        <span className="font-medium text-theme-primary">{formatOrderNumber(order.order_number, order.id)}</span>
                       </td>
                       <td className="px-6 py-4">
                         <div>
-                          <p className="font-medium text-gray-900">{order.profiles?.full_name || 'Guest'}</p>
-                          <p className="text-sm text-gray-500">{formatPhoneNumber(order.profiles?.phone_number)}</p>
-                          <p className="text-xs text-gray-400 truncate max-w-xs">{order.delivery_address}</p>
+                          <p className="font-medium text-theme-primary">{order.profiles?.full_name || 'Guest'}</p>
+                          <p className="text-sm text-theme-secondary">{formatPhoneNumber(order.profiles?.phone_number)}</p>
+                          <p className="text-xs text-theme-secondary truncate max-w-xs">{order.delivery_address}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="space-y-1">
                           <span className="font-bold text-[#0033A0] block">{formatCurrency(order.total_amount)}</span>
-                          <span className="text-xs text-gray-500 block">Delivery: {formatCurrency(order.delivery_fee || 0)}</span>
+                          <span className="text-xs text-theme-secondary block">Delivery: {formatCurrency(order.delivery_fee || 0)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -634,7 +641,7 @@ export default function Orders() {
                       <td className="px-6 py-4">
                         {deliveryInfo ? (
                           <div className="flex flex-wrap items-center gap-2">
-                            <Truck size={16} className="text-gray-400" />
+                            <Truck size={16} className="text-theme-secondary" />
                             <span className={`text-xs px-2 py-1 rounded-full ${getDeliveryStatusColor(deliveryInfo.status)}`}>
                               {deliveryInfo.status === 'assigned' ? 'Waiting for Acceptance' :
                                deliveryInfo.status === 'accepted' ? 'Accepted - Ready to Pick Up' :
@@ -647,10 +654,10 @@ export default function Orders() {
                             </span>
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-400">Not assigned</span>
+                          <span className="text-sm text-theme-secondary">Not assigned</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-theme-secondary">
                         {formatDate(order.created_at)}
                       </td>
                       <td className="px-6 py-4">
@@ -803,31 +810,31 @@ export default function Orders() {
 
       {showDefaultFeeDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl w-full max-w-md shadow-2xl">
+          <div className={`rounded-xl w-full max-w-md shadow-2xl transition-colors duration-300 ${surfaceClass}`}>
             <div className="p-6 border-b bg-[#0033A0] text-white">
               <h3 className="text-lg font-bold">Update Default Delivery Fee</h3>
               <p className="text-sm text-blue-100 mt-1">This will apply to new orders.</p>
             </div>
 
             <div className="p-6 space-y-3">
-              <label className="block text-sm font-medium text-gray-700">Delivery Fee</label>
+              <label className="block text-sm font-medium text-theme-primary">Delivery Fee</label>
               <input
                 type="number"
                 min="0"
                 step="0.01"
                 value={defaultFeeInput}
                 onChange={(e) => setDefaultFeeInput(e.target.value)}
-                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#0033A0] outline-none"
+                className={`w-full rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${inputClass}`}
                 placeholder="Enter default fee"
               />
-              <p className="text-xs text-gray-500">Current: {formatCurrency(defaultDeliveryFee)}</p>
+              <p className="text-xs text-theme-secondary">Current: {formatCurrency(defaultDeliveryFee)}</p>
             </div>
 
-            <div className="p-6 border-t bg-gray-50 flex gap-3 justify-end">
+            <div className={`p-6 border-t flex gap-3 justify-end ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'bg-gray-50'}`}>
               <button
                 onClick={closeDefaultFeeDialog}
                 disabled={savingDefaultFee}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                className={`px-4 py-2 border rounded-lg disabled:opacity-50 transition-colors duration-300 ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-700' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
               >
                 Cancel
               </button>
@@ -845,18 +852,18 @@ export default function Orders() {
 
       {showCancellationDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl w-full max-w-lg shadow-2xl">
+          <div className={`rounded-xl w-full max-w-lg shadow-2xl transition-colors duration-300 ${surfaceClass}`}>
             <div className="p-6 border-b bg-red-600 text-white">
               <h3 className="text-lg font-bold">Cancel Order</h3>
               <p className="text-sm text-red-100 mt-1">Provide reason for cancellation to keep audit trail complete.</p>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cancellation Reason</label>
+                <label className="block text-sm font-medium text-theme-primary mb-1">Cancellation Reason</label>
                 <select
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 outline-none"
+                  className={`w-full rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 outline-none transition-colors duration-300 ${inputClass}`}
                 >
                   {CANCELLATION_REASONS.map((reason) => (
                     <option key={reason} value={reason}>{reason}</option>
@@ -865,20 +872,20 @@ export default function Orders() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes {cancelReason === 'Other' ? '(required)' : '(optional)'}</label>
+                <label className="block text-sm font-medium text-theme-primary mb-1">Notes {cancelReason === 'Other' ? '(required)' : '(optional)'}</label>
                 <textarea
                   value={cancelNote}
                   onChange={(e) => setCancelNote(e.target.value)}
                   rows={3}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 outline-none"
+                  className={`w-full rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 outline-none transition-colors duration-300 ${inputClass}`}
                   placeholder="Add context for the cancellation"
                 />
               </div>
             </div>
-            <div className="p-6 border-t bg-gray-50 flex gap-3 justify-end">
+            <div className={`p-6 border-t flex gap-3 justify-end ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'bg-gray-50'}`}>
               <button
                 onClick={closeDialogs}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
+                className={`px-4 py-2 border rounded-lg transition-colors duration-300 ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-700' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
               >
                 Back
               </button>

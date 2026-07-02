@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { X, Truck, MapPin, Phone, User, CheckCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { diffObjects, formatChangesDescription } from '../utils/diff';
+import { diffObjects } from '../utils/diff';
 import { notifySuccess } from '../utils/successNotifier';
 import { useAdminLog } from '../hooks/useAdminLog';
+import { useTheme } from '../context/ThemeContext';
 
 export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, availableRiders }) {
+  const { isDarkMode } = useTheme();
   const { logOrderAction } = useAdminLog();
   const [selectedRider, setSelectedRider] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,7 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
         fetchAvailableRiders();
       }
     }
-  }, [isOpen]);
+  }, [isOpen, availableRiders, riders.length]);
 
   const fetchAvailableRiders = async () => {
     try {
@@ -57,48 +59,44 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
     try {
       // 1. Ensure a single delivery record per order: update existing or insert new
       let delivery = null;
-      try {
-        const { data: existing, error: fetchErr } = await supabase
+      const { data: existing, error: fetchErr } = await supabase
+        .from('deliveries')
+        .select('*')
+        .eq('order_id', order.id)
+        .order('assigned_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (fetchErr && fetchErr.code !== 'PGRST116') throw fetchErr;
+
+      if (existing) {
+        const { data: updatedDelivery, error: updateErr } = await supabase
           .from('deliveries')
-          .select('*')
-          .eq('order_id', order.id)
-          .order('assigned_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+          .update({
+            rider_id: selectedRider,
+            status: 'assigned',
+            assigned_at: new Date().toISOString()
+          })
+          .eq('id', existing.id)
+          .select()
+          .single();
 
-        if (fetchErr && fetchErr.code !== 'PGRST116') throw fetchErr;
+        if (updateErr) throw updateErr;
+        delivery = updatedDelivery;
+      } else {
+        const { data: newDelivery, error: insertErr } = await supabase
+          .from('deliveries')
+          .insert({
+            order_id: order.id,
+            rider_id: selectedRider,
+            status: 'assigned',
+            assigned_at: new Date().toISOString()
+          })
+          .select()
+          .single();
 
-        if (existing) {
-          const { data: updatedDelivery, error: updateErr } = await supabase
-            .from('deliveries')
-            .update({
-              rider_id: selectedRider,
-              status: 'assigned',
-              assigned_at: new Date().toISOString()
-            })
-            .eq('id', existing.id)
-            .select()
-            .single();
-
-          if (updateErr) throw updateErr;
-          delivery = updatedDelivery;
-        } else {
-          const { data: newDelivery, error: insertErr } = await supabase
-            .from('deliveries')
-            .insert({
-              order_id: order.id,
-              rider_id: selectedRider,
-              status: 'assigned',
-              assigned_at: new Date().toISOString()
-            })
-            .select()
-            .single();
-
-          if (insertErr) throw insertErr;
-          delivery = newDelivery;
-        }
-      } catch (err) {
-        throw err;
+        if (insertErr) throw insertErr;
+        delivery = newDelivery;
       }
 
       // 2. Assign rider to order, but do not advance order status yet.
@@ -174,7 +172,7 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl w-full max-w-md shadow-2xl">
+      <div className={`rounded-xl w-full max-w-md shadow-2xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900'}`}>
         <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white flex items-center">
             <Truck className="mr-2" size={24} />
@@ -194,20 +192,20 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="text-green-600" size={40} />
               </div>
-              <h4 className="text-lg font-bold text-gray-900 mb-2">Rider Assigned Successfully!</h4>
-              <p className="text-gray-500">
+              <h4 className="text-lg font-bold text-theme-primary mb-2">Rider Assigned Successfully!</h4>
+              <p className="text-theme-secondary">
                 Rider has been notified of the delivery assignment.
               </p>
             </div>
           ) : (
             <>
               {/* Order Summary */}
-              <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                <p className="text-sm text-gray-500 mb-1">Order #{order?.id}</p>
-                <p className="font-medium text-gray-900 mb-2">Delivery Address:</p>
-                <p className="text-sm text-gray-600">{order?.delivery_address}</p>
+              <div className={`p-4 rounded-lg mb-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                <p className="text-sm text-theme-secondary mb-1">Order #{order?.id}</p>
+                <p className="font-medium text-theme-primary mb-2">Delivery Address:</p>
+                <p className="text-sm text-theme-secondary">{order?.delivery_address}</p>
                 <div className="flex justify-between mt-3 pt-3 border-t">
-                  <span className="text-sm text-gray-500">Total Amount:</span>
+                  <span className="text-sm text-theme-secondary">Total Amount:</span>
                   <span className="font-bold text-[#0033A0]">
                     ₱{order?.total_amount?.toFixed(2)}
                   </span>
@@ -215,24 +213,24 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
               </div>
 
               {error && (
-                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
+                <div className={`border-l-4 border-red-500 p-4 rounded mb-6 ${isDarkMode ? 'bg-red-950/40' : 'bg-red-50'}`}>
                   <div className="flex items-center">
                     <AlertCircle className="text-red-500 mr-2" size={20} />
-                    <p className="text-sm text-red-700">{error}</p>
+                    <p className="text-sm text-red-400">{error}</p>
                   </div>
                 </div>
               )}
 
               {/* Rider Selection */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-theme-primary mb-2">
                   Select Rider
                 </label>
                 
                 {riders.length === 0 ? (
-                  <div className="text-center py-8 bg-gray-50 rounded-lg">
-                    <User className="mx-auto text-gray-400 mb-2" size={32} />
-                    <p className="text-gray-500">No active riders available</p>
+                  <div className={`text-center py-8 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                    <User className="mx-auto text-theme-secondary mb-2" size={32} />
+                    <p className="text-theme-secondary">No active riders available</p>
                   </div>
                 ) : (
                   <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
@@ -242,7 +240,7 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
                         className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors ${
                           selectedRider === rider.id
                             ? 'border-[#0033A0] bg-[#E5EEFF]'
-                            : 'border-gray-200 hover:bg-gray-50'
+                            : isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'border-gray-200 hover:bg-gray-50'
                         }`}
                       >
                         <input
@@ -255,17 +253,17 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
                         />
                         <div className="flex-1">
                           <div className="flex justify-between">
-                            <p className="font-medium text-gray-900">{rider.full_name}</p>
+                            <p className="font-medium text-theme-primary">{rider.full_name}</p>
                             <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
                               Active
                             </span>
                           </div>
-                          <p className="text-sm text-gray-500 flex items-center mt-1">
+                          <p className="text-sm text-theme-secondary flex items-center mt-1">
                             <Phone size={14} className="mr-1" />
                             {rider.phone_number}
                           </p>
                           {rider.vehicle_type && (
-                            <p className="text-sm text-gray-500 flex items-center mt-1">
+                            <p className="text-sm text-theme-secondary flex items-center mt-1">
                               <Truck size={14} className="mr-1" />
                               {rider.vehicle_type} {rider.vehicle_plate && `(${rider.vehicle_plate})`}
                             </p>
@@ -281,7 +279,7 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
               <div className="flex gap-3">
                 <button
                   onClick={handleClose}  // Use handleClose instead of onClose directly
-                  className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className={`flex-1 py-2.5 border rounded-lg transition-colors ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
                 >
                   Cancel
                 </button>

@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 // src/components/Layout.jsx
 import React, { useState, useCallback, memo } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../context/ThemeContext';
 import { useNotifications } from '../context/NotificationContext';
 import { 
   LayoutDashboard, 
@@ -21,6 +23,7 @@ import {
   CheckCheck,
   Trash2
 } from 'lucide-react';
+import DarkModeToggle from './DarkModeToggle';
 import { motion, AnimatePresence } from 'framer-motion';
 import mkcLogo from '../assets/images/mkc-logo.png';
 import PageTransition from './PageTransition';
@@ -29,7 +32,7 @@ import FloatingChatBubble from './common/FloatingChatBubble';
 
 
 // Animated NavItem with scale and slide effects
-const NavItem = memo(({ to, icon: Icon, label, isActive, onClick }) => {
+const NavItem = memo(({ icon: Icon, label, isActive, onClick }) => {
   return (
     <motion.button
       onClick={onClick}
@@ -162,8 +165,8 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
           >
             <div className="px-4 py-3 border-b flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
-                <p className="text-xs text-gray-500">{unreadCount} unread</p>
+                <h3 className="text-sm font-semibold text-theme-primary">Notifications</h3>
+                <p className="text-xs text-theme-secondary">{unreadCount} unread</p>
               </div>
             </div>
 
@@ -173,7 +176,7 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
                   onClick={async () => {
                     await markAllAsRead();
                   }}
-                  className="inline-flex items-center gap-1 text-xs text-blue-700 hover:text-blue-900 font-medium"
+                  className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-400 font-medium"
                 >
                   <CheckCheck size={14} />
                   Mark all as read
@@ -183,7 +186,7 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
                     await clearAll();
                     setIsOpen(false);
                   }}
-                  className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-[#ED1C24]"
+                  className="inline-flex items-center gap-1 text-xs text-theme-secondary hover:text-[#ED1C24]"
                 >
                   <Trash2 size={14} />
                   Remove all
@@ -193,7 +196,7 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
 
             <div className="max-h-[340px] overflow-auto">
               {previewNotifications.length === 0 ? (
-                <div className="p-6 text-center text-sm text-gray-500">No notifications yet</div>
+                <div className="p-6 text-center text-sm text-theme-secondary">No notifications yet</div>
               ) : (
                 <div className="divide-y">
                   {previewNotifications.map((notification) => (
@@ -212,9 +215,9 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{notification.title}</p>
-                          <p className="text-xs text-gray-600 mt-1 break-words">{notification.message}</p>
-                          <p className="text-[11px] text-gray-400 mt-2">
+                          <p className="text-sm font-semibold text-theme-primary truncate">{notification.title}</p>
+                          <p className="text-xs text-theme-secondary mt-1 break-words">{notification.message}</p>
+                          <p className="text-[11px] text-theme-secondary mt-2">
                             {formatNotificationTime(notification.created_at)}
                           </p>
                         </div>
@@ -262,7 +265,8 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
 NotificationMenu.displayName = 'NotificationMenu';
 
 // Sidebar component
-const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setSlideDirection, onSettingsClick, onProfileClick, notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll, requestNotificationPermission, onNotificationClick }) => {
+const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setSlideDirection, onProfileClick, notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll, requestNotificationPermission, onNotificationClick }) => {
+  const { isDarkMode } = useTheme();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   // Handle navigation with slide direction
@@ -299,7 +303,7 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
       initial={{ x: -300 }}
       animate={{ x: 0 }}
       transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
-      className="hidden md:flex flex-col w-72 bg-white border-r border-gray-200 relative z-40 overflow-visible"
+      className={`hidden md:flex flex-col w-72 relative z-40 overflow-visible transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-r border-slate-700' : 'bg-white border-r border-gray-200'}`}
     >
       {/* Logo Section */}
       <motion.div 
@@ -328,19 +332,21 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
             </motion.div>
           </div>
 
-          <NotificationMenu
-            notifications={notifications}
-            unreadCount={unreadCount}
-            markAsRead={markAsRead}
-            markAllAsRead={markAllAsRead}
-            removeNotification={removeNotification}
-            clearAll={clearAll}
-            onNotificationClick={onNotificationClick}
-            requestNotificationPermission={requestNotificationPermission}
-            placement="right-start"
-            className="translate-x-2"
-            buttonClassName="bg-white border-white/70 text-[#0033A0] hover:bg-[#E5EEFF]"
-          />
+          <div className="flex items-center gap-2">
+            <NotificationMenu
+              notifications={notifications}
+              unreadCount={unreadCount}
+              markAsRead={markAsRead}
+              markAllAsRead={markAllAsRead}
+              removeNotification={removeNotification}
+              clearAll={clearAll}
+              onNotificationClick={onNotificationClick}
+              requestNotificationPermission={requestNotificationPermission}
+              placement="right-start"
+              className="translate-x-2"
+              buttonClassName="bg-white border-white/70 text-[#0033A0] hover:bg-[#E5EEFF]"
+            />
+          </div>
         </div>
       </motion.div>
 
@@ -366,7 +372,7 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
 
       {/* Profile Section */}
       <motion.div 
-        className="p-4 border-t"
+        className={`p-4 border-t transition-colors duration-300 ${isDarkMode ? 'border-slate-700 bg-slate-900' : 'border-gray-200 bg-white'}`}
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.6 }}
@@ -390,16 +396,16 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
               </div>
             )}
             <div className="flex-1 text-left min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-theme-primary truncate">
                 {profile?.full_name || 'Admin'}
               </p>
-              <p className="text-xs text-gray-500 truncate">{profile?.email || 'admin@mkcfoods.com'}</p>
+              <p className="text-xs text-theme-secondary truncate">{profile?.email || 'admin@mkcfoods.com'}</p>
             </div>
             <motion.div
               animate={{ rotate: isProfileMenuOpen ? 180 : 0 }}
               transition={{ duration: 0.3 }}
             >
-              <ChevronDown size={18} className="text-gray-400 flex-shrink-0" />
+              <ChevronDown size={18} className="text-theme-secondary flex-shrink-0" />
             </motion.div>
           </motion.button>
 
@@ -407,7 +413,7 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
           <AnimatePresence>
             {isProfileMenuOpen && (
               <motion.div 
-                className="absolute bottom-full left-0 w-full mb-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                className={`absolute bottom-full left-0 w-full mb-2 rounded-lg shadow-lg border py-2 z-50 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
@@ -415,7 +421,7 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
               >
                 <motion.button 
                   whileHover={{ x: 5 }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0] flex items-center"
+                  className={`w-full px-4 py-2 text-left text-sm flex items-center transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700 hover:text-white' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}
                   onClick={() => {
                     onProfileClick();
                     setIsProfileMenuOpen(false);
@@ -424,6 +430,10 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
                   <User size={16} className="mr-2" />
                   Profile and settings
                 </motion.button>
+                <div className="px-4 py-2 flex items-center justify-between gap-3">
+                  <span className={`text-sm ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>Theme</span>
+                  <DarkModeToggle showLabel />
+                </div>
                 <div className="border-t my-2"></div>
                 <motion.button 
                   whileHover={{ x: 5 }}
@@ -445,7 +455,8 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
 Sidebar.displayName = 'Sidebar';
 
 // Mobile header with animations
-const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation, setSlideDirection, notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll, requestNotificationPermission, onSettingsClick, onProfileClick, onNotificationClick }) => {
+const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation, setSlideDirection, notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll, requestNotificationPermission, onProfileClick, onNotificationClick }) => {
+  const { isDarkMode } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileProfileMenuOpen, setIsMobileProfileMenuOpen] = useState(false);
 
@@ -513,7 +524,7 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div 
-            className="md:hidden fixed inset-0 top-16 bg-white z-10 overflow-y-auto"
+            className={`md:hidden fixed inset-0 top-16 z-10 overflow-y-auto transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-white text-gray-900'}`}
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -100, opacity: 0 }}
@@ -524,7 +535,6 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
                 {[
                   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
                   { to: '/orders', icon: ShoppingCart, label: 'Orders' },
-
                   { to: '/products', icon: Package, label: 'Inventory' },
                   { to: '/customers', icon: Users, label: 'Customers' },
                   { to: '/riders', icon: Truck, label: 'Riders' },
@@ -557,7 +567,7 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
               <div className="border-t pt-4">
                 <button
                   onClick={() => setIsMobileProfileMenuOpen(prev => !prev)}
-                  className="w-full flex items-center mb-2 p-2 rounded-lg hover:bg-gray-100 transition"
+                  className={`w-full flex items-center mb-2 p-2 rounded-lg transition ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-gray-100'}`}
                 >
                   {profile?.avatar_url ? (
                     <img
@@ -571,13 +581,13 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
                     </div>
                   )}
                   <div className="min-w-0 text-left flex-1">
-                    <p className="font-medium text-gray-900 truncate">{profile?.full_name || 'Admin'}</p>
-                    <p className="text-sm text-gray-500 truncate">{profile?.email || 'admin@mkcfoods.com'}</p>
+                    <p className="font-medium text-theme-primary truncate">{profile?.full_name || 'Admin'}</p>
+                    <p className="text-sm text-theme-secondary truncate">{profile?.email || 'admin@mkcfoods.com'}</p>
                   </div>
                   <motion.div
                     animate={{ rotate: isMobileProfileMenuOpen ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
-                    className="text-gray-500"
+                    className="text-theme-secondary"
                   >
                     <ChevronDown size={18} />
                   </motion.div>
@@ -585,25 +595,29 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
 
                 <AnimatePresence>
                   {isMobileProfileMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.15 }}
-                    className="mb-3 bg-gray-50 border border-gray-200 rounded-lg p-2"
-                  >
-                    <button
-                      onClick={() => {
-                        onProfileClick();
-                        setIsMobileProfileMenuOpen(false);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0] rounded-md flex items-center"
+                    <motion.div
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.15 }}
+                      className={`mb-3 rounded-lg border p-2 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`}
                     >
-                      <User size={16} className="mr-2" />
-                      Profile and settings
-                    </button>
-                  </motion.div>
+                      <button
+                        onClick={() => {
+                          onProfileClick();
+                          setIsMobileProfileMenuOpen(false);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className={`w-full px-3 py-2 text-left text-sm rounded-md flex items-center transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700 hover:text-white' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}
+                      >
+                        <User size={16} className="mr-2" />
+                        Profile and settings
+                      </button>
+                      <div className="px-3 pt-2 pb-1 flex items-center justify-between gap-3">
+                        <span className={`text-sm ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>Theme</span>
+                        <DarkModeToggle showLabel />
+                      </div>
+                    </motion.div>
                   )}
                 </AnimatePresence>
 
@@ -629,6 +643,7 @@ MobileHeader.displayName = 'MobileHeader';
 
 export default function Layout() {
   const { user, profile, signOut } = useAuth();
+  const { isDarkMode } = useTheme();
   const {
     notifications,
     unreadCount,
@@ -641,7 +656,7 @@ export default function Layout() {
   } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
-  const [slideDirection, setSlideDirection] = useState('right');
+  const [, setSlideDirection] = useState('right');
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   const handleSignOut = useCallback(async () => {
@@ -731,7 +746,7 @@ export default function Layout() {
   const isActive = useCallback((path) => location.pathname === path, [location.pathname]);
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className={`flex h-screen transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-gray-100 text-gray-900'}`}>
       <Sidebar 
         profile={profile} 
         handleSignOut={handleSignOut}
@@ -750,7 +765,7 @@ export default function Layout() {
         onNotificationClick={handleNotificationClick}
       />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className={`flex-1 flex flex-col overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-slate-950' : 'bg-gray-50'}`}>
         <MobileHeader 
           profile={profile} 
           handleSignOut={handleSignOut}
@@ -769,7 +784,7 @@ export default function Layout() {
           onNotificationClick={handleNotificationClick}
         />
 
-        <main className="flex-1 overflow-auto p-4 md:p-8 bg-gray-50">
+        <main className={`flex-1 overflow-auto p-4 md:p-8 transition-colors duration-300 ${isDarkMode ? 'bg-slate-950' : 'bg-gray-50'}`}>
           {(permissionStatus === 'denied' || permissionStatus === 'unsupported') && (
             <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900">
               <div className="flex flex-wrap items-center justify-between gap-2">

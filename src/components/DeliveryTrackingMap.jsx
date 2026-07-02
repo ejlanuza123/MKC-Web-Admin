@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { X, Navigation, Phone, MapPin, User, Clock, Route } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { formatDate, formatOrderNumber } from '../utils/formatters';
+import { useTheme } from '../context/ThemeContext';
 
 export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
+  const { isDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [delivery, setDelivery] = useState(null);
   const [riderLocation, setRiderLocation] = useState(null);
@@ -15,52 +17,31 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
   const iframeRef = useRef(null);
   const refreshInterval = useRef(null);
 
-  useEffect(() => {
-    if (!isOpen || !deliveryId) return;
+  const fetchRiderLocation = useCallback(async (riderId = null) => {
+    const targetRiderId = riderId || delivery?.rider?.id;
+    if (!targetRiderId) return;
 
-    fetchDeliveryDetails();
+    try {
+      const { data, error: queryError } = await supabase
+        .from('profiles')
+        .select('address_lat, address_lng, updated_at')
+        .eq('id', targetRiderId)
+        .single();
 
-    refreshInterval.current = setInterval(() => {
-      fetchRiderLocation();
-    }, 10000);
+      if (queryError) throw queryError;
+      if (!data?.address_lat || !data?.address_lng) return;
 
-    return () => {
-      if (refreshInterval.current) clearInterval(refreshInterval.current);
-      setRouteEtaMinutes(null);
-      setRouteDistanceKm(null);
-    };
-  }, [isOpen, deliveryId]);
+      setRiderLocation({
+        lat: Number(data.address_lat),
+        lng: Number(data.address_lng),
+      });
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Error fetching rider location:', err);
+    }
+  }, [delivery?.rider?.id]);
 
-  useEffect(() => {
-    const onMessage = (event) => {
-      const payload = event.data;
-      if (!payload || payload.source !== 'DELIVERY_TRACKING_MAP') return;
-
-      if (payload.type === 'ROUTE_METRICS') {
-        setRouteEtaMinutes(typeof payload.etaMinutes === 'number' ? payload.etaMinutes : null);
-        setRouteDistanceKm(typeof payload.distanceKm === 'number' ? payload.distanceKm : null);
-      }
-    };
-
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, []);
-
-  useEffect(() => {
-    if (!delivery || !riderLocation) return;
-    setMapHtml(generateMapHtml(delivery, riderLocation));
-  }, [delivery, riderLocation]);
-
-  useEffect(() => {
-    if (!iframeRef.current?.contentWindow || !riderLocation) return;
-
-    iframeRef.current.contentWindow.postMessage(
-      { type: 'UPDATE_LOCATION', lat: riderLocation.lat, lng: riderLocation.lng },
-      '*'
-    );
-  }, [riderLocation, mapHtml]);
-
-  const fetchDeliveryDetails = async () => {
+  const fetchDeliveryDetails = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -102,31 +83,52 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [deliveryId, fetchRiderLocation]);
 
-  const fetchRiderLocation = async (riderId = null) => {
-    const targetRiderId = riderId || delivery?.rider?.id;
-    if (!targetRiderId) return;
+  useEffect(() => {
+    if (!isOpen || !deliveryId) return;
 
-    try {
-      const { data, error: queryError } = await supabase
-        .from('profiles')
-        .select('address_lat, address_lng, updated_at')
-        .eq('id', targetRiderId)
-        .single();
+    fetchDeliveryDetails();
 
-      if (queryError) throw queryError;
-      if (!data?.address_lat || !data?.address_lng) return;
+    refreshInterval.current = setInterval(() => {
+      fetchRiderLocation();
+    }, 10000);
 
-      setRiderLocation({
-        lat: Number(data.address_lat),
-        lng: Number(data.address_lng),
-      });
-      setLastUpdated(new Date());
-    } catch (err) {
-      console.error('Error fetching rider location:', err);
-    }
-  };
+    return () => {
+      if (refreshInterval.current) clearInterval(refreshInterval.current);
+      setRouteEtaMinutes(null);
+      setRouteDistanceKm(null);
+    };
+  }, [isOpen, deliveryId, fetchDeliveryDetails, fetchRiderLocation]);
+
+  useEffect(() => {
+    const onMessage = (event) => {
+      const payload = event.data;
+      if (!payload || payload.source !== 'DELIVERY_TRACKING_MAP') return;
+
+      if (payload.type === 'ROUTE_METRICS') {
+        setRouteEtaMinutes(typeof payload.etaMinutes === 'number' ? payload.etaMinutes : null);
+        setRouteDistanceKm(typeof payload.distanceKm === 'number' ? payload.distanceKm : null);
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
+
+  useEffect(() => {
+    if (!delivery || !riderLocation) return;
+    setMapHtml(generateMapHtml(delivery, riderLocation));
+  }, [delivery, riderLocation]);
+
+  useEffect(() => {
+    if (!iframeRef.current?.contentWindow || !riderLocation) return;
+
+    iframeRef.current.contentWindow.postMessage(
+      { type: 'UPDATE_LOCATION', lat: riderLocation.lat, lng: riderLocation.lng },
+      '*'
+    );
+  }, [riderLocation, mapHtml]);
 
   const generateMapHtml = (deliveryData, currentLocation) => {
     const destination = deliveryData?.order?.delivery_lat && deliveryData?.order?.delivery_lng
@@ -353,7 +355,7 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl">
+      <div className={`rounded-xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900'}`}>
         <div className="bg-mkc-blue p-4 flex justify-between items-center">
           <div className="flex items-center">
             <Navigation className="text-white mr-2" size={24} />
@@ -375,7 +377,7 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0033A0] mx-auto mb-4"></div>
-                  <p className="text-gray-500">Loading map...</p>
+                  <p className="text-theme-secondary">Loading map...</p>
                 </div>
               </div>
             ) : error ? (
@@ -399,55 +401,55 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
             )}
           </div>
 
-          <div className="w-full md:w-96 bg-white border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto">
+          <div className={`w-full md:w-96 overflow-y-auto transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700 md:border-l' : 'bg-white border-gray-200 border-t md:border-t-0 md:border-l'}`}>
             <div className="p-4 space-y-4">
               {lastUpdated && (
-                <div className="text-xs text-gray-500 text-center bg-gray-50 p-2 rounded">Last updated: {lastUpdated.toLocaleTimeString()}</div>
+                <div className={`text-xs text-center p-2 rounded ${isDarkMode ? 'text-slate-400 bg-slate-800' : 'text-gray-500 bg-gray-50'}`}>Last updated: {lastUpdated.toLocaleTimeString()}</div>
               )}
 
-              <div className="bg-indigo-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-gray-900 mb-2 flex items-center"><Route size={16} className="mr-2 text-[#0033A0]" />Road Route Metrics</h4>
-                <div className="text-sm text-gray-700 space-y-1">
+              <div className={`p-4 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-indigo-50'}`}>
+                <h4 className="font-semibold text-theme-primary mb-2 flex items-center"><Route size={16} className="mr-2 text-[#0033A0]" />Road Route Metrics</h4>
+                <div className="text-sm text-theme-primary space-y-1">
                   <p>ETA: <span className="font-semibold">{routeEtaMinutes ? `${routeEtaMinutes} min` : 'Calculating...'}</span></p>
                   <p>Distance: <span className="font-semibold">{routeDistanceKm ? `${routeDistanceKm} km` : 'Calculating...'}</span></p>
                 </div>
               </div>
 
               {delivery?.rider && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center"><User size={16} className="mr-2 text-[#0033A0]" />Rider Information</h4>
+                <div className={`p-4 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-blue-50'}`}>
+                  <h4 className="font-semibold text-theme-primary mb-3 flex items-center"><User size={16} className="mr-2 text-[#0033A0]" />Rider Information</h4>
                   <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Name:</span> {delivery.rider.full_name}</p>
-                    <p><span className="font-medium">Contact:</span> {delivery.rider.phone_number}</p>
+                    <p><span className="font-medium text-theme-primary">Name:</span> {delivery.rider.full_name}</p>
+                    <p><span className="font-medium text-theme-primary">Contact:</span> {delivery.rider.phone_number}</p>
                     {delivery.rider.vehicle_type && (
-                      <p><span className="font-medium">Vehicle:</span> {delivery.rider.vehicle_type} {delivery.rider.vehicle_plate ? `(${delivery.rider.vehicle_plate})` : ''}</p>
+                      <p><span className="font-medium text-theme-primary">Vehicle:</span> {delivery.rider.vehicle_type} {delivery.rider.vehicle_plate ? `(${delivery.rider.vehicle_plate})` : ''}</p>
                     )}
                   </div>
                 </div>
               )}
 
               {delivery?.order && (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center"><MapPin size={16} className="mr-2 text-[#ED1C24]" />Delivery Details</h4>
-                  <p className="text-sm mb-2">{delivery.order.delivery_address}</p>
-                  <p className="text-sm"><span className="font-medium">Amount:</span> ₱{parseFloat(delivery.order.total_amount || 0).toFixed(2)}</p>
+                <div className={`p-4 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                  <h4 className="font-semibold text-theme-primary mb-3 flex items-center"><MapPin size={16} className="mr-2 text-[#ED1C24]" />Delivery Details</h4>
+                  <p className="text-sm mb-2 text-theme-primary">{delivery.order.delivery_address}</p>
+                  <p className="text-sm"><span className="font-medium text-theme-primary">Amount:</span> ₱{parseFloat(delivery.order.total_amount || 0).toFixed(2)}</p>
                 </div>
               )}
 
               {delivery && (
-                <div className="bg-white border border-gray-200 p-4 rounded-lg text-sm space-y-2">
-                  <h4 className="font-semibold text-gray-900">Delivery Status</h4>
-                  <p><span className="text-gray-500">Status:</span> <span className="font-medium">{delivery.status}</span></p>
-                  {delivery.assigned_at && <p><span className="text-gray-500">Assigned:</span> {formatDate(delivery.assigned_at)}</p>}
-                  {delivery.picked_up_at && <p><span className="text-gray-500">Picked Up:</span> {formatDate(delivery.picked_up_at)}</p>}
-                  {delivery.delivered_at && <p><span className="text-gray-500">Delivered:</span> {formatDate(delivery.delivered_at)}</p>}
+                <div className={`border p-4 rounded-lg text-sm space-y-2 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+                  <h4 className="font-semibold text-theme-primary">Delivery Status</h4>
+                  <p><span className="text-theme-secondary">Status:</span> <span className="font-medium text-theme-primary">{delivery.status}</span></p>
+                  {delivery.assigned_at && <p><span className="text-theme-secondary">Assigned:</span> {formatDate(delivery.assigned_at)}</p>}
+                  {delivery.picked_up_at && <p><span className="text-theme-secondary">Picked Up:</span> {formatDate(delivery.picked_up_at)}</p>}
+                  {delivery.delivered_at && <p><span className="text-theme-secondary">Delivered:</span> {formatDate(delivery.delivered_at)}</p>}
                 </div>
               )}
 
               <button
                 onClick={callRider}
                 disabled={!delivery?.rider?.phone_number}
-                className="w-full py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className={`w-full py-2.5 border rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
               >
                 <Phone size={18} />
                 Call Rider

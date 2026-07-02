@@ -19,10 +19,11 @@ import { formatCurrency, formatDate } from '../utils/formatters';
 import ExcelJS from 'exceljs';
 import { jsPDF } from 'jspdf';
 import { saveAs } from 'file-saver';
+import { useTheme } from '../context/ThemeContext';
 
 // Skeleton Components
 const StatCardSkeleton = () => (
-  <div className="bg-white p-6 rounded-xl border border-gray-200 animate-pulse">
+  <div className="bg-slate-900 p-6 rounded-xl border border-slate-700 animate-pulse">
     <div className="flex justify-between mb-2">
       <div className="h-4 w-24 bg-gray-200 rounded"></div>
       <div className="w-8 h-8 bg-gray-200 rounded"></div>
@@ -34,14 +35,19 @@ const StatCardSkeleton = () => (
 
 const CategorySkeleton = () => (
   <div className="space-y-3">
-    {[1,2,3,4].map(i => (
+    {[
+      { labelWidth: 'w-24', valueWidth: 'w-20', barWidth: 'w-3/4' },
+      { labelWidth: 'w-20', valueWidth: 'w-16', barWidth: 'w-1/2' },
+      { labelWidth: 'w-28', valueWidth: 'w-24', barWidth: 'w-2/3' },
+      { labelWidth: 'w-22', valueWidth: 'w-18', barWidth: 'w-5/6' },
+    ].map((item, i) => (
       <div key={i} className="animate-pulse">
         <div className="flex justify-between mb-1">
-          <div className="h-4 w-24 bg-gray-200 rounded"></div>
-          <div className="h-4 w-20 bg-gray-200 rounded"></div>
+          <div className={`h-4 ${item.labelWidth} bg-gray-200 rounded`}></div>
+          <div className={`h-4 ${item.valueWidth} bg-gray-200 rounded`}></div>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
-          <div className="bg-gray-300 h-2 rounded-full" style={{ width: `${Math.random() * 100}%` }}></div>
+          <div className={`bg-gray-300 h-2 rounded-full ${item.barWidth}`}></div>
         </div>
       </div>
     ))}
@@ -49,7 +55,7 @@ const CategorySkeleton = () => (
 );
 
 const ChartSkeleton = () => (
-  <div className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+  <div className="bg-slate-900 rounded-xl border border-slate-700 p-6 animate-pulse">
     <div className="h-6 w-48 bg-gray-200 rounded mb-6"></div>
     <div className="space-y-4">
       {[1,2,3,4,5,6,7].map(i => (
@@ -99,7 +105,7 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
       </button>
 
       {isOpen && !exporting && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+        <div className="absolute right-0 mt-2 w-56 bg-slate-900 text-slate-100 rounded-lg shadow-lg border border-slate-700 py-1 z-50">
           <button
             onClick={() => {
               setIsOpen(false);
@@ -109,8 +115,8 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
           >
             <FileSpreadsheet size={18} className="text-green-600" />
             <div>
-              <p className="text-sm font-medium text-gray-700">Excel (.xlsx)</p>
-              <p className="text-xs text-gray-400">Download as spreadsheet</p>
+              <p className="text-sm font-medium text-slate-100">Excel (.xlsx)</p>
+              <p className="text-xs text-slate-400">Download as spreadsheet</p>
             </div>
           </button>
           
@@ -123,8 +129,8 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
           >
             <FileText size={18} className="text-red-600" />
             <div>
-              <p className="text-sm font-medium text-gray-700">PDF Document</p>
-              <p className="text-xs text-gray-400">Download as printable report</p>
+              <p className="text-sm font-medium text-slate-100">PDF Document</p>
+              <p className="text-xs text-slate-400">Download as printable report</p>
             </div>
           </button>
         </div>
@@ -134,6 +140,7 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
 };
 
 export default function Reports() {
+  const { isDarkMode } = useTheme();
   const [dateRange, setDateRange] = useState('month');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -381,7 +388,6 @@ export default function Reports() {
       ];
 
       statsData.forEach((row, index) => {
-        const rowNum = index + 4;
         const excelRow = summarySheet.addRow(row);
         
         if (index === 0) {
@@ -935,7 +941,7 @@ export default function Reports() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ChartSkeleton />
-          <div className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+          <div className={`rounded-xl border p-6 animate-pulse ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
             <div className="h-6 w-48 bg-gray-200 rounded mb-6"></div>
             <CategorySkeleton />
           </div>
@@ -949,7 +955,7 @@ export default function Reports() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Reports & Analytics</h2>
+          <h2 className="text-2xl font-bold text-theme-primary">Reports & Analytics</h2>
           {reportData && (
             <p className="text-sm text-gray-500 mt-1">
               <Calendar size={14} className="inline mr-1" />
@@ -962,7 +968,7 @@ export default function Reports() {
           <select
             value={dateRange}
             onChange={handleDateRangeChange}
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#0033A0] outline-none bg-white"
+            className={`rounded-lg px-4 py-2 border focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-300 text-gray-900'}`}
             disabled={refreshing || exporting}
           >
             <option value="week">Last 7 Days</option>
@@ -974,7 +980,7 @@ export default function Reports() {
           <button
             onClick={handleRefresh}
             disabled={refreshing || exporting}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className={`px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 hover:bg-gray-50'}`}
             title="Refresh Data"
           >
             <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
@@ -994,63 +1000,63 @@ export default function Reports() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-500">Total Revenue</p>
+                <p className="text-sm text-theme-secondary">Total Revenue</p>
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <DollarSign className="text-[#0033A0]" size={18} />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-theme-primary">
                 {formatCurrency(reportData.summary.totalRevenue)}
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-theme-secondary mt-1">
                 {reportData.summary.completedOrders} completed orders
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-500">Total Orders</p>
+                <p className="text-sm text-theme-secondary">Total Orders</p>
                 <div className="p-2 bg-red-100 rounded-lg">
                   <ShoppingCart className="text-[#ED1C24]" size={18} />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-gray-900">{reportData.summary.totalOrders}</p>
+              <p className="text-2xl font-bold text-theme-primary">{reportData.summary.totalOrders}</p>
               <div className="flex gap-2 mt-1 text-xs">
                 <span className="text-green-600">{reportData.summary.completedOrders} completed</span>
                 <span className="text-yellow-600">{reportData.summary.pendingOrders} pending</span>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-500">Avg Order Value</p>
+                <p className="text-sm text-theme-secondary">Avg Order Value</p>
                 <div className="p-2 bg-green-100 rounded-lg">
                   <TrendingUp className="text-green-600" size={18} />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-theme-primary">
                 {formatCurrency(reportData.summary.averageOrderValue)}
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-theme-secondary mt-1">
                 per completed order
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-500">Success Rate</p>
+                <p className="text-sm text-theme-secondary">Success Rate</p>
                 <div className="p-2 bg-purple-100 rounded-lg">
                   <BarChart3 className="text-purple-600" size={18} />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-theme-primary">
                 {reportData.summary.totalOrders > 0 
                   ? Math.round((reportData.summary.completedOrders / reportData.summary.totalOrders) * 100) 
                   : 0}%
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-theme-secondary mt-1">
                 {reportData.summary.uniqueCustomers} unique customers
               </p>
             </div>
@@ -1059,8 +1065,8 @@ export default function Reports() {
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Sales Timeline */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Sales Timeline</h3>
+            <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+              <h3 className="text-lg font-semibold text-theme-primary mb-4">Sales Timeline</h3>
               {reportData.timeSeriesData.length > 0 ? (
                 <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
                   {reportData.timeSeriesData.map((item, index) => {
@@ -1069,7 +1075,7 @@ export default function Reports() {
                     
                     return (
                       <div key={index} className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500 w-24">{item.date}</span>
+                        <span className="text-xs text-theme-secondary w-24">{item.date}</span>
                         <div className="flex-1">
                           <div className="h-8 bg-gray-100 rounded-lg relative group">
                             <div 

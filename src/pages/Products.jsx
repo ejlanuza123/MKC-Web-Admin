@@ -11,25 +11,8 @@ import ConfirmDialog from '../components/common/ConfirmDialog';
 import { useProducts } from '../hooks/useProducts';
 import { PRODUCT_CATEGORIES } from '../utils/constants';
 import { formatCurrency } from '../utils/formatters';
+import { useTheme } from '../context/ThemeContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-// Default placeholder images based on category
-const getPlaceholderImage = (category) => {
-  switch(category) {
-    case PRODUCT_CATEGORIES.WHOLE_CHICKEN:
-      return 'https://images.unsplash.com/photo-1588707631731-9627b1e4cd2a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
-    case PRODUCT_CATEGORIES.CUT_UPS:
-      return 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
-    case PRODUCT_CATEGORIES.READY_TO_COOK:
-      return 'https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
-    case PRODUCT_CATEGORIES.GIBLETS:
-      return 'https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
-    case PRODUCT_CATEGORIES.CLASS_B:
-      return 'https://images.unsplash.com/photo-1513639776629-7b61b0ac49cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
-    default:
-      return 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
-  }
-};
 
 // Skeleton Components
 const ProductCardSkeleton = () => (
@@ -66,6 +49,7 @@ const StatCardSkeleton = () => (
 export default function Products() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
   const handledFocusNonceRef = useRef(null);
   const { products, loading, error, addProduct, updateProduct, deleteProduct } = useProducts();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -144,7 +128,7 @@ export default function Products() {
       }
       setIsModalOpen(false);
       setEditingProduct(null);
-    } catch (err) {
+    } catch {
       // Error is handled by hook
     }
   }, [editingProduct, addProduct, updateProduct]);
@@ -218,14 +202,14 @@ export default function Products() {
     return (
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="h-8 w-48 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-12 w-40 bg-gray-200 rounded animate-pulse"></div>
+          <div className={`h-8 w-48 rounded animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
+          <div className={`h-12 w-40 rounded animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
         </div>
 
         {/* Filters Skeleton */}
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 h-12 bg-gray-200 rounded animate-pulse"></div>
-          <div className="w-48 h-12 bg-gray-200 rounded animate-pulse"></div>
+          <div className={`flex-1 h-12 rounded animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
+          <div className={`w-48 h-12 rounded animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
         </div>
 
         {/* Stats Summary Skeleton */}
@@ -244,7 +228,7 @@ export default function Products() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-800">Product Catalog</h2>
+        <h2 className="text-2xl font-bold text-theme-primary">Product Catalog</h2>
         
         <button 
           onClick={openAdd}
@@ -268,7 +252,7 @@ export default function Products() {
         <select
           value={categoryFilter}
           onChange={handleCategoryChange}
-          className="bg-white border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#0033A0] outline-none"
+          className={`rounded-lg px-4 py-2 border focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-300 text-gray-900'}`}
         >
           <option value="All">All Categories</option>
           {Object.values(PRODUCT_CATEGORIES).map(category => (
@@ -279,20 +263,20 @@ export default function Products() {
 
       {/* Stats Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200 min-w-0">
-          <p className="text-sm text-gray-500">Total Products</p>
+        <div className={`p-4 rounded-lg border min-w-0 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Total Products</p>
           <p className="text-2xl font-bold text-[#0033A0]">{stats.total}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200 min-w-0">
-          <p className="text-sm text-gray-500">Low Stock</p>
+        <div className={`p-4 rounded-lg border min-w-0 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Low Stock</p>
           <p className="text-2xl font-bold text-[#ED1C24]">{stats.lowStock}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200 min-w-0">
-          <p className="text-sm text-gray-500">Categories</p>
-          <p className="text-2xl font-bold text-gray-900">{stats.categories}</p>
+        <div className={`p-4 rounded-lg border min-w-0 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Categories</p>
+          <p className="text-2xl font-bold text-theme-primary">{stats.categories}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200 min-w-0">
-          <p className="text-sm text-gray-500">Total Value</p>
+        <div className={`p-4 rounded-lg border min-w-0 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Total Value</p>
           <p className="text-lg sm:text-2xl font-bold text-green-600 leading-tight break-words">
             {formatCurrency(stats.totalValue)}
           </p>
@@ -317,11 +301,11 @@ export default function Products() {
             {paginatedProducts.map((product) => (
               <div 
                 key={product.id} 
-                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-150 group cursor-pointer"
+                className={`rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow duration-150 group cursor-pointer ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}
                 onClick={() => openDetails(product)}
               >
                 {/* Product Image */}
-                <div className="h-48 bg-gray-100 relative overflow-hidden">
+                <div className={`h-48 relative overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
                   {!imageErrors[product.id] && product.image_url ? (
                     <img 
                       src={product.image_url}
@@ -330,10 +314,10 @@ export default function Products() {
                       onError={() => handleImageError(product.id)}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                    <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${isDarkMode ? 'from-slate-800 to-slate-900' : 'from-gray-100 to-gray-200'}`}>
                       <div className="text-center">
                         <div className="text-6xl mb-2">🍗</div>
-                        <p className="text-sm text-gray-400">MKC Product</p>
+                        <p className="text-sm text-theme-secondary">MKC Product</p>
                       </div>
                     </div>
                   )}
@@ -351,17 +335,17 @@ export default function Products() {
 
                   {/* Category Badge */}
                   <div className="absolute top-2 left-2">
-                    <span className="px-2 py-1 text-xs font-bold rounded bg-white/90 backdrop-blur-sm text-gray-700 shadow-lg">
+                    <span className={`px-2 py-1 text-xs font-bold rounded backdrop-blur-sm shadow-lg ${isDarkMode ? 'bg-slate-900/90 text-slate-100' : 'bg-white/90 text-gray-700'}`}>
                       {product.category}
                     </span>
                   </div>
                 </div>
 
                 <div className="p-4">
-                  <h3 className="font-bold text-gray-900 mb-1 line-clamp-1">{product.name}</h3>
+                  <h3 className="font-bold text-theme-primary mb-1 line-clamp-1">{product.name}</h3>
                   
                   {product.description && (
-                    <p className="text-sm text-gray-500 mb-2 line-clamp-2">{product.description}</p>
+                    <p className="text-sm text-theme-secondary mb-2 line-clamp-2">{product.description}</p>
                   )}
                   
                   {product.stock_quantity < 10 && (
@@ -373,13 +357,13 @@ export default function Products() {
 
                   <div className="flex justify-between items-center mt-3">
                     <div>
-                      <p className="text-xs text-gray-400">Price</p>
+                      <p className="text-xs text-theme-secondary">Price</p>
                       <p className="font-bold text-[#0033A0] text-lg">
                         {formatCurrency(product.current_price)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-400">Stock</p>
+                      <p className="text-xs text-theme-secondary">Stock</p>
                       <p className={`font-medium ${
                         product.stock_quantity > 10 ? 'text-green-600' : 'text-red-600'
                       }`}>
@@ -394,7 +378,7 @@ export default function Products() {
                         e.stopPropagation();
                         openEdit(product);
                       }}
-                      className="flex-1 bg-gray-50 text-gray-700 py-2 rounded-lg hover:bg-[#E5EEFF] hover:text-[#0033A0] text-sm font-medium flex items-center justify-center gap-2 transition-colors duration-150"
+                      className={`flex-1 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors duration-150 ${isDarkMode ? 'bg-slate-800 text-slate-100 hover:bg-slate-700' : 'bg-gray-50 text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}
                     >
                       <Edit2 size={14} />
                       Edit

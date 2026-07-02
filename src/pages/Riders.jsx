@@ -10,11 +10,12 @@ import { diffObjects, formatChangesDescription } from '../utils/diff';
 import { notifySuccess } from '../utils/successNotifier';
 import { useAdminLog } from '../hooks/useAdminLog';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../context/ThemeContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // Skeleton Components (keep as is)
 const RiderCardSkeleton = () => (
-  <div className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+  <div className="bg-slate-900 rounded-xl border border-slate-700 p-6 animate-pulse">
     <div className="flex items-start justify-between mb-4">
       <div className="flex items-center">
         <div className="w-12 h-12 bg-gray-200 rounded-xl mr-3"></div>
@@ -47,7 +48,7 @@ const RiderCardSkeleton = () => (
 );
 
 const StatCardSkeleton = () => (
-  <div className="bg-white p-4 rounded-lg border border-gray-200 animate-pulse">
+  <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 animate-pulse">
     <div className="h-4 w-20 bg-gray-200 rounded mb-2"></div>
     <div className="h-8 w-16 bg-gray-300 rounded"></div>
   </div>
@@ -1021,6 +1022,7 @@ RiderDetailsModal.displayName = 'RiderDetailsModal';
 export default function Riders() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
   const { user, loading: authLoading } = useAuth();
   const handledFocusNonceRef = useRef(null);
   const { logRiderAction } = useAdminLog();
@@ -1307,8 +1309,8 @@ export default function Riders() {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <div className="h-8 w-48 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-10 w-32 bg-gray-200 rounded animate-pulse"></div>
+          <div className={`h-8 w-48 rounded animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
+          <div className={`h-10 w-32 rounded animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
         </div>
 
         {/* Stats Summary Skeleton */}
@@ -1317,7 +1319,7 @@ export default function Riders() {
         </div>
 
         {/* Search Skeleton */}
-        <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
+        <div className={`h-12 rounded animate-pulse ${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'}`}></div>
 
         {/* Riders Grid Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1330,7 +1332,7 @@ export default function Riders() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Rider Management</h2>
+        <h2 className="text-2xl font-bold text-theme-primary">Rider Management</h2>
         <button
           onClick={() => setShowAddModal(true)}
           className="bg-mkc-blue text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity"
@@ -1344,23 +1346,23 @@ export default function Riders() {
 
       {/* Stats Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Total Riders</p>
+        <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Total Riders</p>
           <p className="text-2xl font-bold text-[#0033A0]">{stats.total}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Active Riders</p>
+        <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Active Riders</p>
           <p className="text-2xl font-bold text-green-600">{stats.active}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Total Deliveries</p>
+        <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Total Deliveries</p>
           <p className="text-2xl font-bold text-[#ED1C24]">{stats.totalDeliveries}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-500">Success Rate</p>
+        <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+          <p className="text-sm text-theme-secondary">Success Rate</p>
           <div className="flex items-center">
             <CheckCircle size={20} className="text-green-500 mr-1" />
-            <span className="text-2xl font-bold text-gray-900">{stats.successRate}%</span>
+            <span className="text-2xl font-bold text-theme-primary">{stats.successRate}%</span>
           </div>
         </div>
       </div>
@@ -1373,10 +1375,10 @@ export default function Riders() {
       />
 
       {filteredRiders.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+        <div className={`rounded-xl border p-12 text-center transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
           <Truck size={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No riders found</h3>
-          <p className="text-gray-500">
+          <h3 className="text-lg font-medium text-theme-primary mb-2">No riders found</h3>
+          <p className="text-theme-secondary">
             {searchQuery ? "Try adjusting your search" : "No riders have been added yet"}
           </p>
           {!searchQuery && (
@@ -1394,7 +1396,7 @@ export default function Riders() {
             const riderStats = getRiderStats(rider);
             
             return (
-              <div key={rider.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              <div key={rider.id} className={`rounded-xl shadow-sm border p-6 hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center">
                     {rider.avatar_url ? (
@@ -1416,8 +1418,8 @@ export default function Riders() {
                       </div>
                     )}
                     <div>
-                      <h3 className="font-bold text-gray-900">{rider.full_name || 'Unnamed'}</h3>
-                      <p className="text-sm text-gray-500 flex items-center">
+                      <h3 className="font-bold text-theme-primary">{rider.full_name || 'Unnamed'}</h3>
+                      <p className="text-sm text-theme-secondary flex items-center">
                         <Phone size={12} className="mr-1" />
                         {rider.phone_number || 'No phone'}
                       </p>
@@ -1425,53 +1427,53 @@ export default function Riders() {
                   </div>
                   <div className="flex items-center">
                     <span className={`w-3 h-3 rounded-full ${rider.is_active ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
-                    <span className="ml-2 text-xs font-medium text-gray-600">{rider.is_active ? 'Active' : 'Inactive'}</span>
+                    <span className="ml-2 text-xs font-medium text-theme-secondary">{rider.is_active ? 'Active' : 'Inactive'}</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   <div className="bg-blue-50 p-2 rounded-lg text-center">
-                    <p className="text-xs text-gray-600">Total</p>
+                    <p className="text-xs text-theme-secondary">Total</p>
                     <p className="font-bold text-[#0033A0] text-lg">{riderStats.total}</p>
                   </div>
                   <div className="bg-green-50 p-2 rounded-lg text-center">
-                    <p className="text-xs text-gray-600">Completed</p>
+                    <p className="text-xs text-theme-secondary">Completed</p>
                     <p className="font-bold text-green-600 text-lg">{riderStats.completed}</p>
                   </div>
                   <div className="bg-yellow-50 p-2 rounded-lg text-center">
-                    <p className="text-xs text-gray-600">Pending</p>
+                    <p className="text-xs text-theme-secondary">Pending</p>
                     <p className="font-bold text-yellow-600 text-lg">{riderStats.pending}</p>
                   </div>
                 </div>
 
                 <div className="space-y-2 mb-4">
                   {rider.email && (
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-theme-secondary">
                       <span className="font-medium">Email:</span> {rider.email}
                     </div>
                   )}
                   
                   {rider.vehicle_type && (
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-theme-secondary">
                       <span className="font-medium">Vehicle:</span> {rider.vehicle_type} 
                       {rider.vehicle_plate && ` (${rider.vehicle_plate})`}
                     </div>
                   )}
 
                   {rider.address && (
-                    <div className="flex items-start text-sm text-gray-600">
+                    <div className="flex items-start text-sm text-theme-secondary">
                       <MapPin size={16} className="mr-2 text-gray-400 flex-shrink-0 mt-0.5" />
                       <span className="line-clamp-2">{rider.address}</span>
                     </div>
                   )}
 
-                  <div className="text-xs text-gray-500 flex items-center">
+                  <div className="text-xs text-theme-secondary flex items-center">
                     <Calendar size={12} className="mr-1" />
                     Joined: {new Date(rider.created_at).toLocaleDateString()}
                   </div>
 
                   {riderStats.avgDeliveryTime && (
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-theme-secondary">
                       Avg delivery time: {riderStats.avgDeliveryTime} mins
                     </div>
                   )}

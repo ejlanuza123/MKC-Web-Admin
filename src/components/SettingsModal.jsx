@@ -1,10 +1,14 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { X, Settings as SettingsIcon, Bell, BellOff, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { notifySuccess } from '../utils/successNotifier';
 import { pushNotificationService } from '../services/pushNotificationService';
+import DarkModeToggle from './DarkModeToggle';
+import { useTheme } from '../context/ThemeContext';
 
 export default function SettingsModal({ isOpen, onClose }) {
+  const { isDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [permissionState, setPermissionState] = useState('default');
@@ -81,24 +85,27 @@ export default function SettingsModal({ isOpen, onClose }) {
           onClick={onClose}
         >
           <motion.div 
-            className="bg-white rounded-lg w-full max-w-md shadow-xl"
+            className={`rounded-lg w-full max-w-md shadow-xl border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}`}
             initial={{ scale: 0.95, y: 20 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 20 }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b bg-blue-50">
+            <div className={`flex items-center justify-between gap-3 p-6 border-b ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-gray-200 bg-blue-50'}`}>
               <div className="flex items-center gap-2">
                 <SettingsIcon size={24} className="text-blue-600" />
-                <h2 className="text-xl font-bold text-gray-900">Settings</h2>
+                <h2 className="text-xl font-bold text-theme-primary">Settings</h2>
               </div>
-              <button 
-                onClick={onClose}
-                className="p-1 hover:bg-white rounded-lg transition"
-              >
-                <X size={20} className="text-gray-600" />
-              </button>
+              <div className="flex items-center gap-2">
+                <DarkModeToggle showLabel />
+                <button 
+                  onClick={onClose}
+                  className="p-1 hover:bg-white rounded-lg transition"
+                >
+                  <X size={20} className="text-gray-600" />
+                </button>
+              </div>
             </div>
 
             {/* Content */}
@@ -116,16 +123,16 @@ export default function SettingsModal({ isOpen, onClose }) {
                     </div>
                   )}
 
-                  <div className="border-b pb-4">
-                    <h3 className="font-semibold text-gray-900 mb-3">Push Notifications</h3>
-                    <p className="text-sm text-gray-600 mb-4">
+                  <div className="border-b border-theme pb-4">
+                    <h3 className="font-semibold text-theme-primary mb-3">Push Notifications</h3>
+                    <p className="text-sm text-theme-secondary mb-4">
                       Manage browser notification permission for admin alerts and updates.
                     </p>
 
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div>
-                        <p className="text-sm text-gray-500">Current Permission</p>
-                        <p className={`text-xl font-bold ${isNotificationsEnabled ? 'text-green-600' : 'text-gray-700'}`}>
+                        <p className="text-sm text-theme-secondary">Current Permission</p>
+                        <p className={`text-xl font-bold ${isNotificationsEnabled ? 'text-green-400' : 'text-theme-primary'}`}>
                           {isNotificationsEnabled ? 'Enabled' : permissionState === 'denied' ? 'Blocked' : permissionState === 'unsupported' ? 'Unsupported' : 'Not Enabled'}
                         </p>
                       </div>
@@ -155,7 +162,15 @@ export default function SettingsModal({ isOpen, onClose }) {
                     </div>
                   </div>
 
-                  <div className="text-xs text-gray-500 space-y-1 pt-2">
+                  <div className="flex items-center justify-between gap-4 rounded-lg border border-theme bg-theme-secondary px-4 py-3">
+                    <div>
+                      <h3 className="font-semibold text-theme-primary">Appearance</h3>
+                      <p className="text-sm text-theme-secondary">Toggle between light and dark mode.</p>
+                    </div>
+                    <DarkModeToggle showLabel />
+                  </div>
+
+                  <div className="text-xs text-theme-secondary space-y-1 pt-2">
                     <p><span className="font-semibold">How it works:</span></p>
                     <ul className="list-disc list-inside space-y-1">
                       <li>Click Enable to request browser permission</li>
