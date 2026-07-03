@@ -117,9 +117,9 @@ export default function SettingsModal({ isOpen, onClose }) {
               ) : (
                 <div className="space-y-4">
                   {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-2">
-                      <AlertCircle size={18} className="text-red-600 flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-red-800">{error}</p>
+                    <div className={`border rounded-lg p-3 flex gap-2 ${isDarkMode ? 'bg-red-950/40 border-red-800' : 'bg-red-50 border-red-200'}`}>
+                      <AlertCircle size={18} className={`flex-shrink-0 mt-0.5 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />
+                      <p className={`text-sm ${isDarkMode ? 'text-red-300' : 'text-red-800'}`}>{error}</p>
                     </div>
                   )}
 
@@ -151,7 +151,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                         <button
                           onClick={handleTestNotification}
                           disabled={!isNotificationsEnabled}
-                          className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                          className={`px-4 py-2 rounded-lg transition font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed ${isDarkMode ? 'bg-slate-700 text-slate-100 hover:bg-slate-600' : 'bg-gray-800 text-white hover:bg-gray-900'}`}
                         >
                           <span className="inline-flex items-center gap-2">
                             <BellOff size={16} />

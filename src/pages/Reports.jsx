@@ -957,7 +957,7 @@ export default function Reports() {
         <div>
           <h2 className="text-2xl font-bold text-theme-primary">Reports & Analytics</h2>
           {reportData && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className={`text-sm mt-1 transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
               <Calendar size={14} className="inline mr-1" />
               {reportData.dateRange.label}
             </p>
@@ -1003,8 +1003,8 @@ export default function Reports() {
             <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-theme-secondary">Total Revenue</p>
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <DollarSign className="text-[#0033A0]" size={18} />
+                <div className={`p-2 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100'}`}>
+                  <DollarSign className={isDarkMode ? 'text-blue-300' : 'text-[#0033A0]'} size={18} />
                 </div>
               </div>
               <p className="text-2xl font-bold text-theme-primary">
@@ -1018,22 +1018,22 @@ export default function Reports() {
             <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-theme-secondary">Total Orders</p>
-                <div className="p-2 bg-red-100 rounded-lg">
-                  <ShoppingCart className="text-[#ED1C24]" size={18} />
+                <div className={`p-2 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-red-900/30' : 'bg-red-100'}`}>
+                  <ShoppingCart className={isDarkMode ? 'text-red-300' : 'text-[#ED1C24]'} size={18} />
                 </div>
               </div>
               <p className="text-2xl font-bold text-theme-primary">{reportData.summary.totalOrders}</p>
               <div className="flex gap-2 mt-1 text-xs">
-                <span className="text-green-600">{reportData.summary.completedOrders} completed</span>
-                <span className="text-yellow-600">{reportData.summary.pendingOrders} pending</span>
+                <span className={isDarkMode ? 'text-green-400' : 'text-green-600'}>{reportData.summary.completedOrders} completed</span>
+                <span className={isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}>{reportData.summary.pendingOrders} pending</span>
               </div>
             </div>
 
             <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-theme-secondary">Avg Order Value</p>
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <TrendingUp className="text-green-600" size={18} />
+                <div className={`p-2 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-green-900/30' : 'bg-green-100'}`}>
+                  <TrendingUp className={isDarkMode ? 'text-green-300' : 'text-green-600'} size={18} />
                 </div>
               </div>
               <p className="text-2xl font-bold text-theme-primary">
@@ -1047,8 +1047,8 @@ export default function Reports() {
             <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-theme-secondary">Success Rate</p>
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <BarChart3 className="text-purple-600" size={18} />
+                <div className={`p-2 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-purple-900/30' : 'bg-purple-100'}`}>
+                  <BarChart3 className={isDarkMode ? 'text-purple-300' : 'text-purple-600'} size={18} />
                 </div>
               </div>
               <p className="text-2xl font-bold text-theme-primary">
@@ -1077,7 +1077,7 @@ export default function Reports() {
                       <div key={index} className="flex items-center gap-3">
                         <span className="text-xs text-theme-secondary w-24">{item.date}</span>
                         <div className="flex-1">
-                          <div className="h-8 bg-gray-100 rounded-lg relative group">
+                          <div className={`h-8 rounded-lg relative group transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
                             <div 
                               className="h-full bg-mkc-blue rounded-lg transition-all duration-300"
                               style={{ width: `${percentage}%` }}
@@ -1088,7 +1088,7 @@ export default function Reports() {
                             </div>
                           </div>
                         </div>
-                        <span className="text-sm font-medium text-gray-700 w-24 text-right">
+                        <span className={`text-sm font-medium w-24 text-right transition-colors duration-300 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                           {formatCurrency(item.amount)}
                         </span>
                       </div>
@@ -1096,15 +1096,15 @@ export default function Reports() {
                   })}
                 </div>
               ) : (
-                <div className="text-center py-12 text-gray-500">
+                <div className={`text-center py-12 transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
                   No sales data available for this period
                 </div>
               )}
             </div>
 
             {/* Category Breakdown */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Sales by Category</h3>
+            <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+              <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-slate-100' : 'text-gray-800'}`}>Sales by Category</h3>
               {Object.keys(reportData.categorySales).length > 0 ? (
                 <div className="space-y-4">
                   {Object.entries(reportData.categorySales)
@@ -1113,8 +1113,8 @@ export default function Reports() {
                       <div key={category}>
                         <div className="flex justify-between items-center mb-1">
                           <div>
-                            <span className="font-medium text-gray-700">{category}</span>
-                            <span className="text-xs text-gray-500 ml-2">
+                            <span className={`font-medium transition-colors duration-300 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>{category}</span>
+                            <span className={`text-xs ml-2 transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
                               ({data.quantity} units)
                             </span>
                           </div>
@@ -1122,7 +1122,7 @@ export default function Reports() {
                             {formatCurrency(data.revenue)}
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className={`w-full rounded-full h-2.5 transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
                           <div 
                             className="bg-mkc-blue h-2.5 rounded-full transition-all duration-300"
                             style={{ 
@@ -1130,14 +1130,14 @@ export default function Reports() {
                             }}
                           ></div>
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className={`text-xs mt-1 transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-400'}`}>
                           {data.orderCount} orders
                         </p>
                       </div>
                     ))}
                 </div>
               ) : (
-                <div className="text-center py-12 text-gray-500">
+                <div className={`text-center py-12 transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
                   No category data available
                 </div>
               )}
@@ -1146,22 +1146,22 @@ export default function Reports() {
 
           {/* Top Customers */}
           {reportData.topCustomers.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Top Customers</h3>
+            <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+              <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-slate-100' : 'text-gray-800'}`}>Top Customers</h3>
               <div className="space-y-3">
                 {reportData.topCustomers.map((customer, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div key={index} className={`flex items-center justify-between p-3 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-gray-50 hover:bg-gray-100'}`}>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-mkc-blue rounded-lg flex items-center justify-center text-white font-bold text-sm">
                         {customer.name?.charAt(0)?.toUpperCase() || '?'}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{customer.name}</p>
+                        <p className={`font-medium transition-colors duration-300 ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{customer.name}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-[#0033A0]">{formatCurrency(customer.totalSpent)}</p>
-                      <p className="text-xs text-gray-500">{customer.orderCount} orders</p>
+                      <p className={`text-xs transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>{customer.orderCount} orders</p>
                     </div>
                   </div>
                 ))}

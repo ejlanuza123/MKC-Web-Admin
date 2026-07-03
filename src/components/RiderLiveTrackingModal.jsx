@@ -461,7 +461,7 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl w-full max-w-6xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-theme-primary rounded-xl w-full max-w-6xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white flex items-center">
             <Navigation className="mr-2" size={24} />
@@ -473,7 +473,7 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider }) {
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 bg-gray-100 relative">
+          <div className="flex-1 bg-theme-secondary relative">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
@@ -499,30 +499,30 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider }) {
             )}
           </div>
 
-          <div className="w-96 bg-white border-l border-gray-200 overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+          <div className="w-96 bg-theme-primary border-l border-theme overflow-y-auto">
+            <div className="p-6 border-b border-theme">
+              <h4 className="font-semibold text-theme-primary mb-4 flex items-center">
                 <User size={18} className="mr-2 text-mkc-blue" />
                 Rider Information
               </h4>
               <div className="space-y-3 text-sm">
-                <p><span className="text-gray-500">Name:</span> <span className="font-medium text-gray-900">{rider?.full_name || 'N/A'}</span></p>
-                <p className="flex items-center"><Phone size={14} className="mr-1 text-gray-500" />{rider?.phone_number || 'N/A'}</p>
+                <p><span className="text-theme-secondary">Name:</span> <span className="font-medium text-theme-primary">{rider?.full_name || 'N/A'}</span></p>
+                <p className="flex items-center"><Phone size={14} className="mr-1 text-theme-secondary" />{rider?.phone_number || 'N/A'}</p>
                 {rider?.vehicle_type && (
-                  <p><span className="text-gray-500">Vehicle:</span> <span className="font-medium">{rider.vehicle_type} {rider?.vehicle_plate ? `(${rider.vehicle_plate})` : ''}</span></p>
+                  <p><span className="text-theme-secondary">Vehicle:</span> <span className="font-medium">{rider.vehicle_type} {rider?.vehicle_plate ? `(${rider.vehicle_plate})` : ''}</span></p>
                 )}
                 <div className="flex items-center gap-2">
                   <span className={`w-3 h-3 rounded-full ${riderLocation?.isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
-                  <span className="font-medium text-gray-900">{riderLocation?.isOnline ? 'Online' : 'Offline'}</span>
+                  <span className="font-medium text-theme-primary">{riderLocation?.isOnline ? 'Online' : 'Offline'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`w-2.5 h-2.5 rounded-full ${getChannelBadge().dot}`}></span>
-                  <span className="text-xs text-gray-600">Realtime: {getChannelBadge().label}</span>
+                  <span className="text-xs text-theme-secondary">Realtime: {getChannelBadge().label}</span>
                 </div>
-                {lastUpdated && <p className="text-xs text-gray-500">Last updated: {lastUpdated.toLocaleTimeString()}</p>}
+                {lastUpdated && <p className="text-xs text-theme-secondary">Last updated: {lastUpdated.toLocaleTimeString()}</p>}
                 <button
                   onClick={fetchInitialData}
-                  className="mt-2 inline-flex items-center px-3 py-1.5 text-xs border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="mt-2 inline-flex items-center px-3 py-1.5 text-xs border border-theme rounded-md hover:bg-theme-secondary"
                 >
                   <RefreshCw size={12} className="mr-1" />
                   Refresh Data
@@ -553,39 +553,35 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider }) {
             </div>
 
             <div className="p-6">
-              <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+              <h4 className="font-semibold text-theme-primary mb-3 flex items-center">
                 <Truck size={18} className="mr-2 text-mkc-blue" />
-                Active Deliveries ({activeDeliveries?.length || 0})
+                Active Deliveries ({activeDeliveries.length})
               </h4>
-
-              {!activeDeliveries?.length ? (
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                  <Truck size={24} className="mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500">No active deliveries</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {activeDeliveries.map((delivery) => {
-                    const isFocused = String(selectedDeliveryId) === String(delivery.id);
-                    return (
-                      <button
-                        key={delivery.id}
-                        onClick={() => setSelectedDeliveryId(delivery.id)}
-                        className={`w-full text-left p-3 rounded-lg border transition-colors ${isFocused ? 'border-[#0033A0] bg-blue-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'}`}
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <p className="font-medium text-gray-900">Order {formatOrderNumber(delivery.order?.order_number, delivery.order?.id)}</p>
-                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadgeColor(delivery.status)}`}>{delivery.status}</span>
-                        </div>
-                        <p className="text-sm text-gray-600 line-clamp-2 flex items-start">
-                          <MapPin size={14} className="mr-1 mt-0.5 flex-shrink-0" />
-                          {delivery.order?.delivery_address}
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                {activeDeliveries.length > 0 ? (
+                  activeDeliveries.map((delivery) => (
+                    <button
+                      key={delivery.id}
+                      onClick={() => setSelectedDeliveryId(delivery.id)}
+                      className={`w-full text-left p-3 rounded-lg transition-colors ${selectedDeliveryId === delivery.id ? 'bg-mkc-blue text-white' : 'bg-theme-secondary hover:bg-theme-tertiary'}`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <p className={`font-medium ${selectedDeliveryId === delivery.id ? 'text-white' : 'text-theme-primary'}`}>
+                          Order #{formatOrderNumber(delivery.order.order_number, delivery.order.id)}
                         </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                        <span className={`text-xs px-2 py-1 rounded-full ${getStatusBadgeColor(delivery.status)}`}>
+                          {delivery.status}
+                        </span>
+                      </div>
+                      <p className={`text-xs mt-1 truncate ${selectedDeliveryId === delivery.id ? 'text-blue-200' : 'text-theme-secondary'}`}>
+                        {delivery.order.delivery_address}
+                      </p>
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-sm text-theme-secondary">No active deliveries for this rider.</p>
+                )}
+              </div>
             </div>
           </div>
         </div>

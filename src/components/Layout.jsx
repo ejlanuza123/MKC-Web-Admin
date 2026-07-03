@@ -43,7 +43,7 @@ const NavItem = memo(({ icon: Icon, label, isActive, onClick }) => {
         transition-all duration-300 ease-in-out
         ${isActive 
           ? 'bg-mkc-blue text-white shadow-lg' 
-          : 'text-gray-600 hover:bg-[#E5EEFF] hover:text-[#0033A0]'
+          : 'bg-theme-secondary'
         }
       `}
     >
@@ -142,7 +142,7 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
           }
           setIsOpen(prev => !prev);
         }}
-        className={`relative p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition ${buttonClassName}`}
+        className={`relative p-2 rounded-lg border border-theme bg-theme-primary hover:bg-theme-secondary transition ${buttonClassName}`}
         aria-label="Open notifications"
       >
         <Bell size={20} className="text-current" />
@@ -160,10 +160,10 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
             animate={{ y: 0 }}
             exit={{ y: 8 }}
             transition={{ duration: 0.2 }}
-            className={`${panelPositionClass} ${placement === 'mobile-center' ? '' : 'w-[min(22rem,calc(100vw-1rem))]'} max-h-[420px] bg-white border border-gray-200 rounded-xl shadow-xl z-[120] overflow-hidden`}
+            className={`${panelPositionClass} ${placement === 'mobile-center' ? '' : 'w-[min(22rem,calc(100vw-1rem))]'} max-h-[420px] bg-theme-primary border border-theme rounded-xl shadow-xl z-[120] overflow-hidden`}
             style={{ opacity: 1 }}
           >
-            <div className="px-4 py-3 border-b flex items-center justify-between">
+            <div className="px-4 py-3 border-b border-theme flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold text-theme-primary">Notifications</h3>
                 <p className="text-xs text-theme-secondary">{unreadCount} unread</p>
@@ -171,7 +171,7 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
             </div>
 
             {notifications.length > 0 && (
-              <div className="px-4 py-2 border-b bg-gray-50 flex items-center justify-between gap-2">
+              <div className="px-4 py-2 border-b border-theme bg-theme-secondary flex items-center justify-between gap-2">
                 <button
                   onClick={async () => {
                     await markAllAsRead();
@@ -211,7 +211,7 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
                         }
                         setIsOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-3 transition hover:bg-gray-50 ${notification.is_read ? 'bg-white' : 'bg-blue-50'}`}
+                      className={`w-full text-left px-4 py-3 transition hover:bg-theme-tertiary ${notification.is_read ? 'bg-theme-primary' : 'bg-theme-secondary'}`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
@@ -344,7 +344,7 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
               requestNotificationPermission={requestNotificationPermission}
               placement="right-start"
               className="translate-x-2"
-              buttonClassName="bg-white border-white/70 text-[#0033A0] hover:bg-[#E5EEFF]"
+              buttonClassName={`${isDarkMode ? 'bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600' : 'bg-white border-white/70 text-[#0033A0] hover:bg-theme-secondary'}`}
             />
           </div>
         </div>
@@ -382,7 +382,7 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="flex items-center w-full px-4 py-3 rounded-lg hover:bg-[#E5EEFF] transition-all duration-300"
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-slate-800 hover:bg-opacity-60' : 'hover:bg-[#E5EEFF]'}`}
           >
             {profile?.avatar_url ? (
               <img
@@ -438,7 +438,7 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
                 <motion.button 
                   whileHover={{ x: 5 }}
                   onClick={handleSignOut}
-                  className="w-full px-4 py-2 text-left text-sm text-[#ED1C24] hover:bg-red-50 flex items-center"
+                  className={`w-full px-4 py-2 text-left text-sm text-[#ED1C24] flex items-center ${isDarkMode ? 'hover:bg-red-900/30' : 'hover:bg-red-50'}`}
                 >
                   <LogOut size={16} className="mr-2" />
                   Sign Out
@@ -509,6 +509,7 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
             onNotificationClick={onNotificationClick}
             requestNotificationPermission={requestNotificationPermission}
             placement="mobile-center"
+            buttonClassName={`${isDarkMode ? 'bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600' : 'bg-white border-white/70 text-[#0033A0] hover:bg-theme-secondary'}`}
           />
           <motion.button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -625,7 +626,7 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleSignOut}
-                  className="flex items-center justify-center w-full bg-red-50 text-[#ED1C24] px-4 py-3 rounded-lg hover:bg-red-100"
+                  className={`flex items-center justify-center w-full text-[#ED1C24] px-4 py-3 rounded-lg ${isDarkMode ? 'bg-red-900/20 hover:bg-red-900/40' : 'bg-red-50 hover:bg-red-100'}`}
                 >
                   <LogOut size={20} className="mr-2" />
                   Sign Out

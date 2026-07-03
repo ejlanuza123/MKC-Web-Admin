@@ -11,6 +11,7 @@ import { notifySuccess } from '../utils/successNotifier';
 import { useAdminLog } from '../hooks/useAdminLog';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../context/ThemeContext';
+import ConfirmationModal from '../components/common/ConfirmationModal';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // Skeleton Components (keep as is)
@@ -57,6 +58,7 @@ const StatCardSkeleton = () => (
 // Add Rider Modal Component
 const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
   const { logRiderAction } = useAdminLog();
+  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -217,9 +219,9 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white rounded-xl max-w-2xl w-full shadow-2xl my-8">
-        <div className="bg-mkc-blue p-6 flex justify-between items-center sticky top-0">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm overflow-y-auto">
+      <div className={`rounded-xl max-w-2xl w-full shadow-2xl my-8 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900'}`}>
+        <div className="bg-mkc-blue p-6 flex justify-between items-center sticky top-0 rounded-t-xl">
           <h3 className="text-xl font-bold text-white">Add New Rider</h3>
           <button 
             onClick={onClose}
@@ -240,7 +242,7 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
             {/* Left Column */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
                   Full Name <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -249,13 +251,13 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
                   required
                   value={formData.full_name}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
                   placeholder="Juan Dela Cruz"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
                   Email Address <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -264,13 +266,13 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
                   placeholder="rider@example.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
                   Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -280,23 +282,23 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none pr-10"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none pr-10 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
                     placeholder="••••••••"
                     minLength="6"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${isDarkMode ? 'text-slate-400 hover:text-slate-200' : 'text-gray-500 hover:text-gray-700'}`}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+                <p className={`text-xs mt-1 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>Minimum 6 characters</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
                   Confirm Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -306,13 +308,13 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
                     required
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none pr-10"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none pr-10 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
                     placeholder="••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${isDarkMode ? 'text-slate-400 hover:text-slate-200' : 'text-gray-500 hover:text-gray-700'}`}
                   >
                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -323,7 +325,7 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
             {/* Right Column */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
                   Phone Number <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -332,20 +334,20 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
                   required
                   value={formData.phone_number}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
                   placeholder="0912 345 6789"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
                   Vehicle Type
                 </label>
                 <select
                   name="vehicle_type"
                   value={formData.vehicle_type}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-300 text-gray-900'}`}
                 >
                   <option value="">Select vehicle type</option>
                   <option value="Motorcycle">Motorcycle</option>
@@ -357,7 +359,7 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
                   Plate Number
                 </label>
                 <input
@@ -365,21 +367,21 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
                   name="vehicle_plate"
                   value={formData.vehicle_plate}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none uppercase"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none uppercase transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
                   placeholder="ABC-1234"
                   style={{ textTransform: 'uppercase' }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
                   Address
                 </label>
                 <textarea
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none resize-none"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none resize-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
                   rows="3"
                   placeholder="Rider's complete address"
                 />
@@ -388,18 +390,18 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
           </div>
 
           {/* Important Note */}
-          <div className="bg-blue-50 p-4 rounded-lg mt-4">
-            <p className="text-sm text-blue-800">
+          <div className={`p-4 rounded-lg mt-4 ${isDarkMode ? 'bg-slate-800' : 'bg-blue-50'}`}>
+            <p className={`text-sm ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}>
               <strong>Note:</strong> The rider will use this email and password to log in to the mobile app. 
               Please save these credentials and share them securely with the rider.
             </p>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t mt-4">
+          <div className={`flex gap-3 pt-4 border-t mt-4 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className={`flex-1 py-2.5 border rounded-lg transition-colors ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
             >
               Cancel
             </button>
@@ -432,6 +434,7 @@ AddRiderModal.displayName = 'AddRiderModal';
 // Edit Rider Modal Component
 const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
   const { logRiderAction } = useAdminLog();
+  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     full_name: '',
     phone_number: '',
@@ -520,9 +523,9 @@ const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
-        <div className="bg-mkc-blue p-6 flex justify-between items-center">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <div className={`rounded-xl max-w-md w-full shadow-2xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900'}`}>
+        <div className="bg-mkc-blue p-6 flex justify-between items-center rounded-t-xl">
           <h3 className="text-xl font-bold text-white">Edit Rider</h3>
           <button 
             onClick={onClose}
@@ -540,7 +543,7 @@ const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               Full Name *
             </label>
             <input
@@ -549,12 +552,12 @@ const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
               required
               value={formData.full_name}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               Phone Number *
             </label>
             <input
@@ -563,19 +566,19 @@ const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
               required
               value={formData.phone_number}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               Vehicle Type
             </label>
             <select
               name="vehicle_type"
               value={formData.vehicle_type}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-300 text-gray-900'}`}
             >
               <option value="">Select vehicle type</option>
               <option value="Motorcycle">Motorcycle</option>
@@ -587,7 +590,7 @@ const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               Plate Number
             </label>
             <input
@@ -595,20 +598,20 @@ const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
               name="vehicle_plate"
               value={formData.vehicle_plate}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none uppercase"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none uppercase transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
               style={{ textTransform: 'uppercase' }}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               Address
             </label>
             <textarea
               name="address"
               value={formData.address}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none resize-none"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none resize-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
               rows="2"
             />
           </div>
@@ -622,16 +625,16 @@ const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
               onChange={handleChange}
               className="rounded border-gray-300 text-[#0033A0] focus:ring-[#0033A0]"
             />
-            <label htmlFor="is_active" className="ml-2 text-sm text-gray-700">
+            <label htmlFor="is_active" className={`ml-2 text-sm ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               Active (can log in and receive deliveries)
             </label>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t">
+          <div className={`flex gap-3 pt-4 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className={`flex-1 py-2.5 border rounded-lg transition-colors ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
             >
               Cancel
             </button>
@@ -664,6 +667,7 @@ EditRiderModal.displayName = 'EditRiderModal';
 // Reset Password Modal Component
 const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
   const { logRiderAction } = useAdminLog();
+  const { isDarkMode } = useTheme();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -715,8 +719,8 @@ const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
-        <div className="bg-mkc-blue p-6 flex justify-between items-center">
+      <div className={`rounded-xl max-w-md w-full shadow-2xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900'}`}>
+        <div className="bg-mkc-blue p-6 flex justify-between items-center rounded-t-xl">
           <h3 className="text-xl font-bold text-white">Reset Password</h3>
           <button 
             onClick={onClose}
@@ -728,7 +732,7 @@ const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+            <div className={`border-l-4 p-4 rounded ${isDarkMode ? 'bg-red-900/20 border-red-500' : 'bg-red-50 border-red-500'}`}>
               <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
@@ -737,9 +741,9 @@ const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Rider
             </label>
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <p className="font-medium text-gray-900">{rider?.full_name}</p>
-              <p className="text-sm text-gray-500">{rider?.email}</p>
+            <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+              <p className="font-medium text-theme-primary">{rider?.full_name}</p>
+              <p className="text-sm text-theme-secondary">{rider?.email}</p>
             </div>
           </div>
 
@@ -752,14 +756,14 @@ const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
                 type={showPassword ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none pr-10"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none pr-10 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
                 placeholder="••••••••"
                 minLength="6"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${isDarkMode ? 'text-slate-400 hover:text-slate-200' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -775,31 +779,31 @@ const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none pr-10"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#0033A0] outline-none pr-10 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-400' : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400'}`}
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${isDarkMode ? 'text-slate-400 hover:text-slate-200' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>
 
-          <div className="bg-yellow-50 p-4 rounded-lg">
-            <p className="text-sm text-yellow-800">
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-yellow-900/20' : 'bg-yellow-50'}`}>
+            <p className={`text-sm ${isDarkMode ? 'text-yellow-300' : 'text-yellow-800'}`}>
               <strong>Note:</strong> Password reset requires admin privileges in Supabase. 
               Make sure your service role key is configured.
             </p>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t">
+          <div className={`flex gap-3 pt-4 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className={`flex-1 py-2.5 border rounded-lg transition-colors ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
             >
               Cancel
             </button>
@@ -831,6 +835,7 @@ ResetPasswordModal.displayName = 'ResetPasswordModal';
 
 // Rider Details Modal Component
 const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider, onAvatarClick, chatInFlight }) => {
+  const { isDarkMode } = useTheme();
   const stats = useMemo(() => {
     const deliveries = rider?.deliveries || [];
     const completed = deliveries.filter(d => d.status === 'delivered').length;
@@ -849,8 +854,8 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="bg-mkc-blue p-6 flex justify-between items-center">
+      <div className={`rounded-xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900'}`}>
+        <div className="bg-mkc-blue p-6 flex justify-between items-center rounded-t-xl">
           <h3 className="text-xl font-bold text-white">Rider Details</h3>
           <button 
             onClick={onClose}
@@ -883,65 +888,65 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
                 </div>
               )}
               <div>
-                <h4 className="text-xl font-bold text-gray-900">{rider.full_name}</h4>
-                <p className="text-gray-500 flex items-center mt-1">
+                <h4 className="text-xl font-bold text-theme-primary">{rider.full_name}</h4>
+                <p className="text-theme-secondary flex items-center mt-1">
                   <Phone size={14} className="mr-1" />
                   {rider.phone_number || 'No phone'}
                 </p>
                 <div className="mt-2 flex items-center">
                   <span className={`w-3 h-3 rounded-full mr-2 ${rider.is_active ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  <span className="text-sm font-medium text-gray-600">{rider.is_active ? 'Active' : 'Inactive'}</span>
+                  <span className="text-sm font-medium text-theme-secondary">{rider.is_active ? 'Active' : 'Inactive'}</span>
                 </div>
               </div>
             </div>
 
             {/* Quick Stats */}
             <div className="grid grid-cols-4 gap-3">
-              <div className="bg-blue-50 p-3 rounded-lg text-center">
+              <div className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-blue-50'}`}>
                 <Package size={18} className="text-[#0033A0] mx-auto mb-1" />
-                <p className="text-xs text-gray-600">Total</p>
+                <p className="text-xs text-theme-secondary">Total</p>
                 <p className="font-bold text-[#0033A0] text-lg">{stats.total}</p>
               </div>
-              <div className="bg-green-50 p-3 rounded-lg text-center">
+              <div className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-green-50'}`}>
                 <CheckCircle size={18} className="text-green-600 mx-auto mb-1" />
-                <p className="text-xs text-gray-600">Completed</p>
+                <p className="text-xs text-theme-secondary">Completed</p>
                 <p className="font-bold text-green-600 text-lg">{stats.completed}</p>
               </div>
-              <div className="bg-yellow-50 p-3 rounded-lg text-center">
+              <div className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-yellow-50'}`}>
                 <Clock size={18} className="text-yellow-600 mx-auto mb-1" />
-                <p className="text-xs text-gray-600">Pending</p>
+                <p className="text-xs text-theme-secondary">Pending</p>
                 <p className="font-bold text-yellow-600 text-lg">{stats.pending}</p>
               </div>
-              <div className="bg-red-50 p-3 rounded-lg text-center">
+              <div className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-red-50'}`}>
                 <X size={18} className="text-red-600 mx-auto mb-1" />
-                <p className="text-xs text-gray-600">Failed</p>
+                <p className="text-xs text-theme-secondary">Failed</p>
                 <p className="font-bold text-red-600 text-lg">{stats.failed}</p>
               </div>
             </div>
 
             {/* Vehicle Information */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">Vehicle Type</p>
-                <p className="font-medium text-gray-900 mt-1">{rider.vehicle_type || 'N/A'}</p>
+              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                <p className="text-sm text-theme-secondary">Vehicle Type</p>
+                <p className="font-medium text-theme-primary mt-1">{rider.vehicle_type || 'N/A'}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">Vehicle Plate</p>
-                <p className="font-medium text-gray-900 mt-1">{rider.vehicle_plate || 'N/A'}</p>
+              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                <p className="text-sm text-theme-secondary">Vehicle Plate</p>
+                <p className="font-medium text-theme-primary mt-1">{rider.vehicle_plate || 'N/A'}</p>
               </div>
               {rider.address && (
-                <div className="col-span-2 bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500 flex items-center">
+                <div className={`col-span-2 p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                  <p className="text-sm text-theme-secondary flex items-center">
                     <MapPin size={14} className="mr-1" /> Address
                   </p>
-                  <p className="font-medium text-gray-900 mt-1">{rider.address}</p>
+                  <p className="font-medium text-theme-primary mt-1">{rider.address}</p>
                 </div>
               )}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 flex items-center">
+              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                <p className="text-sm text-theme-secondary flex items-center">
                   <Calendar size={14} className="mr-1" /> Member Since
                 </p>
-                <p className="font-medium text-gray-900 mt-1">
+                <p className="font-medium text-theme-primary mt-1">
                   {rider.created_at ? new Date(rider.created_at).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
@@ -949,14 +954,14 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
 
             {/* Recent Deliveries */}
             <div>
-              <h5 className="font-semibold text-gray-900 mb-3">Recent Deliveries</h5>
+              <h5 className="font-semibold text-theme-primary mb-3">Recent Deliveries</h5>
               {rider.deliveries && rider.deliveries.length > 0 ? (
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
                   {rider.deliveries.slice(0, 5).map(delivery => (
-                    <div key={delivery.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div key={delivery.id} className={`flex justify-between items-center p-3 rounded-lg transition-colors ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-gray-50 hover:bg-gray-100'}`}>
                       <div>
-                        <p className="font-medium text-gray-900">Order #{delivery.order_id}</p>
-                        <p className="text-xs text-gray-500">{new Date(delivery.assigned_at).toLocaleDateString()}</p>
+                        <p className="font-medium text-theme-primary">Order #{delivery.order_id}</p>
+                        <p className="text-xs text-theme-secondary">{new Date(delivery.assigned_at).toLocaleDateString()}</p>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                         delivery.status === 'delivered' ? 'bg-green-100 text-green-700' :
@@ -972,18 +977,18 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
                   ))}
                 </div>
               ) : (
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <div className={`p-4 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
                   <Truck size={24} className="mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500">No deliveries yet</p>
+                  <p className="text-sm text-theme-secondary">No deliveries yet</p>
                 </div>
               )}
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t mt-6">
+            <div className={`flex flex-col sm:flex-row gap-3 pt-6 border-t mt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
               <button
                 onClick={onClose}
-                className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className={`flex-1 py-2.5 border rounded-lg transition-colors ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
               >
                 Close
               </button>
@@ -1041,6 +1046,50 @@ export default function Riders() {
   const [selectedRiderForTracking, setSelectedRiderForTracking] = useState(null);
   const [statusUpdateInFlight, setStatusUpdateInFlight] = useState({});
   const [chatInFlightRiderId, setChatInFlightRiderId] = useState(null);
+  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [riderToDeactivate, setRiderToDeactivate] = useState(null);
+
+  const openDeactivateModal = (rider) => {
+    setRiderToDeactivate(rider);
+    setIsDeactivateModalOpen(true);
+  };
+
+  const closeDeactivateModal = () => {
+    setRiderToDeactivate(null);
+    setIsDeactivateModalOpen(false);
+  };
+
+  const handleDeactivate = async () => {
+    if (!riderToDeactivate) return;
+
+    const riderName = riderToDeactivate.full_name;
+    const newStatus = !riderToDeactivate.is_active;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_active: newStatus })
+        .eq('id', riderToDeactivate.id);
+
+      if (error) throw error;
+
+      notifySuccess(`Rider ${riderName} has been ${newStatus ? 'activated' : 'deactivated'}.`);
+      await logRiderAction(riderToDeactivate.id, newStatus ? 'activate_rider' : 'deactivate_rider');
+      
+      // Manually update local state to reflect change immediately
+      setRiders(prevRiders => 
+        prevRiders.map(r => 
+          r.id === riderToDeactivate.id ? { ...r, is_active: newStatus } : r
+        )
+      );
+
+    } catch (err) {
+      console.error('Error updating rider status:', err);
+      setError(`Failed to update status for ${riderName}.`);
+    } finally {
+      closeDeactivateModal();
+    }
+  };
 
   useEffect(() => {
     if (!previewImageUrl) return;
@@ -1432,15 +1481,15 @@ export default function Riders() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 mb-4">
-                  <div className="bg-blue-50 p-2 rounded-lg text-center">
+                  <div className={`p-2 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-blue-50'}`}>
                     <p className="text-xs text-theme-secondary">Total</p>
                     <p className="font-bold text-[#0033A0] text-lg">{riderStats.total}</p>
                   </div>
-                  <div className="bg-green-50 p-2 rounded-lg text-center">
+                  <div className={`p-2 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-green-50'}`}>
                     <p className="text-xs text-theme-secondary">Completed</p>
                     <p className="font-bold text-green-600 text-lg">{riderStats.completed}</p>
                   </div>
-                  <div className="bg-yellow-50 p-2 rounded-lg text-center">
+                  <div className={`p-2 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-yellow-50'}`}>
                     <p className="text-xs text-theme-secondary">Pending</p>
                     <p className="font-bold text-yellow-600 text-lg">{riderStats.pending}</p>
                   </div>
@@ -1481,7 +1530,7 @@ export default function Riders() {
 
                 <div className="flex gap-2 pt-4 border-t">
                   <button
-                    onClick={() => updateRiderStatus(rider.id, !rider.is_active)}
+                    onClick={() => openDeactivateModal(rider)}
                     disabled={Boolean(statusUpdateInFlight[rider.id])}
                     className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
                       rider.is_active
@@ -1493,39 +1542,39 @@ export default function Riders() {
                   </button>
                   <button 
                     onClick={() => handleResetPasswordClick(rider)}
-                    className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    className={`p-2 border rounded-lg hover:bg-theme-secondary transition-colors ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}
                     title="Reset Password"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-theme-secondary">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                       <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
                   </button>
                   <button 
                     onClick={() => handleEditClick(rider)}
-                    className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    className={`p-2 border rounded-lg hover:bg-theme-secondary transition-colors ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}
                     title="Edit Rider"
                   >
-                    <Edit2 size={18} className="text-gray-600" />
+                    <Edit2 size={18} className="text-theme-secondary" />
                   </button>
                   <button 
                     onClick={() => handleViewRiderDetails(rider)}
-                    className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    className={`p-2 border rounded-lg hover:bg-theme-secondary transition-colors ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}
                     title="View Details"
                   >
-                    <Eye size={18} className="text-gray-600" />
+                    <Eye size={18} className="text-theme-secondary" />
                   </button>
                   <button 
                     onClick={() => handleChatRider(rider)}
                     disabled={chatInFlightRiderId === rider.id}
-                    className="p-2 border border-gray-200 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-60"
+                    className={`p-2 border rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-60 ${isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'border-gray-200'}`}
                     title="Chat Rider"
                   >
                     <MessageCircle size={18} className="text-[#0033A0]" />
                   </button>
                   <button 
                     onClick={() => handleTrackRiderLive(rider)}
-                    className="p-2 border border-gray-200 rounded-lg hover:bg-blue-50 transition-colors"
+                    className={`p-2 border rounded-lg hover:bg-blue-50 transition-colors ${isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'border-gray-200'}`}
                     title="Track Live Location"
                   >
                     <Navigation size={18} className="text-blue-600" />
@@ -1542,6 +1591,15 @@ export default function Riders() {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAdd={handleAddSuccess}
+      />
+
+      <ConfirmationModal
+        isOpen={isDeactivateModalOpen}
+        onClose={closeDeactivateModal}
+        onConfirm={handleDeactivate}
+        title={`${riderToDeactivate?.is_active ? 'Deactivate' : 'Activate'} Rider`}
+        message={`Are you sure you want to ${riderToDeactivate?.is_active ? 'deactivate' : 'activate'} ${riderToDeactivate?.full_name}?`}
+        confirmText={riderToDeactivate?.is_active ? 'Deactivate' : 'Activate'}
       />
 
       <EditRiderModal

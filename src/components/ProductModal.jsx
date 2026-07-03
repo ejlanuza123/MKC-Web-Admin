@@ -133,7 +133,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
 
   return createPortal(
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm w-screen h-screen">
-      <div className="bg-white rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden">
+      <div className="bg-theme-primary text-theme-primary rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden">
         <div className="bg-mkc-blue p-6">
           <h3 className="text-xl font-bold text-white">
             {product ? 'Edit Product' : 'Add New Product'}
@@ -145,13 +145,13 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
             {/* Left Column */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-theme-secondary mb-1">
                   Product Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   name="name"
-                  className={`w-full border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
+                  className={`w-full border ${errors.name ? 'border-red-500' : 'border-theme'} bg-input-theme rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
                   value={formData.name}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -166,13 +166,13 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-theme-secondary mb-1">
                   SKU
                 </label>
                 <input
                   type="text"
                   name="sku"
-                  className={`w-full border ${errors.sku ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
+                  className={`w-full border ${errors.sku ? 'border-red-500' : 'border-theme'} bg-input-theme rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
                   value={formData.sku}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -187,12 +187,12 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-theme-secondary mb-1">
                   Unit
                 </label>
                 <select
                   name="unit"
-                  className={`w-full border ${errors.unit ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
+                  className={`w-full border ${errors.unit ? 'border-red-500' : 'border-theme'} bg-input-theme rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
                   value={formData.unit}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -208,7 +208,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-theme-secondary mb-1">
                     Price (₱)
                   </label>
                   <input
@@ -216,7 +216,7 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
                     name="current_price"
                     step="0.01"
                     min="0"
-                    className={`w-full border ${errors.current_price ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
+                    className={`w-full border ${errors.current_price ? 'border-red-500' : 'border-theme'} bg-input-theme rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
                     value={formData.current_price}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -224,14 +224,14 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-theme-secondary mb-1">
                     Stock
                   </label>
                   <input
                     type="number"
                     name="stock_quantity"
                     min="0"
-                    className={`w-full border ${errors.stock_quantity ? 'border-red-500' : 'border-gray-300'} rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
+                    className={`w-full border ${errors.stock_quantity ? 'border-red-500' : 'border-theme'} bg-input-theme rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none`}
                     value={formData.stock_quantity}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -241,14 +241,14 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-theme-secondary mb-1">
                   Low Stock Threshold
                 </label>
                 <input
                   type="number"
                   name="low_stock_threshold"
                   min="1"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none"
+                  className="w-full border border-theme bg-input-theme rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none"
                   value={formData.low_stock_threshold}
                   onChange={handleChange}
                   placeholder="10"
@@ -262,9 +262,9 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
                   id="is_active"
                   checked={formData.is_active}
                   onChange={handleChange}
-                  className="rounded border-gray-300 text-[#0033A0] focus:ring-[#0033A0]"
+                  className="rounded border-theme bg-input-theme text-[#0033A0] focus:ring-[#0033A0]"
                 />
-                <label htmlFor="is_active" className="ml-2 text-sm text-gray-700">
+                <label htmlFor="is_active" className="ml-2 text-sm text-theme-secondary">
                   Active (visible to customers)
                 </label>
               </div>
@@ -273,13 +273,13 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
             {/* Right Column */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-theme-secondary mb-1">
                   Image URL
                 </label>
                 <input
                   type="url"
                   name="image_url"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none"
+                  className="w-full border border-theme bg-input-theme rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none"
                   value={formData.image_url}
                   onChange={handleChange}
                   placeholder="https://example.com/image.jpg"
@@ -298,12 +298,12 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-theme-secondary mb-1">
                   Description
                 </label>
                 <textarea
                   name="description"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none h-32 resize-none"
+                  className="w-full border border-theme bg-input-theme rounded-lg p-2.5 focus:ring-2 focus:ring-[#0033A0] outline-none h-32 resize-none"
                   value={formData.description}
                   onChange={handleChange}
                   placeholder="Product details, specifications, etc."
@@ -312,11 +312,11 @@ export default function ProductModal({ isOpen, onClose, product, onSave }) {
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex gap-3 pt-4 border-t border-theme">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
+              className="flex-1 py-2.5 border border-theme text-theme-primary font-medium rounded-lg hover:bg-theme-secondary transition"
             >
               Cancel
             </button>

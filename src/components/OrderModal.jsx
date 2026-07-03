@@ -421,10 +421,10 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange }) {
               {order.order_items && order.order_items.length > 0 ? (
                 <div className="space-y-3 print:hidden">
                   {order.order_items.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={item.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
                       <div className="flex items-center">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                          <Store size={20} className="text-blue-600" />
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${isDarkMode ? 'bg-slate-700' : 'bg-blue-100'}`}>
+                          <Store size={20} className={isDarkMode ? 'text-blue-400' : 'text-blue-600'} />
                         </div>
                         <div>
                           <p className="font-medium text-theme-primary">{item.products?.name}</p>
@@ -433,7 +433,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange }) {
                           </p>
                         </div>
                       </div>
-                      <p className="font-bold text-blue-600">
+                      <p className={`font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
                         {formatCurrency(item.quantity * item.price_at_order)}
                       </p>
                     </div>
@@ -488,7 +488,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange }) {
                             </p>
                           </div>
                           {proof.recipient_name && (
-                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            <span className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800'}`}>
                               {proof.recipient_name}
                             </span>
                           )}
@@ -558,7 +558,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange }) {
         )}
 
         {/* Footer */}
-        <div className="p-6 border-t bg-gray-50" data-order-print-footer="true">
+        <div className={`p-6 border-t transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`} data-order-print-footer="true">
           <div className="flex justify-end gap-3">
               <button 
               onClick={onClose}

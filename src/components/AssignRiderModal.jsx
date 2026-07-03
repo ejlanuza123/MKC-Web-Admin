@@ -172,7 +172,7 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className={`rounded-xl w-full max-w-md shadow-2xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900'}`}>
+      <div className="bg-theme-primary text-theme-primary rounded-xl w-full max-w-md shadow-2xl transition-colors duration-300">
         <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white flex items-center">
             <Truck className="mr-2" size={24} />
@@ -187,17 +187,17 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
         </div>
 
         <div className="p-6">
-          {success ? (
-            <div className="text-center py-8">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="text-green-600" size={40} />
-              </div>
-              <h4 className="text-lg font-bold text-theme-primary mb-2">Rider Assigned Successfully!</h4>
-              <p className="text-theme-secondary">
-                Rider has been notified of the delivery assignment.
-              </p>
-            </div>
-          ) : (
+              {success ? (
+                <div className="text-center py-8">
+                  <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-green-100 dark:bg-green-900/30">
+                    <CheckCircle className="text-green-600 dark:text-green-400" size={40} />
+                  </div>
+                  <h4 className="text-lg font-bold text-theme-primary mb-2">Rider Assigned Successfully!</h4>
+                  <p className="text-theme-secondary">
+                    Rider has been notified of the delivery assignment.
+                  </p>
+                </div>
+              ) : (
             <>
               {/* Order Summary */}
               <div className={`p-4 rounded-lg mb-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
@@ -235,14 +235,14 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
                 ) : (
                   <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                     {riders.map((rider) => (
-                      <label
-                        key={rider.id}
-                        className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors ${
-                          selectedRider === rider.id
-                            ? 'border-[#0033A0] bg-[#E5EEFF]'
-                            : isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'border-gray-200 hover:bg-gray-50'
-                        }`}
-                      >
+                        <label
+                          key={rider.id}
+                          className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors ${
+                            selectedRider === rider.id
+                              ? isDarkMode ? 'border-blue-500 bg-blue-900/20' : 'border-[#0033A0] bg-[#E5EEFF]'
+                              : isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
                         <input
                           type="radio"
                           name="rider"
@@ -254,9 +254,9 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
                         <div className="flex-1">
                           <div className="flex justify-between">
                             <p className="font-medium text-theme-primary">{rider.full_name}</p>
-                            <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
-                              Active
-                            </span>
+                              <span className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'text-green-400 bg-green-900/20' : 'text-green-600 bg-green-50'}`}>
+                                Active
+                              </span>
                           </div>
                           <p className="text-sm text-theme-secondary flex items-center mt-1">
                             <Phone size={14} className="mr-1" />

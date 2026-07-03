@@ -687,7 +687,7 @@ export default function Customers() {
                 {paginatedCustomers.map((customer) => {
                   const stats = getCustomerStats(customer);
                   return (
-                    <tr key={customer.id} className="hover:bg-gray-50 transition-colors duration-150">
+                    <tr key={customer.id} className="hover:bg-theme-secondary transition-colors duration-150">
                       <td className="px-6 py-4">
                         <div className="flex items-center">
                           {customer.avatar_url ? (
@@ -709,20 +709,20 @@ export default function Customers() {
                             </div>
                           )}
                           <div>
-                            <p className="font-medium text-gray-900">{customer.full_name || 'Unnamed'}</p>
-                            <p className="text-sm text-gray-500">{customer.email || 'No email'}</p>
+                            <p className="font-medium text-theme-primary">{customer.full_name || 'Unnamed'}</p>
+                            <p className="text-sm text-theme-secondary">{customer.email || 'No email'}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="space-y-1">
-                          <p className="text-sm text-gray-900 flex items-center">
-                            <Phone size={14} className="mr-1 text-gray-400" />
+                          <p className="text-sm text-theme-primary flex items-center">
+                            <Phone size={14} className="mr-1 text-theme-secondary" />
                             {customer.phone_number || 'N/A'}
                           </p>
                           {customer.address && (
-                            <p className="text-sm text-gray-500 flex items-center">
-                              <MapPin size={14} className="mr-1 text-gray-400" />
+                            <p className="text-sm text-theme-secondary flex items-center">
+                              <MapPin size={14} className="mr-1 text-theme-secondary" />
                               <span className="truncate max-w-[200px]">{customer.address}</span>
                             </p>
                           )}
@@ -730,8 +730,8 @@ export default function Customers() {
                       </td>
                       <td className="px-6 py-4">
                         <div>
-                          <p className="font-medium text-gray-900">{stats.totalOrders}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="font-medium text-theme-primary">{stats.totalOrders}</p>
+                          <p className="text-xs text-theme-secondary">
                             {stats.completedOrders} completed
                           </p>
                         </div>
@@ -742,10 +742,10 @@ export default function Customers() {
                       <td className="px-6 py-4">
                         {stats.lastOrder ? (
                           <div>
-                            <p className="text-sm text-gray-900">
+                            <p className="text-sm text-theme-primary">
                               {stats.lastOrder.toLocaleDateString()}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-theme-secondary">
                               {stats.lastOrder.toLocaleTimeString()}
                             </p>
                           </div>
