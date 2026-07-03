@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../context/ThemeContext';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 export default function AdminLogsViewer({ entityType = 'all', entityId = '', startDate = '', endDate = '', limit = 50 }) {
   const { isDarkMode } = useTheme();
@@ -354,36 +356,138 @@ export default function AdminLogsViewer({ entityType = 'all', entityId = '', sta
       if (error) throw error;
 
       const rows = data || [];
-      if (!rows.length) {
-        return;
+      if (!rows.length) return;
+
+      // Build Excel workbook with design
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'MKC Admin';
+      workbook.created = new Date();
+
+      const sheet = workbook.addWorksheet('Audit Logs', {
+        properties: { tabColor: { argb: 'FF0033A0' } }
+      });
+
+      // Title row
+      sheet.mergeCells('A1:G1');
+      const titleCell = sheet.getCell('A1');
+      titleCell.value = 'MKC Audit Logs';
+      titleCell.font = { size: 18, bold: true, color: { argb: 'FFFFFFFF' } };
+      titleCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF0033A0' }
+      };
+      titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      sheet.getRow(1).height = 40;
+
+      // Date row
+      sheet.mergeCells('A2:G2');
+      const dateCell = sheet.getCell('A2');
+      const filterParts = [];
+      if (entityType && entityType !== 'all') filterParts.push(`Type: ${entityType}`);
+      if (entityId && entityId.trim()) filterParts.push(`ID: ${entityId.trim()}`);
+      if (startDate || endDate) {
+        filterParts.push(`${startDate || '...'} to ${endDate || '...'}`);
       }
+      dateCell.value = `Generated: ${new Date().toLocaleString()}${filterParts.length ? ` | ${filterParts.join(', ')}` : ''}`;
+      dateCell.font = { size: 11, bold: true };
+      dateCell.alignment = { horizontal: 'center' };
+      sheet.getRow(2).height = 28;
 
-      const headers = ['id', 'created_at', 'action', 'entity_type', 'entity_id', 'admin_id', 'details'];
-      const csvBody = rows.map((row) => ([
-        row.id,
-        row.created_at,
-        row.action,
-        row.entity_type,
-        row.entity_id,
-        row.admin_id,
-        JSON.stringify(row.details || {})
-      ].map((value) => {
-        const text = String(value ?? '');
-        return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-      }).join(',')));
+      // Header row
+      const headerRow = sheet.getRow(4);
+      const headers = ['Date/Time', 'Action', 'Entity Type', 'Entity ID', 'Admin ID', 'Description', 'Details (JSON)'];
+      headerRow.values = headers;
+      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF0033A0' }
+      };
+      headerRow.height = 28;
+      headerRow.eachCell(cell => {
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      });
 
-      const csvContent = [headers.join(','), ...csvBody].join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      // Data rows
+      rows.forEach((row, index) => {
+        const details = row.details || {};
+        const description = details?.description || '';
+        const actionFormatted = row.action.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+        const createdDate = new Date(row.created_at).toLocaleString(undefined, {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        });
+
+        const excelRow = sheet.addRow([
+          createdDate,
+          actionFormatted,
+          (row.entity_type || '').toUpperCase(),
+          row.entity_id || '',
+          row.admin_id || '',
+          description,
+          JSON.stringify(details)
+        ]);
+
+        excelRow.height = 22;
+
+        // Alternate row colors
+        if (index % 2 === 1) {
+          excelRow.eachCell(cell => {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFF0F4FF' }
+            };
+          });
+        }
+
+        excelRow.eachCell(cell => {
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
+          cell.font = { size: 10 };
+          cell.alignment = { vertical: 'middle', wrapText: true };
+        });
+
+        // Color-code the action column
+        const actionCell = excelRow.getCell(2);
+        if (row.action.includes('create')) {
+          actionCell.font = { size: 10, bold: true, color: { argb: 'FF16A34A' } };
+        } else if (row.action.includes('delete')) {
+          actionCell.font = { size: 10, bold: true, color: { argb: 'FFDC2626' } };
+        } else if (row.action.includes('assign')) {
+          actionCell.font = { size: 10, bold: true, color: { argb: 'FF9333EA' } };
+        } else if (row.action.includes('update')) {
+          actionCell.font = { size: 10, bold: true, color: { argb: 'FF2563EB' } };
+        }
+      });
+
+      // Column widths
+      sheet.getColumn(1).width = 22; // Date/Time
+      sheet.getColumn(2).width = 18; // Action
+      sheet.getColumn(3).width = 14; // Entity Type
+      sheet.getColumn(4).width = 14; // Entity ID
+      sheet.getColumn(5).width = 16; // Admin ID
+      sheet.getColumn(6).width = 50; // Description
+      sheet.getColumn(7).width = 30; // Details JSON
+
+      // Save
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
       const dateLabel = new Date().toISOString().slice(0, 10);
-
-      link.href = url;
-      link.download = `audit-logs-${dateLabel}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      saveAs(blob, `audit-logs-${dateLabel}.xlsx`);
     } catch (error) {
       console.error('Error exporting logs:', error);
     } finally {
