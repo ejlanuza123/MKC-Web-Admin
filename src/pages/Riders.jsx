@@ -56,9 +56,8 @@ const StatCardSkeleton = () => (
 );
 
 // Add Rider Modal Component
-const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
+const AddRiderModal = React.memo(({ isOpen, onClose, onAdd, isDarkMode }) => {
   const { logRiderAction } = useAdminLog();
-  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -233,8 +232,8 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className={`border-l-4 p-4 rounded ${isDarkMode ? 'bg-red-900/20 border-red-500' : 'bg-red-50 border-red-500'}`}>
+              <p className={`text-sm ${isDarkMode ? 'text-red-300' : 'text-red-700'}`}>{error}</p>
             </div>
           )}
 
@@ -432,9 +431,8 @@ const AddRiderModal = React.memo(({ isOpen, onClose, onAdd }) => {
 AddRiderModal.displayName = 'AddRiderModal';
 
 // Edit Rider Modal Component
-const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
+const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate, isDarkMode }) => {
   const { logRiderAction } = useAdminLog();
-  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     full_name: '',
     phone_number: '',
@@ -537,8 +535,8 @@ const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className={`border-l-4 p-4 rounded ${isDarkMode ? 'bg-red-900/20 border-red-500' : 'bg-red-50 border-red-500'}`}>
+              <p className={`text-sm ${isDarkMode ? 'text-red-300' : 'text-red-700'}`}>{error}</p>
             </div>
           )}
 
@@ -665,9 +663,8 @@ const EditRiderModal = React.memo(({ isOpen, onClose, rider, onUpdate }) => {
 EditRiderModal.displayName = 'EditRiderModal';
 
 // Reset Password Modal Component
-const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
+const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset, isDarkMode }) => {
   const { logRiderAction } = useAdminLog();
-  const { isDarkMode } = useTheme();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -733,22 +730,22 @@ const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
             <div className={`border-l-4 p-4 rounded ${isDarkMode ? 'bg-red-900/20 border-red-500' : 'bg-red-50 border-red-500'}`}>
-              <p className="text-sm text-red-700">{error}</p>
+              <p className={`text-sm ${isDarkMode ? 'text-red-300' : 'text-red-700'}`}>{error}</p>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               Rider
             </label>
             <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
-              <p className="font-medium text-theme-primary">{rider?.full_name}</p>
-              <p className="text-sm text-theme-secondary">{rider?.email}</p>
+              <p className={`font-medium ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{rider?.full_name}</p>
+              <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>{rider?.email}</p>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               New Password *
             </label>
             <div className="relative">
@@ -771,7 +768,7 @@ const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
               Confirm New Password *
             </label>
             <div className="relative">
@@ -834,8 +831,7 @@ const ResetPasswordModal = React.memo(({ isOpen, onClose, rider, onReset }) => {
 ResetPasswordModal.displayName = 'ResetPasswordModal';
 
 // Rider Details Modal Component
-const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider, onAvatarClick, chatInFlight }) => {
-  const { isDarkMode } = useTheme();
+const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider, onAvatarClick, chatInFlight, isDarkMode }) => {
   const stats = useMemo(() => {
     const deliveries = rider?.deliveries || [];
     const completed = deliveries.filter(d => d.status === 'delivered').length;
@@ -888,14 +884,14 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
                 </div>
               )}
               <div>
-                <h4 className="text-xl font-bold text-theme-primary">{rider.full_name}</h4>
-                <p className="text-theme-secondary flex items-center mt-1">
+                <h4 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{rider.full_name}</h4>
+                <p className={`flex items-center mt-1 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
                   <Phone size={14} className="mr-1" />
                   {rider.phone_number || 'No phone'}
                 </p>
                 <div className="mt-2 flex items-center">
                   <span className={`w-3 h-3 rounded-full mr-2 ${rider.is_active ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  <span className="text-sm font-medium text-theme-secondary">{rider.is_active ? 'Active' : 'Inactive'}</span>
+                  <span className={`text-sm font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}>{rider.is_active ? 'Active' : 'Inactive'}</span>
                 </div>
               </div>
             </div>
@@ -904,22 +900,22 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
             <div className="grid grid-cols-4 gap-3">
               <div className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-blue-50'}`}>
                 <Package size={18} className="text-[#0033A0] mx-auto mb-1" />
-                <p className="text-xs text-theme-secondary">Total</p>
+                <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}>Total</p>
                 <p className="font-bold text-[#0033A0] text-lg">{stats.total}</p>
               </div>
               <div className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-green-50'}`}>
                 <CheckCircle size={18} className="text-green-600 mx-auto mb-1" />
-                <p className="text-xs text-theme-secondary">Completed</p>
+                <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}>Completed</p>
                 <p className="font-bold text-green-600 text-lg">{stats.completed}</p>
               </div>
               <div className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-yellow-50'}`}>
                 <Clock size={18} className="text-yellow-600 mx-auto mb-1" />
-                <p className="text-xs text-theme-secondary">Pending</p>
+                <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}>Pending</p>
                 <p className="font-bold text-yellow-600 text-lg">{stats.pending}</p>
               </div>
               <div className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-red-50'}`}>
                 <X size={18} className="text-red-600 mx-auto mb-1" />
-                <p className="text-xs text-theme-secondary">Failed</p>
+                <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}>Failed</p>
                 <p className="font-bold text-red-600 text-lg">{stats.failed}</p>
               </div>
             </div>
@@ -927,26 +923,26 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
             {/* Vehicle Information */}
             <div className="grid grid-cols-2 gap-4">
               <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
-                <p className="text-sm text-theme-secondary">Vehicle Type</p>
-                <p className="font-medium text-theme-primary mt-1">{rider.vehicle_type || 'N/A'}</p>
+                <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>Vehicle Type</p>
+                <p className={`font-medium mt-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{rider.vehicle_type || 'N/A'}</p>
               </div>
               <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
-                <p className="text-sm text-theme-secondary">Vehicle Plate</p>
-                <p className="font-medium text-theme-primary mt-1">{rider.vehicle_plate || 'N/A'}</p>
+                <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>Vehicle Plate</p>
+                <p className={`font-medium mt-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{rider.vehicle_plate || 'N/A'}</p>
               </div>
               {rider.address && (
                 <div className={`col-span-2 p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
-                  <p className="text-sm text-theme-secondary flex items-center">
+                  <p className={`text-sm flex items-center ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
                     <MapPin size={14} className="mr-1" /> Address
                   </p>
-                  <p className="font-medium text-theme-primary mt-1">{rider.address}</p>
+                  <p className={`font-medium mt-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{rider.address}</p>
                 </div>
               )}
               <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
-                <p className="text-sm text-theme-secondary flex items-center">
+                <p className={`text-sm flex items-center ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
                   <Calendar size={14} className="mr-1" /> Member Since
                 </p>
-                <p className="font-medium text-theme-primary mt-1">
+                <p className={`font-medium mt-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   {rider.created_at ? new Date(rider.created_at).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
@@ -954,22 +950,22 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
 
             {/* Recent Deliveries */}
             <div>
-              <h5 className="font-semibold text-theme-primary mb-3">Recent Deliveries</h5>
+              <h5 className={`font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Recent Deliveries</h5>
               {rider.deliveries && rider.deliveries.length > 0 ? (
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
                   {rider.deliveries.slice(0, 5).map(delivery => (
                     <div key={delivery.id} className={`flex justify-between items-center p-3 rounded-lg transition-colors ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-gray-50 hover:bg-gray-100'}`}>
                       <div>
-                        <p className="font-medium text-theme-primary">Order #{delivery.order_id}</p>
-                        <p className="text-xs text-theme-secondary">{new Date(delivery.assigned_at).toLocaleDateString()}</p>
+                        <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Order #{delivery.order_id}</p>
+                        <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>{new Date(delivery.assigned_at).toLocaleDateString()}</p>
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        delivery.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                        delivery.status === 'picked_up' ? 'bg-blue-100 text-blue-700' :
-                        delivery.status === 'accepted' ? 'bg-cyan-100 text-cyan-700' :
-                        delivery.status === 'assigned' ? 'bg-yellow-100 text-yellow-700' :
-                        delivery.status === 'failed' ? 'bg-red-100 text-red-700' :
-                        'bg-gray-100 text-gray-700'
+                        delivery.status === 'delivered' ? (isDarkMode ? 'bg-green-900/50 text-green-300' : 'bg-green-100 text-green-700') :
+                        delivery.status === 'picked_up' ? (isDarkMode ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-100 text-blue-700') :
+                        delivery.status === 'accepted' ? (isDarkMode ? 'bg-cyan-900/50 text-cyan-300' : 'bg-cyan-100 text-cyan-700') :
+                        delivery.status === 'assigned' ? (isDarkMode ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-700') :
+                        delivery.status === 'failed' ? (isDarkMode ? 'bg-red-900/50 text-red-300' : 'bg-red-100 text-red-700') :
+                        (isDarkMode ? 'bg-slate-700 text-slate-300' : 'bg-gray-100 text-gray-700')
                       }`}>
                         {delivery.status}
                       </span>
@@ -978,8 +974,8 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
                 </div>
               ) : (
                 <div className={`p-4 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
-                  <Truck size={24} className="mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-theme-secondary">No deliveries yet</p>
+                  <Truck size={24} className={`mx-auto mb-2 ${isDarkMode ? 'text-slate-500' : 'text-gray-400'}`} />
+                  <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>No deliveries yet</p>
                 </div>
               )}
             </div>
@@ -1528,57 +1524,59 @@ export default function Riders() {
                   )}
                 </div>
 
-                <div className="flex gap-2 pt-4 border-t">
+                <div className="flex flex-wrap gap-2 pt-4 border-t">
                   <button
                     onClick={() => openDeactivateModal(rider)}
                     disabled={Boolean(statusUpdateInFlight[rider.id])}
-                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex-1 min-w-[120px] py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                       rider.is_active
-                        ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                        : 'bg-green-50 text-green-600 hover:bg-green-100'
+                        ? (isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-600 hover:bg-red-100')
+                        : (isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-600 hover:bg-green-100')
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     {statusUpdateInFlight[rider.id] ? 'Updating...' : (rider.is_active ? 'Deactivate' : 'Activate')}
                   </button>
-                  <button 
-                    onClick={() => handleResetPasswordClick(rider)}
-                    className={`p-2 border rounded-lg hover:bg-theme-secondary transition-colors ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}
-                    title="Reset Password"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-theme-secondary">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                  </button>
-                  <button 
-                    onClick={() => handleEditClick(rider)}
-                    className={`p-2 border rounded-lg hover:bg-theme-secondary transition-colors ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}
-                    title="Edit Rider"
-                  >
-                    <Edit2 size={18} className="text-theme-secondary" />
-                  </button>
-                  <button 
-                    onClick={() => handleViewRiderDetails(rider)}
-                    className={`p-2 border rounded-lg hover:bg-theme-secondary transition-colors ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}
-                    title="View Details"
-                  >
-                    <Eye size={18} className="text-theme-secondary" />
-                  </button>
-                  <button 
-                    onClick={() => handleChatRider(rider)}
-                    disabled={chatInFlightRiderId === rider.id}
-                    className={`p-2 border rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-60 ${isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'border-gray-200'}`}
-                    title="Chat Rider"
-                  >
-                    <MessageCircle size={18} className="text-[#0033A0]" />
-                  </button>
-                  <button 
-                    onClick={() => handleTrackRiderLive(rider)}
-                    className={`p-2 border rounded-lg hover:bg-blue-50 transition-colors ${isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'border-gray-200'}`}
-                    title="Track Live Location"
-                  >
-                    <Navigation size={18} className="text-blue-600" />
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => handleResetPasswordClick(rider)}
+                      className={`p-2 border rounded-lg hover:bg-theme-secondary transition-colors ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}
+                      title="Reset Password"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-theme-secondary">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    </button>
+                    <button 
+                      onClick={() => handleEditClick(rider)}
+                      className={`p-2 border rounded-lg hover:bg-theme-secondary transition-colors ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}
+                      title="Edit Rider"
+                    >
+                      <Edit2 size={18} className="text-theme-secondary" />
+                    </button>
+                    <button 
+                      onClick={() => handleViewRiderDetails(rider)}
+                      className={`p-2 border rounded-lg hover:bg-theme-secondary transition-colors ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}
+                      title="View Details"
+                    >
+                      <Eye size={18} className="text-theme-secondary" />
+                    </button>
+                    <button 
+                      onClick={() => handleChatRider(rider)}
+                      disabled={chatInFlightRiderId === rider.id}
+                      className={`p-2 border rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-60 ${isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'border-gray-200'}`}
+                      title="Chat Rider"
+                    >
+                      <MessageCircle size={18} className="text-[#0033A0]" />
+                    </button>
+                    <button 
+                      onClick={() => handleTrackRiderLive(rider)}
+                      className={`p-2 border rounded-lg hover:bg-blue-50 transition-colors ${isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'border-gray-200'}`}
+                      title="Track Live Location"
+                    >
+                      <Navigation size={18} className="text-blue-600" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -1591,6 +1589,7 @@ export default function Riders() {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAdd={handleAddSuccess}
+        isDarkMode={isDarkMode}
       />
 
       <ConfirmationModal
@@ -1607,6 +1606,7 @@ export default function Riders() {
         onClose={handleCloseEdit}
         rider={selectedRider}
         onUpdate={handleUpdateSuccess}
+        isDarkMode={isDarkMode}
       />
 
       <ResetPasswordModal
@@ -1614,6 +1614,7 @@ export default function Riders() {
         onClose={handleCloseResetPassword}
         rider={selectedRider}
         onReset={handleUpdateSuccess}
+        isDarkMode={isDarkMode}
       />
 
       {showRiderDetailsModal && (
@@ -1631,6 +1632,7 @@ export default function Riders() {
           }}
           chatInFlight={chatInFlightRiderId === selectedRiderForDetails?.id}
           onAvatarClick={setPreviewImageUrl}
+          isDarkMode={isDarkMode}
         />
       )}
 
@@ -1641,6 +1643,7 @@ export default function Riders() {
           setSelectedRiderForTracking(null);
         }}
         rider={selectedRiderForTracking}
+        isDarkMode={isDarkMode}
       />
 
       {previewImageUrl && (
