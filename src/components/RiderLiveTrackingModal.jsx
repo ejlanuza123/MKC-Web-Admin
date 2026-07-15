@@ -64,7 +64,7 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider, isDarkM
       const profileData = await retryAsync(async () => {
         const { data, error: profileError } = await supabase
           .from('profiles')
-          .select('id, full_name, phone_number, address_lat, address_lng, vehicle_type, vehicle_plate, is_online')
+          .select('id, full_name, phone_number, address_lat, address_lng, vehicle_type, vehicle_plate, is_online, last_seen')
           .eq('id', rider.id)
           .single();
 
@@ -81,6 +81,7 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider, isDarkM
         lat: profileData.address_lat || 9.7534772,
         lng: profileData.address_lng || 118.7478688,
         isOnline: profileData.is_online,
+        lastSeen: profileData.last_seen,
       });
 
       const deliveriesData = await retryAsync(async () => {
@@ -154,6 +155,7 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider, isDarkM
             lat: updated.address_lat,
             lng: updated.address_lng,
             isOnline: updated.is_online,
+            lastSeen: updated.last_seen,
           });
           setLastUpdated(new Date());
 
@@ -457,6 +459,24 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider, isDarkM
     }
   };
 
+  const formatLastSeen = (lastSeen) => {
+    if (!lastSeen) return 'Unknown';
+
+    const date = new Date(lastSeen);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHours < 24) return `${diffHours} hr ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+    return date.toLocaleDateString();
+  };
+
   if (!isOpen || !rider) return null;
 
   return (
@@ -515,6 +535,7 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider, isDarkM
                   <span className={`w-3 h-3 rounded-full ${riderLocation?.isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
                   <span className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>{riderLocation?.isOnline ? 'Online' : 'Offline'}</span>
                 </div>
+                <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>Last seen: {formatLastSeen(riderLocation?.lastSeen)}</p>
                 <div className="flex items-center gap-2">
                   <span className={`w-2.5 h-2.5 rounded-full ${getChannelBadge().dot}`}></span>
                   <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Realtime: {getChannelBadge().label}</span>
