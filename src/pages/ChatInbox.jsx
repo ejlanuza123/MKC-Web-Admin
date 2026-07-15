@@ -117,6 +117,15 @@ export default function ChatInbox() {
       if (showLoader) {
         setLoadingRiders(true);
       }
+
+      // Mark stale riders as offline before loading (in case their app was force-closed)
+      try {
+        await supabase.rpc('mark_stale_riders_offline', { threshold_minutes: 2 });
+      } catch (rpcErr) {
+        // Function may not exist yet - non-blocking
+        console.warn('mark_stale_riders_offline not available:', rpcErr?.message);
+      }
+
       const { data, error: fetchError } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url, is_online, last_seen, phone_number, role, vehicle_type, vehicle_plate')
