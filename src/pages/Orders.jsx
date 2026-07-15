@@ -216,8 +216,10 @@ export default function Orders() {
     }
     
     if (selectedRider !== 'all') {
-      // Filter by rider - we'll need to check deliveries
-      // This is simplified - in production you'd want to join in the query
+      filtered = filtered.filter(o => {
+        const deliveryInfo = deliveryInfoMap[o.id];
+        return deliveryInfo?.rider_id === selectedRider;
+      });
     }
     
     if (searchQuery) {
@@ -230,7 +232,7 @@ export default function Orders() {
     }
     
     return filtered;
-  }, [orders, filter, searchQuery, selectedRider]);
+  }, [orders, filter, searchQuery, selectedRider, deliveryInfoMap]);
 
   // Memoized pagination
   const paginatedOrders = useMemo(() => {

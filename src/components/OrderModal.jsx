@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { X, MapPin, Phone, User, CreditCard, Package, Calendar, Store, Image as ImageIcon, Truck } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
-import { ORDER_STATUS_COLORS } from '../utils/constants';
+import { ORDER_STATUS, ORDER_STATUS_COLORS } from '../utils/constants';
 import { formatCurrency, formatDate, formatPhoneNumber, formatOrderNumber } from '../utils/formatters';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../context/ThemeContext';
@@ -221,16 +221,42 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange }) {
 
       if (deliveryError) throw deliveryError;
 
+      const deliveryIds = (deliveries || []).map(d => d.id);
+
+      console.log('[Admin][OrderModal] fetchDeliveryProofs', {
+        orderId: order.id,
+        deliveriesCount: deliveries?.length || 0,
+        deliveryIds,
+      });
+
       // If there are deliveries, fetch proofs for them
-      if (deliveries && deliveries.length > 0) {
-        const deliveryIds = deliveries.map(d => d.id);
+      if (deliveryIds.length > 0) {
+        console.log('[Admin][OrderModal] Querying delivery_proofs for deliveryIds:', deliveryIds);
         const { data: proofs, error: proofsError } = await supabase
           .from('delivery_proofs')
           .select('*')
           .in('delivery_id', deliveryIds)
           .order('delivered_at', { ascending: false });
 
-        if (proofsError) throw proofsError;
+        console.log('[Admin][OrderModal] delivery_proofs raw response:', { proofs, proofsError });
+
+        if (proofsError) {
+          console.error('[Admin][OrderModal] proofsError:', proofsError);
+          throw proofsError;
+        }
+
+        console.log('[Admin][OrderModal] delivery_proofs fetched', {
+          proofsCount: proofs?.length || 0,
+          firstProof: proofs?.[0]
+            ? {
+                id: proofs[0].id,
+                delivery_id: proofs[0].delivery_id,
+                photo_url: proofs[0].photo_url,
+                delivered_at: proofs[0].delivered_at,
+              }
+            : null,
+        });
+
         setDeliveryProofs(proofs || []);
       } else {
         setDeliveryProofs([]);
@@ -465,7 +491,7 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange }) {
             </div>
 
             {/* Delivery Proof Section */}
-            {order.status === 'Completed' && (
+            {order.status === ORDER_STATUS.COMPLETED && (
               <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
                 <h3 className="font-semibold text-theme-primary mb-3 flex items-center">
                   <ImageIcon size={18} className="mr-2 text-blue-600" />
