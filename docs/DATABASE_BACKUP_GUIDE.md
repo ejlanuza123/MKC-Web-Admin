@@ -179,10 +179,10 @@ If `pg_dump` is already available in your `PATH`:
 ```powershell
 # Use a timestamp to avoid overwriting previous backups (format: yyyyMMdd-HHmmss)
 $ts = Get-Date -Format yyyyMMdd-HHmmss
-pg_dump -h aws-1-ap-northeast-1.pooler.supabase.com -p 5432 -U postgres.lledahkvurqaoiptcfvq -d postgres --schema-only --no-owner --no-acl -f "C:\Projects\schema-only-$ts.sql"
+pg_dump -h aws-1-ap-northeast-1.pooler.supabase.com -p 5432 -U postgres.lledahkvurqaoiptcfvq -d postgres --schema-only --no-owner --no-acl -f "C:\Projects\schema-only-mkc$ts.sql"
 
 # Or without timestamp:
-pg_dump -h aws-1-ap-northeast-1.pooler.supabase.com -p 5432 -U postgres.lledahkvurqaoiptcfvq -d postgres --schema-only --no-owner --no-acl -f "C:\Projects\schema-only.sql"
+pg_dump -h aws-1-ap-northeast-1.pooler.supabase.com -p 5432 -U postgres.lledahkvurqaoiptcfvq -d postgres --schema-only --no-owner --no-acl -f "C:\Projects\schema-only-mkc.sql"
 ```
 
 Command Prompt (cmd):
