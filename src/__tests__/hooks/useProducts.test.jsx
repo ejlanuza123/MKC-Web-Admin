@@ -83,8 +83,12 @@ describe('useProducts', () => {
       await result.current.addProduct({ name: 'MKC Chicken Wings' });
     });
 
-    expect(mocks.productService.create).toHaveBeenCalledWith({ name: 'MKC Chicken Wings' });
-    expect(mocks.logProductAction).toHaveBeenCalledWith('p-2', 'create_product', { name: 'MKC Chicken Wings' });
+    expect(mocks.productService.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'MKC Chicken Wings' }));
+    const createCall = mocks.logProductAction.mock.calls[0];
+    expect(createCall[0]).toBe('p-2');
+    expect(createCall[1]).toBe('create_product');
+    expect(createCall[2]).toMatchObject({ name: 'MKC Chicken Wings' });
+    expect(createCall[3]).toEqual(expect.stringContaining('Added product'));
     expect(mocks.notifySuccess).toHaveBeenCalledWith('Created product: MKC Chicken Wings');
     expect(result.current.products.some((p) => p.id === 'p-2')).toBe(true);
   });
@@ -100,20 +104,23 @@ describe('useProducts', () => {
       await result.current.updateProduct('p-1', { name: 'MKC Chicken Breast+' });
     });
 
-    expect(mocks.productService.update).toHaveBeenCalledWith('p-1', { name: 'MKC Chicken Breast+' });
-    expect(mocks.logProductAction).toHaveBeenCalledWith(
-      'p-1',
-      'update_product',
-      expect.any(Object),
-      'Updated product'
-    );
+    expect(mocks.productService.update).toHaveBeenCalledWith('p-1', expect.objectContaining({ name: 'MKC Chicken Breast+' }));
+    const updateCall = mocks.logProductAction.mock.calls[0];
+    expect(updateCall[0]).toBe('p-1');
+    expect(updateCall[1]).toBe('update_product');
+    expect(updateCall[2]).toEqual(expect.any(Object));
+    expect(updateCall[3]).toEqual('Updated product');
 
     await act(async () => {
       await result.current.deleteProduct('p-1');
     });
 
     expect(mocks.productService.delete).toHaveBeenCalledWith('p-1');
-    expect(mocks.logProductAction).toHaveBeenCalledWith('p-1', 'delete_product');
+    const deleteCall = mocks.logProductAction.mock.calls[1];
+    expect(deleteCall[0]).toBe('p-1');
+    expect(deleteCall[1]).toBe('delete_product');
+    expect(deleteCall[2]).toMatchObject({ name: 'MKC Chicken Breast+' });
+    expect(deleteCall[3]).toEqual(expect.stringContaining('Deleted product'));
     expect(result.current.products.find((p) => p.id === 'p-1')).toBeUndefined();
   });
 

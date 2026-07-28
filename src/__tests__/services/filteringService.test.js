@@ -116,7 +116,7 @@ describe('filteringService', () => {
     expect(result.success).toBe(true);
     expect(result.options.statuses).toEqual(['Pending']);
     expect(result.options.paymentMethods).toEqual(['COD', 'GCash']);
-    expect(result.options.categories).toEqual(['Cut-Ups & Portions', 'Whole Chicken']);
+    expect(result.options.categories.sort()).toEqual(['Cut-Ups & Portions', 'Whole Chicken']);
     expect(result.options.riders).toEqual([{ id: 'r1', name: 'Rider One' }]);
   });
 

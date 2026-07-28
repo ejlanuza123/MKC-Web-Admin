@@ -48,6 +48,11 @@ vi.mock('../../components/DeliveryTrackingMap', () => ({
   default: () => null,
 }));
 
+vi.mock('../../context/ThemeContext', () => ({
+  useTheme: () => ({ isDarkMode: false, toggleDarkMode: vi.fn() }),
+  ThemeProvider: ({ children }) => children,
+}));
+
 vi.mock('../../components/common/ErrorAlert', () => ({
   default: ({ message, onDismiss }) => (
     <button type="button" onClick={onDismiss} data-testid="error-alert">
