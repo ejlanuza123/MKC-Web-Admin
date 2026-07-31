@@ -407,26 +407,25 @@ const Sidebar = memo(({
         isDarkMode={isDarkMode}
       />
 
-      {/* Logo Section - Hide logo text when collapsed, show only icon */}
+      {/* Logo Section */}
       <motion.div 
         className="p-6 border-b bg-petron-blue relative"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <div className={`flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} gap-3`}>
-          <motion.img 
-            src={mkcLogo} 
-            alt="MKC Foods Logo" 
-            className="h-12 w-auto object-contain bg-white rounded-lg p-1 flex-shrink-0"
-            whileHover={{ rotate: 360 }}
-            transition={{ duration: 0.5 }}
-          />
-          
-          {isExpanded && (
-            <>
+        <div className={`flex items-start ${isExpanded ? 'justify-between' : 'justify-center'} gap-3`}>
+          <div className={`flex items-center space-x-3 ${isExpanded ? 'min-w-0' : 'min-w-0'}`}>
+            <motion.img 
+              src={mkcLogo} 
+              alt="MKC Foods Logo" 
+              className="h-12 w-auto object-contain bg-white rounded-lg p-1 flex-shrink-0"
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 0.5 }}
+            />
+            {showLogoText && (
               <motion.div
-                className="min-w-0 flex-1"
+                className="min-w-0"
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
@@ -434,22 +433,24 @@ const Sidebar = memo(({
                 <h1 className="text-xl font-bold text-white truncate">Admin Portal</h1>
                 <p className="text-xs text-white/80 truncate">Management System</p>
               </motion.div>
-              
-              <NotificationMenu
-                notifications={notifications}
-                unreadCount={unreadCount}
-                markAsRead={markAsRead}
-                markAllAsRead={markAllAsRead}
-                removeNotification={removeNotification}
-                clearAll={clearAll}
-                onNotificationClick={onNotificationClick}
-                requestNotificationPermission={requestNotificationPermission}
-                placement="right-start"
-                className="translate-x-2 flex-shrink-0"
-                buttonClassName={isDarkMode ? 'bg-slate-800 border-slate-700 text-[#0033A0] hover:bg-slate-700' : 'bg-white border-white/70 text-[#0033A0] hover:bg-[#E5EEFF]'}
-                isDarkMode={isDarkMode}
-              />
-            </>
+            )}
+          </div>
+
+          {isExpanded && (
+            <NotificationMenu
+              notifications={notifications}
+              unreadCount={unreadCount}
+              markAsRead={markAsRead}
+              markAllAsRead={markAllAsRead}
+              removeNotification={removeNotification}
+              clearAll={clearAll}
+              onNotificationClick={onNotificationClick}
+              requestNotificationPermission={requestNotificationPermission}
+              placement="right-start"
+              className="translate-x-2 flex-shrink-0"
+              buttonClassName={isDarkMode ? 'bg-slate-800 border-slate-700 text-[#0033A0] hover:bg-slate-700' : 'bg-white border-white/70 text-[#0033A0] hover:bg-[#E5EEFF]'}
+              isDarkMode={isDarkMode}
+            />
           )}
         </div>
       </motion.div>
@@ -475,7 +476,7 @@ const Sidebar = memo(({
         ))}
       </nav>
 
-      {/* Profile Section - Only show avatar when collapsed */}
+      {/* Profile Section */}
       <motion.div 
         className={`p-4 border-t transition-colors duration-300 ${isDarkMode ? 'border-slate-700 bg-slate-900' : 'border-gray-200 bg-white'}`}
         initial={{ y: 20, opacity: 0 }}
@@ -493,7 +494,7 @@ const Sidebar = memo(({
               <img
                 src={profile.avatar_url}
                 alt={profile?.full_name || 'Admin'}
-                className={`w-8 h-8 rounded-lg object-cover ${isExpanded ? 'mr-3' : ''} flex-shrink-0 border border-gray-200`}
+                className="w-8 h-8 rounded-lg object-cover mr-3 flex-shrink-0 border border-gray-200"
               />
             ) : (
               <div className={`w-8 h-8 bg-petron-blue rounded-lg flex items-center justify-center text-white font-bold ${isExpanded ? 'mr-3' : ''} flex-shrink-0`}>
@@ -518,43 +519,45 @@ const Sidebar = memo(({
             )}
           </motion.button>
 
-          {/* Profile dropdown */}
-          <AnimatePresence>
-            {isProfileMenuOpen && isExpanded && (
-              <motion.div 
-                className={`absolute bottom-full left-0 w-full mb-2 rounded-lg shadow-lg border py-2 z-50 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <motion.button 
-                  whileHover={{ x: 5 }}
-                  className={`w-full px-4 py-2 text-left text-sm flex items-center transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700 hover:text-white' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}
-                  onClick={() => {
-                    onProfileClick();
-                    setIsProfileMenuOpen(false);
-                  }}
+          {/* Profile dropdown - only show when expanded */}
+          {isExpanded && (
+            <AnimatePresence>
+              {isProfileMenuOpen && (
+                <motion.div 
+                  className={`absolute bottom-full left-0 w-full mb-2 rounded-lg shadow-lg border py-2 z-50 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <User size={16} className="mr-2" />
-                  Profile and settings
-                </motion.button>
-                <div className={`w-full px-4 py-2 flex items-center transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}>
-                  <AnimatedThemeToggle className="mr-2" />
-                  <span className="text-sm">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                </div>
-                <div className={`border-t my-2 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}></div>
-                <motion.button 
-                  whileHover={{ x: 5 }}
-                  onClick={handleSignOut}
-                  className={`w-full px-4 py-2 text-left text-sm text-[#ED1C24] flex items-center transition-colors duration-300 ${isDarkMode ? 'hover:bg-red-900/30' : 'hover:bg-red-50'}`}
-                >
-                  <LogOut size={16} className="mr-2" />
-                  Sign Out
-                </motion.button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <motion.button 
+                    whileHover={{ x: 5 }}
+                    className={`w-full px-4 py-2 text-left text-sm flex items-center transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700 hover:text-white' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}
+                    onClick={() => {
+                      onProfileClick();
+                      setIsProfileMenuOpen(false);
+                    }}
+                  >
+                    <User size={16} className="mr-2" />
+                    Profile and settings
+                  </motion.button>
+                  <div className={`w-full px-4 py-2 flex items-center transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}>
+                    <AnimatedThemeToggle className="mr-2" />
+                    <span className="text-sm">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                  </div>
+                  <div className={`border-t my-2 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}></div>
+                  <motion.button 
+                    whileHover={{ x: 5 }}
+                    onClick={handleSignOut}
+                    className={`w-full px-4 py-2 text-left text-sm text-[#ED1C24] flex items-center transition-colors duration-300 ${isDarkMode ? 'hover:bg-red-900/30' : 'hover:bg-red-50'}`}
+                  >
+                    <LogOut size={16} className="mr-2" />
+                    Sign Out
+                  </motion.button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
         </div>
       </motion.div>
     </motion.aside>
@@ -563,7 +566,7 @@ const Sidebar = memo(({
 
 Sidebar.displayName = 'Sidebar';
 
-// Mobile Header Component - Updated to always show notification and profile
+// Mobile Header Component
 const MobileHeader = memo(({ 
   profile, 
   handleSignOut, 
@@ -614,7 +617,7 @@ const MobileHeader = memo(({
           <motion.img 
             src={mkcLogo} 
             alt="MKC Foods Logo" 
-            className="h-10 w-auto object-contain bg-white rounded-lg p-1 border border-white/60 mr-3 shrink-0"
+            className="h-12 w-auto object-contain bg-white rounded-lg p-1 border border-white/60 mr-3 shrink-0"
             whileHover={{ rotate: 360 }}
             transition={{ duration: 0.5 }}
           />
