@@ -1,10 +1,9 @@
-/* eslint-disable no-unused-vars */
-// src/components/Layout.jsx
-import React, { useState, useCallback, memo } from 'react';
+// MKC Foods Corporation/mkc-admin-web/src/components/Layout.jsx
+import React, { useState, useCallback, memo, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { useTheme } from '../context/ThemeContext';
 import { useNotifications } from '../context/NotificationContext';
+import { useTheme } from '../context/ThemeContext';
 import { 
   LayoutDashboard, 
   ShoppingCart, 
@@ -21,54 +20,60 @@ import {
   Bell,
   Check,
   CheckCheck,
-  Trash2
+  Trash2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
-import DarkModeToggle from './DarkModeToggle';
+import { AnimatedThemeToggle } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import mkcLogo from '../assets/images/mkc-logo.png';
 import PageTransition from './PageTransition';
 import SettingsModal from './SettingsModal';
 import FloatingChatBubble from './common/FloatingChatBubble';
 
-
 // Animated NavItem with scale and slide effects
-const NavItem = memo(({ icon: Icon, label, isActive, onClick }) => {
+const NavItem = memo(({ to, icon: Icon, label, isActive, onClick, isCollapsed }) => {
+  const { isDarkMode } = useTheme();
+  
   return (
     <motion.button
       onClick={onClick}
-      whileHover={{ scale: 1.05, x: 5 }}
+      whileHover={{ scale: 1.05, x: isCollapsed ? 0 : 5 }}
       whileTap={{ scale: 0.95 }}
       className={`
         relative flex items-center w-full px-4 py-3 rounded-lg 
         transition-all duration-300 ease-in-out
         ${isActive 
-          ? 'bg-mkc-blue text-white shadow-lg' 
-          : 'bg-theme-secondary'
+          ? 'bg-petron-blue text-white shadow-lg' 
+          : isDarkMode 
+            ? 'text-gray-400 hover:bg-gray-700 hover:text-white' 
+            : 'text-gray-600 hover:bg-[#E5EEFF] hover:text-[#0033A0]'
         }
+        ${isCollapsed ? 'justify-center px-2' : ''}
       `}
+      title={isCollapsed ? label : ''}
     >
-      {/* Animated background for active state */}
       {isActive && (
         <motion.div 
-          className="absolute inset-0 bg-mkc-blue rounded-lg opacity-50"
+          className="absolute inset-0 bg-petron-blue rounded-lg opacity-50"
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
       )}
       
-      {/* Icon with animation */}
       <motion.div
-        whileHover={{ rotate: 360 }}
+        whileHover={{ rotate: isCollapsed ? 0 : 360 }}
         transition={{ duration: 0.5 }}
+        className="relative z-10"
       >
-        <Icon size={20} className="mr-3 flex-shrink-0" />
+        <Icon size={20} className={isCollapsed ? 'mx-auto' : 'mr-3 flex-shrink-0'} />
       </motion.div>
       
-      {/* Label */}
-      <span className="font-medium relative z-10">{label}</span>
+      {!isCollapsed && (
+        <span className="font-medium relative z-10">{label}</span>
+      )}
       
-      {/* Active indicator with animation */}
-      {isActive && (
+      {isActive && !isCollapsed && (
         <motion.div 
           className="ml-auto w-1.5 h-1.5 bg-white rounded-full"
           animate={{ scale: [1, 1.5, 1] }}
@@ -81,19 +86,16 @@ const NavItem = memo(({ icon: Icon, label, isActive, onClick }) => {
 
 NavItem.displayName = 'NavItem';
 
+// Format notification time
 const formatNotificationTime = (timestamp) => {
   if (!timestamp) return '';
-
   const createdAt = new Date(timestamp);
   if (Number.isNaN(createdAt.getTime())) return '';
-
   const diffSeconds = Math.max(0, Math.floor((Date.now() - createdAt.getTime()) / 1000));
-
   if (diffSeconds < 60) return 'Just now';
   if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
   if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)}h ago`;
   if (diffSeconds < 604800) return `${Math.floor(diffSeconds / 86400)}d ago`;
-
   return createdAt.toLocaleDateString();
 };
 
@@ -102,24 +104,33 @@ const getReservationDateKey = (notificationData = {}) => {
     || notificationData.reservation_date
     || notificationData.reserved_date
     || notificationData.date;
-
   if (!rawDate) return '';
-
   if (typeof rawDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
     return rawDate;
   }
-
   const parsedDate = new Date(rawDate);
   if (Number.isNaN(parsedDate.getTime())) return '';
-
   const year = parsedDate.getFullYear();
   const month = `${parsedDate.getMonth() + 1}`.padStart(2, '0');
   const day = `${parsedDate.getDate()}`.padStart(2, '0');
-
   return `${year}-${month}-${day}`;
 };
 
-const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll, onNotificationClick, requestNotificationPermission, className = '', placement = 'bottom-right', buttonClassName = '' }) => {
+// Notification Menu Component
+const NotificationMenu = memo(({ 
+  notifications, 
+  unreadCount, 
+  markAsRead, 
+  markAllAsRead, 
+  removeNotification, 
+  clearAll, 
+  onNotificationClick, 
+  requestNotificationPermission, 
+  className = '', 
+  placement = 'bottom-right', 
+  buttonClassName = '', 
+  isDarkMode 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const previewNotifications = notifications.slice(0, 8);
 
@@ -127,9 +138,9 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
     ? 'absolute right-0 left-auto bottom-full mb-2 origin-bottom-right'
     : placement === 'mobile-center'
       ? 'fixed inset-x-0 top-16 mt-2 mx-auto origin-top w-[calc(100vw-1rem)] max-w-sm'
-    : placement === 'right-start'
-      ? 'absolute left-full top-0 ml-2 origin-top-left'
-      : 'absolute right-0 left-auto top-full mt-2 origin-top-right';
+      : placement === 'right-start'
+        ? 'absolute left-full top-0 ml-2 origin-top-left'
+        : 'absolute right-0 left-auto top-full mt-2 origin-top-right';
 
   return (
     <div className={`relative ${className}`}>
@@ -142,7 +153,11 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
           }
           setIsOpen(prev => !prev);
         }}
-        className={`relative p-2 rounded-lg border border-theme bg-theme-primary hover:bg-theme-secondary transition ${buttonClassName}`}
+        className={`relative p-2 rounded-lg border transition ${buttonClassName} ${
+          isDarkMode 
+            ? 'border-slate-700 bg-slate-800 hover:bg-slate-700 text-gray-300' 
+            : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
+        }`}
         aria-label="Open notifications"
       >
         <Bell size={20} className="text-current" />
@@ -160,23 +175,27 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
             animate={{ y: 0 }}
             exit={{ y: 8 }}
             transition={{ duration: 0.2 }}
-            className={`${panelPositionClass} ${placement === 'mobile-center' ? '' : 'w-[min(22rem,calc(100vw-1rem))]'} max-h-[420px] bg-theme-primary border border-theme rounded-xl shadow-xl z-[120] overflow-hidden`}
+            className={`${panelPositionClass} ${placement === 'mobile-center' ? '' : 'w-[min(22rem,calc(100vw-1rem))]'} max-h-[420px] rounded-xl shadow-xl z-[120] overflow-hidden transition-colors duration-300 ${
+              isDarkMode 
+                ? 'bg-slate-800 border border-slate-700 text-slate-100' 
+                : 'bg-white border border-gray-200 text-gray-900'
+            }`}
             style={{ opacity: 1 }}
           >
-            <div className="px-4 py-3 border-b border-theme flex items-center justify-between">
+            <div className={`px-4 py-3 border-b flex items-center justify-between ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
               <div>
-                <h3 className="text-sm font-semibold text-theme-primary">Notifications</h3>
-                <p className="text-xs text-theme-secondary">{unreadCount} unread</p>
+                <h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Notifications</h3>
+                <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{unreadCount} unread</p>
               </div>
             </div>
 
             {notifications.length > 0 && (
-              <div className="px-4 py-2 border-b border-theme bg-theme-secondary flex items-center justify-between gap-2">
+              <div className={`px-4 py-2 border-b flex items-center justify-between gap-2 ${isDarkMode ? 'bg-slate-700/50 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
                 <button
                   onClick={async () => {
                     await markAllAsRead();
                   }}
-                  className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-400 font-medium"
+                  className={`inline-flex items-center gap-1 text-xs font-medium ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-700 hover:text-blue-900'}`}
                 >
                   <CheckCheck size={14} />
                   Mark all as read
@@ -186,7 +205,7 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
                     await clearAll();
                     setIsOpen(false);
                   }}
-                  className="inline-flex items-center gap-1 text-xs text-theme-secondary hover:text-[#ED1C24]"
+                  className={`inline-flex items-center gap-1 text-xs ${isDarkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-600 hover:text-[#ED1C24]'}`}
                 >
                   <Trash2 size={14} />
                   Remove all
@@ -196,9 +215,9 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
 
             <div className="max-h-[340px] overflow-auto">
               {previewNotifications.length === 0 ? (
-                <div className="p-6 text-center text-sm text-theme-secondary">No notifications yet</div>
+                <div className={`p-6 text-center text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>No notifications yet</div>
               ) : (
-                <div className="divide-y">
+                <div className={`divide-y ${isDarkMode ? 'divide-slate-700' : 'divide-gray-200'}`}>
                   {previewNotifications.map((notification) => (
                     <button
                       key={notification.id}
@@ -211,13 +230,17 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
                         }
                         setIsOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-3 transition hover:bg-theme-tertiary ${notification.is_read ? 'bg-theme-primary' : 'bg-theme-secondary'}`}
+                      className={`w-full text-left px-4 py-3 transition ${
+                        isDarkMode 
+                          ? `hover:bg-slate-700 ${notification.is_read ? 'bg-slate-800' : 'bg-blue-900/20'}` 
+                          : `hover:bg-gray-50 ${notification.is_read ? 'bg-white' : 'bg-blue-50'}`
+                      }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-theme-primary truncate">{notification.title}</p>
-                          <p className="text-xs text-theme-secondary mt-1 break-words">{notification.message}</p>
-                          <p className="text-[11px] text-theme-secondary mt-2">
+                          <p className={`text-sm font-semibold truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{notification.title}</p>
+                          <p className={`text-xs mt-1 break-words ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{notification.message}</p>
+                          <p className={`text-[11px] mt-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                             {formatNotificationTime(notification.created_at)}
                           </p>
                         </div>
@@ -227,14 +250,14 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
                               e.stopPropagation();
                               await markAsRead(notification.id);
                             }}
-                            className="mt-0.5 p-1 rounded text-blue-600 hover:bg-blue-100"
+                            className={`mt-0.5 p-1 rounded ${isDarkMode ? 'text-blue-400 hover:bg-blue-900/50' : 'text-blue-600 hover:bg-blue-100'}`}
                             title="Mark as read"
                             aria-label="Mark as read"
                           >
                             <Check size={14} />
                           </button>
                         ) : (
-                          <span className="mt-1 text-green-600" title="Read">
+                          <span className={`mt-1 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`} title="Read">
                             <CheckCheck size={14} />
                           </span>
                         )}
@@ -243,7 +266,7 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
                             e.stopPropagation();
                             await removeNotification(notification.id);
                           }}
-                          className="mt-0.5 p-1 rounded text-gray-500 hover:bg-red-100 hover:text-[#ED1C24]"
+                          className={`mt-0.5 p-1 rounded ${isDarkMode ? 'text-gray-400 hover:bg-red-900/50 hover:text-red-400' : 'text-gray-500 hover:bg-red-100 hover:text-[#ED1C24]'}`}
                           title="Remove notification"
                           aria-label="Remove notification"
                         >
@@ -264,29 +287,94 @@ const NotificationMenu = memo(({ notifications, unreadCount, markAsRead, markAll
 
 NotificationMenu.displayName = 'NotificationMenu';
 
-// Sidebar component
-const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setSlideDirection, onProfileClick, notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll, requestNotificationPermission, onNotificationClick }) => {
-  const { isDarkMode } = useTheme();
+// Sidebar Toggle Button Component
+const SidebarToggle = memo(({ isCollapsed, onToggle, isDarkMode }) => {
+  return (
+    <motion.button
+      onClick={onToggle}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className={`
+        absolute -right-3 top-20 z-50 p-1.5 rounded-full border shadow-md
+        transition-all duration-300
+        ${isDarkMode 
+          ? 'bg-slate-800 border-slate-600 text-gray-300 hover:bg-slate-700' 
+          : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+        }
+        ${isCollapsed ? 'translate-x-0' : 'translate-x-0'}
+      `}
+      aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+    >
+      {isCollapsed ? (
+        <ChevronRight size={16} className="text-current" />
+      ) : (
+        <ChevronLeft size={16} className="text-current" />
+      )}
+    </motion.button>
+  );
+});
+
+SidebarToggle.displayName = 'SidebarToggle';
+
+// Sidebar Component with Auto-Hide
+const Sidebar = memo(({ 
+  profile, 
+  handleSignOut, 
+  isActive, 
+  handleNavigation, 
+  setSlideDirection, 
+  onSettingsClick, 
+  onProfileClick, 
+  notifications, 
+  unreadCount, 
+  markAsRead, 
+  markAllAsRead, 
+  removeNotification, 
+  clearAll, 
+  requestNotificationPermission, 
+  onNotificationClick,
+  isCollapsed,
+  onToggleCollapse
+}) => {
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+
+  // Determine if sidebar should be expanded (for display)
+  // Expand when: NOT collapsed OR hovering over the collapsed sidebar
+  const isExpanded = !isCollapsed || (isCollapsed && isHovering);
 
   // Handle navigation with slide direction
   const onNavigate = (to) => {
     const currentPath = location.pathname;
-    const currentIndex = navItems.findIndex(item => item.to === currentPath);
-    const newIndex = navItems.findIndex(item => item.to === to);
+    const navItems = [
+      '/', '/orders', '/reservations', '/products', 
+      '/customers', '/riders', '/reports', '/audit-logs'
+    ];
+    const currentIndex = navItems.findIndex(item => item === currentPath);
+    const newIndex = navItems.findIndex(item => item === to);
     
-    // Determine slide direction based on navigation
     if (newIndex > currentIndex) {
-      setSlideDirection('right'); // Slide in from right
+      setSlideDirection('right');
     } else if (newIndex < currentIndex) {
-      setSlideDirection('left'); // Slide in from left
+      setSlideDirection('left');
     } else {
-      setSlideDirection('fadeScale'); // Same page, use fade
+      setSlideDirection('fadeScale');
     }
     
     handleNavigation(to);
   };
 
+  // Sidebar width based on state
+  const sidebarWidth = isExpanded ? 'w-72' : 'w-16';
+  
+  // Logo text visibility
+  const showLogoText = isExpanded;
+  
+  // Nav item text visibility
+  const showNavLabels = isExpanded;
+
+  // Nav items with icons only
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/orders', icon: ShoppingCart, label: 'Orders' },
@@ -303,55 +391,71 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
       initial={{ x: -300 }}
       animate={{ x: 0 }}
       transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
-      className={`hidden md:flex flex-col w-72 relative z-40 overflow-visible transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-r border-slate-700' : 'bg-white border-r border-gray-200'}`}
+      className={`
+        ${sidebarWidth} flex flex-col relative z-40 overflow-visible 
+        transition-all duration-300 ease-in-out
+        ${isDarkMode ? 'bg-slate-900 border-r border-slate-700' : 'bg-white border-r border-gray-200'}
+        ${isCollapsed && !isHovering ? 'shadow-lg' : ''}
+      `}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
     >
-      {/* Logo Section */}
+      {/* Toggle Button */}
+      <SidebarToggle 
+        isCollapsed={isCollapsed} 
+        onToggle={onToggleCollapse}
+        isDarkMode={isDarkMode}
+      />
+
+      {/* Logo Section - Hide logo text when collapsed, show only icon */}
       <motion.div 
-        className="p-6 border-b bg-mkc-blue"
+        className="p-6 border-b bg-petron-blue relative"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center space-x-3 min-w-0">
-            <motion.img 
-              src={mkcLogo} 
-              alt="MKC Logo" 
-              className="h-12 w-auto object-contain bg-white rounded-lg p-1"
-              whileHover={{ rotate: 360 }}
-              transition={{ duration: 0.5 }}
-            />
-            <motion.div
-              className="min-w-0"
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <h1 className="text-xl font-bold text-white truncate">Admin Portal</h1>
-              <p className="text-xs text-white/80 truncate">Management System</p>
-            </motion.div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <NotificationMenu
-              notifications={notifications}
-              unreadCount={unreadCount}
-              markAsRead={markAsRead}
-              markAllAsRead={markAllAsRead}
-              removeNotification={removeNotification}
-              clearAll={clearAll}
-              onNotificationClick={onNotificationClick}
-              requestNotificationPermission={requestNotificationPermission}
-              placement="right-start"
-              className="translate-x-2"
-              buttonClassName={`${isDarkMode ? 'bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600' : 'bg-white border-white/70 text-[#0033A0] hover:bg-theme-secondary'}`}
-            />
-          </div>
+        <div className={`flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} gap-3`}>
+          <motion.img 
+            src={mkcLogo} 
+            alt="MKC Foods Logo" 
+            className="h-12 w-auto object-contain bg-white rounded-lg p-1 flex-shrink-0"
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.5 }}
+          />
+          
+          {isExpanded && (
+            <>
+              <motion.div
+                className="min-w-0 flex-1"
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <h1 className="text-xl font-bold text-white truncate">Admin Portal</h1>
+                <p className="text-xs text-white/80 truncate">Management System</p>
+              </motion.div>
+              
+              <NotificationMenu
+                notifications={notifications}
+                unreadCount={unreadCount}
+                markAsRead={markAsRead}
+                markAllAsRead={markAllAsRead}
+                removeNotification={removeNotification}
+                clearAll={clearAll}
+                onNotificationClick={onNotificationClick}
+                requestNotificationPermission={requestNotificationPermission}
+                placement="right-start"
+                className="translate-x-2 flex-shrink-0"
+                buttonClassName={isDarkMode ? 'bg-slate-800 border-slate-700 text-[#0033A0] hover:bg-slate-700' : 'bg-white border-white/70 text-[#0033A0] hover:bg-[#E5EEFF]'}
+                isDarkMode={isDarkMode}
+              />
+            </>
+          )}
         </div>
       </motion.div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-1">
+      <nav className="flex-1 px-4 py-6 space-y-1 overflow-hidden">
         {navItems.map((item, index) => (
           <motion.div
             key={item.to}
@@ -365,12 +469,13 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
               label={item.label} 
               isActive={isActive(item.to)}
               onClick={() => onNavigate(item.to)}
+              isCollapsed={!isExpanded}
             />
           </motion.div>
         ))}
       </nav>
 
-      {/* Profile Section */}
+      {/* Profile Section - Only show avatar when collapsed */}
       <motion.div 
         className={`p-4 border-t transition-colors duration-300 ${isDarkMode ? 'border-slate-700 bg-slate-900' : 'border-gray-200 bg-white'}`}
         initial={{ y: 20, opacity: 0 }}
@@ -382,36 +487,40 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-slate-800 hover:bg-opacity-60' : 'hover:bg-[#E5EEFF]'}`}
+            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-slate-800 hover:bg-opacity-60' : 'hover:bg-[#E5EEFF]'} ${!isExpanded ? 'justify-center px-2' : ''}`}
           >
             {profile?.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt={profile?.full_name || 'Admin'}
-                className="w-8 h-8 rounded-lg object-cover mr-3 flex-shrink-0 border border-gray-200"
+                className={`w-8 h-8 rounded-lg object-cover ${isExpanded ? 'mr-3' : ''} flex-shrink-0 border border-gray-200`}
               />
             ) : (
-              <div className="w-8 h-8 bg-mkc-blue rounded-lg flex items-center justify-center text-white font-bold mr-3 flex-shrink-0">
+              <div className={`w-8 h-8 bg-petron-blue rounded-lg flex items-center justify-center text-white font-bold ${isExpanded ? 'mr-3' : ''} flex-shrink-0`}>
                 {profile?.full_name?.charAt(0)?.toUpperCase() || 'A'}
               </div>
             )}
-            <div className="flex-1 text-left min-w-0">
-              <p className="text-sm font-medium text-theme-primary truncate">
-                {profile?.full_name || 'Admin'}
-              </p>
-              <p className="text-xs text-theme-secondary truncate">{profile?.email || 'admin@mkcfoods.com'}</p>
-            </div>
-            <motion.div
-              animate={{ rotate: isProfileMenuOpen ? 180 : 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <ChevronDown size={18} className="text-theme-secondary flex-shrink-0" />
-            </motion.div>
+            {isExpanded && (
+              <>
+                <div className="flex-1 text-left min-w-0">
+                  <p className="text-sm font-medium text-theme-primary truncate">
+                    {profile?.full_name || 'Admin'}
+                  </p>
+                  <p className="text-xs text-theme-secondary truncate">{profile?.email || 'admin@mkcfoods.com'}</p>
+                </div>
+                <motion.div
+                  animate={{ rotate: isProfileMenuOpen ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ChevronDown size={18} className="text-theme-secondary flex-shrink-0" />
+                </motion.div>
+              </>
+            )}
           </motion.button>
 
           {/* Profile dropdown */}
           <AnimatePresence>
-            {isProfileMenuOpen && (
+            {isProfileMenuOpen && isExpanded && (
               <motion.div 
                 className={`absolute bottom-full left-0 w-full mb-2 rounded-lg shadow-lg border py-2 z-50 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}
                 initial={{ opacity: 0, y: 10 }}
@@ -430,15 +539,15 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
                   <User size={16} className="mr-2" />
                   Profile and settings
                 </motion.button>
-                <div className="px-4 py-2 flex items-center justify-between gap-3">
-                  <span className={`text-sm ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>Theme</span>
-                  <DarkModeToggle showLabel />
+                <div className={`w-full px-4 py-2 flex items-center transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}>
+                  <AnimatedThemeToggle className="mr-2" />
+                  <span className="text-sm">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
                 </div>
-                <div className="border-t my-2"></div>
+                <div className={`border-t my-2 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}></div>
                 <motion.button 
                   whileHover={{ x: 5 }}
                   onClick={handleSignOut}
-                  className={`w-full px-4 py-2 text-left text-sm text-[#ED1C24] flex items-center ${isDarkMode ? 'hover:bg-red-900/30' : 'hover:bg-red-50'}`}
+                  className={`w-full px-4 py-2 text-left text-sm text-[#ED1C24] flex items-center transition-colors duration-300 ${isDarkMode ? 'hover:bg-red-900/30' : 'hover:bg-red-50'}`}
                 >
                   <LogOut size={16} className="mr-2" />
                   Sign Out
@@ -454,9 +563,25 @@ const Sidebar = memo(({ profile, handleSignOut, isActive, handleNavigation, setS
 
 Sidebar.displayName = 'Sidebar';
 
-// Mobile header with animations
-const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation, setSlideDirection, notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll, requestNotificationPermission, onProfileClick, onNotificationClick }) => {
-  const { isDarkMode } = useTheme();
+// Mobile Header Component - Updated to always show notification and profile
+const MobileHeader = memo(({ 
+  profile, 
+  handleSignOut, 
+  isActive, 
+  handleNavigation, 
+  setSlideDirection, 
+  notifications, 
+  unreadCount, 
+  markAsRead, 
+  markAllAsRead, 
+  removeNotification, 
+  clearAll, 
+  requestNotificationPermission, 
+  onSettingsClick, 
+  onProfileClick, 
+  onNotificationClick 
+}) => {
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileProfileMenuOpen, setIsMobileProfileMenuOpen] = useState(false);
 
@@ -480,7 +605,7 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
 
   return (
     <>
-      <header className="md:hidden bg-mkc-blue border-b border-white/20 px-4 py-3 flex justify-between items-center z-20">
+      <header className="md:hidden bg-petron-blue border-b border-white/20 px-4 py-3 flex justify-between items-center z-20">
         <motion.div 
           className="flex items-center min-w-0 flex-1"
           initial={{ x: -20, opacity: 0 }}
@@ -488,8 +613,8 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
         >
           <motion.img 
             src={mkcLogo} 
-            alt="MKC Logo" 
-            className="h-12 w-auto object-contain bg-white rounded-lg p-1 border border-white/60 mr-3 shrink-0"
+            alt="MKC Foods Logo" 
+            className="h-10 w-auto object-contain bg-white rounded-lg p-1 border border-white/60 mr-3 shrink-0"
             whileHover={{ rotate: 360 }}
             transition={{ duration: 0.5 }}
           />
@@ -509,7 +634,7 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
             onNotificationClick={onNotificationClick}
             requestNotificationPermission={requestNotificationPermission}
             placement="mobile-center"
-            buttonClassName={`${isDarkMode ? 'bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600' : 'bg-white border-white/70 text-[#0033A0] hover:bg-theme-secondary'}`}
+            isDarkMode={isDarkMode}
           />
           <motion.button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -553,6 +678,7 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
                       label={item.label} 
                       isActive={isActive(item.to)}
                       onClick={() => onNavigate(item.to)}
+                      isCollapsed={false}
                     />
                   </motion.div>
                 ))}
@@ -568,7 +694,7 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
               <div className="border-t pt-4">
                 <button
                   onClick={() => setIsMobileProfileMenuOpen(prev => !prev)}
-                  className={`w-full flex items-center mb-2 p-2 rounded-lg transition ${isDarkMode ? 'hover:bg-slate-800' : 'hover:bg-gray-100'}`}
+                  className="w-full flex items-center mb-2 p-2 rounded-lg hover:bg-gray-100 transition"
                 >
                   {profile?.avatar_url ? (
                     <img
@@ -577,18 +703,18 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
                       className="w-10 h-10 rounded-lg object-cover mr-3 border border-gray-200"
                     />
                   ) : (
-                    <div className="w-10 h-10 bg-mkc-blue rounded-lg flex items-center justify-center text-white font-bold mr-3">
+                    <div className="w-10 h-10 bg-petron-blue rounded-lg flex items-center justify-center text-white font-bold mr-3">
                       {profile?.full_name?.charAt(0)?.toUpperCase() || 'A'}
                     </div>
                   )}
                   <div className="min-w-0 text-left flex-1">
-                    <p className="font-medium text-theme-primary truncate">{profile?.full_name || 'Admin'}</p>
-                    <p className="text-sm text-theme-secondary truncate">{profile?.email || 'admin@mkcfoods.com'}</p>
+                    <p className={`font-medium truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{profile?.full_name || 'Admin'}</p>
+                    <p className={`text-sm truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{profile?.email || 'admin@mkcfoods.com'}</p>
                   </div>
                   <motion.div
                     animate={{ rotate: isMobileProfileMenuOpen ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
-                    className="text-theme-secondary"
+                    className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}
                   >
                     <ChevronDown size={18} />
                   </motion.div>
@@ -601,7 +727,7 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
                       transition={{ duration: 0.15 }}
-                      className={`mb-3 rounded-lg border p-2 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`}
+                      className={`mb-3 border rounded-lg p-2 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`}
                     >
                       <button
                         onClick={() => {
@@ -614,9 +740,25 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
                         <User size={16} className="mr-2" />
                         Profile and settings
                       </button>
-                      <div className="px-3 pt-2 pb-1 flex items-center justify-between gap-3">
-                        <span className={`text-sm ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>Theme</span>
-                        <DarkModeToggle showLabel />
+                      <div className="flex items-center justify-between px-3 py-2 rounded-md">
+                        <span className={`text-sm flex items-center ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
+                          <AnimatedThemeToggle className="mr-2" />
+                          {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={toggleDarkMode}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
+                            isDarkMode ? 'bg-[#0033A0]' : 'bg-gray-300'
+                          }`}
+                          aria-label="Toggle dark mode"
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
+                              isDarkMode ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
                       </div>
                     </motion.div>
                   )}
@@ -626,7 +768,7 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleSignOut}
-                  className={`flex items-center justify-center w-full text-[#ED1C24] px-4 py-3 rounded-lg ${isDarkMode ? 'bg-red-900/20 hover:bg-red-900/40' : 'bg-red-50 hover:bg-red-100'}`}
+                  className="flex items-center justify-center w-full bg-red-50 text-[#ED1C24] px-4 py-3 rounded-lg hover:bg-red-100"
                 >
                   <LogOut size={20} className="mr-2" />
                   Sign Out
@@ -642,9 +784,10 @@ const MobileHeader = memo(({ profile, handleSignOut, isActive, handleNavigation,
 
 MobileHeader.displayName = 'MobileHeader';
 
+// Main Layout Component
 export default function Layout() {
   const { user, profile, signOut } = useAuth();
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const {
     notifications,
     unreadCount,
@@ -657,8 +800,24 @@ export default function Layout() {
   } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
-  const [, setSlideDirection] = useState('right');
+  const [slideDirection, setSlideDirection] = useState('right');
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  
+  // State for sidebar collapse
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    // Load from localStorage to persist user preference
+    const saved = localStorage.getItem('mkc-sidebar-collapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Save sidebar state to localStorage
+  const handleToggleCollapse = useCallback(() => {
+    setIsSidebarCollapsed(prev => {
+      const newState = !prev;
+      localStorage.setItem('mkc-sidebar-collapsed', JSON.stringify(newState));
+      return newState;
+    });
+  }, []);
 
   const handleSignOut = useCallback(async () => {
     await signOut();
@@ -772,9 +931,11 @@ export default function Layout() {
         clearAll={clearAll}
         requestNotificationPermission={requestNotificationPermission}
         onNotificationClick={handleNotificationClick}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={handleToggleCollapse}
       />
 
-      <div className={`flex-1 flex flex-col overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-slate-950' : 'bg-gray-50'}`}>
+      <div className="flex-1 flex flex-col overflow-hidden">
         <MobileHeader 
           profile={profile} 
           handleSignOut={handleSignOut}
@@ -793,7 +954,7 @@ export default function Layout() {
           onNotificationClick={handleNotificationClick}
         />
 
-        <main className={`flex-1 overflow-auto p-4 md:p-8 transition-colors duration-300 ${isDarkMode ? 'bg-slate-950' : 'bg-gray-50'}`}>
+        <main className={`flex-1 overflow-auto p-4 md:p-8 transition-all duration-300 ${isDarkMode ? 'bg-slate-950' : 'bg-gray-50'}`}>
           {(permissionStatus === 'denied' || permissionStatus === 'unsupported') && (
             <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900">
               <div className="flex flex-wrap items-center justify-between gap-2">
