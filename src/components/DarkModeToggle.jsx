@@ -36,14 +36,14 @@ const DarkModeToggle = ({ className = '', showLabel = false }) => {
         }}
       >
         {isDarkMode ? (
-          <Moon size={20} className="text-yellow-400" />
+          <Sun size={20} className="text-yellow-400" />
         ) : (
-          <Sun size={20} className="text-gray-600" />
+          <Moon size={20} className="text-gray-600" />
         )}
       </motion.div>
       {showLabel && (
         <span className="text-sm font-medium">
-          {isDarkMode ? 'Dark mode' : 'Light mode'}
+          {isDarkMode ? 'Light mode' : 'Dark mode'}
         </span>
       )}
     </motion.button>

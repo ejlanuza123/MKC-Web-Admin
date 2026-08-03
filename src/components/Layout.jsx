@@ -1,5 +1,5 @@
 // MKC Foods Corporation/mkc-admin-web/src/components/Layout.jsx
-import React, { useState, useCallback, memo, useEffect } from 'react';
+import React, { useState, useCallback, memo, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useNotifications } from '../context/NotificationContext';
@@ -366,13 +366,27 @@ const Sidebar = memo(({
 }) => {
   const { isDarkMode } = useTheme();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
   const isExpanded = !isDesktopViewport || !isCollapsed;
   const isCollapsedDesktop = isDesktopViewport && isCollapsed;
-  const logoBorderClass = isExpanded
-    ? 'border border-white/50'
-    : isDarkMode
-      ? 'border border-white/20'
-      : 'border-2 border-gray-300';
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+    };
+  }, [isProfileMenuOpen]);
 
   // Handle navigation with slide direction
   const onNavigate = (to) => {
@@ -397,9 +411,6 @@ const Sidebar = memo(({
 
   // Sidebar width based on state
   const sidebarWidth = isExpanded ? 'w-72' : 'w-16';
-  
-  // Logo text visibility
-  const showLogoText = isExpanded;
   
   // Nav item text visibility
   const showNavLabels = isExpanded;
@@ -436,25 +447,26 @@ const Sidebar = memo(({
         isVisible={isDesktopViewport}
       />
 
-      {/* Logo Section */}
+      {/* Logo Section - Hide logo text when collapsed, show only icon */}
       <motion.div 
         className={`border-b relative ${isDarkMode ? 'bg-mkc-blue-dark' : 'bg-mkc-blue'} ${isExpanded ? 'p-6' : 'p-3'}`}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <div className={`flex items-center gap-2 ${isExpanded ? 'justify-between' : 'justify-between'}`}>
-          <div className={`flex items-center ${isExpanded ? 'space-x-3 min-w-0' : 'flex-1 justify-center'}`}>
-            <motion.img 
-              src={mkcLogo} 
-              alt="MKC Foods Logo" 
-              className={`w-auto object-contain bg-white rounded-lg p-1 flex-shrink-0 shadow-sm ${logoBorderClass} ${isExpanded ? 'h-12' : 'h-10 mx-auto'}`}
-              whileHover={{ rotate: 360 }}
-              transition={{ duration: 0.5 }}
-            />
-            {showLogoText && (
+        <div className="flex items-center justify-between gap-2">
+          <motion.img 
+            src={mkcLogo} 
+            alt="MKC Foods Logo" 
+            className={`w-auto object-contain bg-white rounded-lg p-1 flex-shrink-0 ${isExpanded ? 'h-12' : 'h-8'}`}
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.5 }}
+          />
+          
+          {isExpanded ? (
+            <>
               <motion.div
-                className="min-w-0"
+                className="min-w-0 flex-1"
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
@@ -462,24 +474,22 @@ const Sidebar = memo(({
                 <h1 className="text-xl font-bold text-white truncate">Admin Portal</h1>
                 <p className="text-xs text-white/80 truncate">Management System</p>
               </motion.div>
-            )}
-          </div>
-
-          {isExpanded ? (
-            <NotificationMenu
-              notifications={notifications}
-              unreadCount={unreadCount}
-              markAsRead={markAsRead}
-              markAllAsRead={markAllAsRead}
-              removeNotification={removeNotification}
-              clearAll={clearAll}
-              onNotificationClick={onNotificationClick}
-              requestNotificationPermission={requestNotificationPermission}
-              placement="right-start"
-              className="translate-x-2 flex-shrink-0"
-              buttonClassName={isDarkMode ? 'bg-slate-800 text-mkc-blue hover:bg-slate-700' : 'bg-white text-mkc-blue hover:bg-[#E5EEFF]'}
-              isDarkMode={isDarkMode}
-            />
+              
+              <NotificationMenu
+                notifications={notifications}
+                unreadCount={unreadCount}
+                markAsRead={markAsRead}
+                markAllAsRead={markAllAsRead}
+                removeNotification={removeNotification}
+                clearAll={clearAll}
+                onNotificationClick={onNotificationClick}
+                requestNotificationPermission={requestNotificationPermission}
+                placement="right-start"
+                className="translate-x-2 flex-shrink-0"
+                buttonClassName={isDarkMode ? 'bg-slate-800 text-mkc-blue hover:bg-slate-700' : 'bg-white text-mkc-blue hover:bg-[#E5EEFF]'}
+                isDarkMode={isDarkMode}
+              />
+            </>
           ) : (
             <NotificationMenu
               notifications={notifications}
@@ -527,7 +537,7 @@ const Sidebar = memo(({
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.6 }}
       >
-        <div className="relative">
+        <div ref={profileMenuRef} className="relative">
           <motion.button
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             whileHover={{ scale: 1.02 }}
@@ -787,7 +797,7 @@ const MobileHeader = memo(({
                       </button>
                       <div className="flex items-center justify-between px-3 py-2 rounded-md">
                         <span className={`text-sm flex items-center ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
-                          Dark Mode
+                          {isDarkMode ? 'Light Mode' : 'Dark Mode'}
                         </span>
                         <DarkModeToggle className="shrink-0" />
                       </div>
