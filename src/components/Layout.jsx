@@ -1,5 +1,5 @@
 // MKC Foods Corporation/mkc-admin-web/src/components/Layout.jsx
-import React, { useState, useCallback, memo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, memo, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useNotifications } from '../context/NotificationContext';
@@ -24,7 +24,6 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { AnimatedThemeToggle } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import mkcLogo from '../assets/images/mkc-logo.png';
 import PageTransition from './PageTransition';
@@ -44,7 +43,7 @@ const NavItem = memo(({ to, icon: Icon, label, isActive, onClick, isCollapsed })
         relative flex items-center w-full px-4 py-3 rounded-lg 
         transition-all duration-300 ease-in-out
         ${isActive 
-          ? 'bg-petron-blue text-white shadow-lg' 
+          ? 'bg-mkc-blue text-white shadow-lg' 
           : isDarkMode 
             ? 'text-gray-400 hover:bg-gray-700 hover:text-white' 
             : 'text-gray-600 hover:bg-[#E5EEFF] hover:text-[#0033A0]'
@@ -55,7 +54,7 @@ const NavItem = memo(({ to, icon: Icon, label, isActive, onClick, isCollapsed })
     >
       {isActive && (
         <motion.div 
-          className="absolute inset-0 bg-petron-blue rounded-lg opacity-50"
+          className="absolute inset-0 bg-mkc-blue rounded-lg opacity-50"
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
@@ -116,6 +115,29 @@ const getReservationDateKey = (notificationData = {}) => {
   return `${year}-${month}-${day}`;
 };
 
+const useIsDesktopViewport = () => {
+  const getIsDesktop = useCallback(() => {
+    if (typeof window === 'undefined') return true;
+    return window.innerWidth >= 768;
+  }, []);
+
+  const [isDesktopViewport, setIsDesktopViewport] = useState(getIsDesktop);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const handleResize = () => {
+      setIsDesktopViewport(window.innerWidth >= 768);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return isDesktopViewport;
+};
+
 // Notification Menu Component
 const NotificationMenu = memo(({ 
   notifications, 
@@ -155,8 +177,8 @@ const NotificationMenu = memo(({
         }}
         className={`relative p-2 rounded-lg border transition ${buttonClassName} ${
           isDarkMode 
-            ? 'border-slate-700 bg-slate-800 hover:bg-slate-700 text-gray-300' 
-            : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-700'
+            ? 'border-gray-600 bg-slate-800 hover:bg-slate-700 text-gray-300' 
+            : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-700'
         }`}
         aria-label="Open notifications"
       >
@@ -288,7 +310,11 @@ const NotificationMenu = memo(({
 NotificationMenu.displayName = 'NotificationMenu';
 
 // Sidebar Toggle Button Component
-const SidebarToggle = memo(({ isCollapsed, onToggle, isDarkMode }) => {
+const SidebarToggle = memo(({ isCollapsed, onToggle, isDarkMode, isVisible }) => {
+  if (!isVisible) {
+    return null;
+  }
+
   return (
     <motion.button
       onClick={onToggle}
@@ -334,15 +360,18 @@ const Sidebar = memo(({
   requestNotificationPermission, 
   onNotificationClick,
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  isDesktopViewport
 }) => {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
-
-  // Determine if sidebar should be expanded (for display)
-  // Expand when: NOT collapsed OR hovering over the collapsed sidebar
-  const isExpanded = !isCollapsed || (isCollapsed && isHovering);
+  const isExpanded = !isDesktopViewport || !isCollapsed;
+  const isCollapsedDesktop = isDesktopViewport && isCollapsed;
+  const logoBorderClass = isExpanded
+    ? 'border border-white/50'
+    : isDarkMode
+      ? 'border border-white/20'
+      : 'border-2 border-gray-300';
 
   // Handle navigation with slide direction
   const onNavigate = (to) => {
@@ -395,31 +424,30 @@ const Sidebar = memo(({
         ${sidebarWidth} flex flex-col relative z-40 overflow-visible 
         transition-all duration-300 ease-in-out
         ${isDarkMode ? 'bg-slate-900 border-r border-slate-700' : 'bg-white border-r border-gray-200'}
-        ${isCollapsed && !isHovering ? 'shadow-lg' : ''}
+        ${isCollapsedDesktop ? 'shadow-lg' : ''}
       `}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
     >
       {/* Toggle Button */}
       <SidebarToggle 
         isCollapsed={isCollapsed} 
         onToggle={onToggleCollapse}
         isDarkMode={isDarkMode}
+        isVisible={isDesktopViewport}
       />
 
       {/* Logo Section */}
       <motion.div 
-        className="p-6 border-b bg-petron-blue relative"
+        className={`border-b relative ${isDarkMode ? 'bg-mkc-blue-dark' : 'bg-mkc-blue'} ${isExpanded ? 'p-6' : 'p-3'}`}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <div className={`flex items-start ${isExpanded ? 'justify-between' : 'justify-center'} gap-3`}>
-          <div className={`flex items-center space-x-3 ${isExpanded ? 'min-w-0' : 'min-w-0'}`}>
+        <div className={`flex items-center gap-2 ${isExpanded ? 'justify-between' : 'justify-between'}`}>
+          <div className={`flex items-center ${isExpanded ? 'space-x-3 min-w-0' : 'flex-1 justify-center'}`}>
             <motion.img 
               src={mkcLogo} 
               alt="MKC Foods Logo" 
-              className="h-12 w-auto object-contain bg-white rounded-lg p-1 flex-shrink-0"
+              className={`w-auto object-contain bg-white rounded-lg p-1 flex-shrink-0 shadow-sm ${logoBorderClass} ${isExpanded ? 'h-12' : 'h-10 mx-auto'}`}
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.5 }}
             />
@@ -436,7 +464,7 @@ const Sidebar = memo(({
             )}
           </div>
 
-          {isExpanded && (
+          {isExpanded ? (
             <NotificationMenu
               notifications={notifications}
               unreadCount={unreadCount}
@@ -448,7 +476,22 @@ const Sidebar = memo(({
               requestNotificationPermission={requestNotificationPermission}
               placement="right-start"
               className="translate-x-2 flex-shrink-0"
-              buttonClassName={isDarkMode ? 'bg-slate-800 border-slate-700 text-[#0033A0] hover:bg-slate-700' : 'bg-white border-white/70 text-[#0033A0] hover:bg-[#E5EEFF]'}
+              buttonClassName={isDarkMode ? 'bg-slate-800 text-mkc-blue hover:bg-slate-700' : 'bg-white text-mkc-blue hover:bg-[#E5EEFF]'}
+              isDarkMode={isDarkMode}
+            />
+          ) : (
+            <NotificationMenu
+              notifications={notifications}
+              unreadCount={unreadCount}
+              markAsRead={markAsRead}
+              markAllAsRead={markAllAsRead}
+              removeNotification={removeNotification}
+              clearAll={clearAll}
+              onNotificationClick={onNotificationClick}
+              requestNotificationPermission={requestNotificationPermission}
+              placement="right-start"
+              className="flex-shrink-0"
+              buttonClassName={isDarkMode ? 'bg-slate-800 text-mkc-blue hover:bg-slate-700 p-1.5' : 'bg-white text-mkc-blue hover:bg-[#E5EEFF] p-1.5'}
               isDarkMode={isDarkMode}
             />
           )}
@@ -488,16 +531,17 @@ const Sidebar = memo(({
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`flex items-center w-full px-4 py-3 rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-slate-800 hover:bg-opacity-60' : 'hover:bg-[#E5EEFF]'} ${!isExpanded ? 'justify-center px-2' : ''}`}
+            className={`flex items-center w-full rounded-lg transition-all duration-300 ${isDarkMode ? 'hover:bg-slate-800 hover:bg-opacity-60' : 'hover:bg-[#E5EEFF]'} ${isExpanded ? 'px-4 py-3' : 'justify-center px-2 py-2'}`}
+            aria-label={`Open profile menu for ${profile?.full_name || 'Admin'}`}
           >
             {profile?.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt={profile?.full_name || 'Admin'}
-                className="w-8 h-8 rounded-lg object-cover mr-3 flex-shrink-0 border border-gray-200"
+                className={`w-8 h-8 rounded-lg object-cover flex-shrink-0 border border-gray-200 ${isExpanded ? 'mr-3' : ''}`}
               />
             ) : (
-              <div className={`w-8 h-8 bg-petron-blue rounded-lg flex items-center justify-center text-white font-bold ${isExpanded ? 'mr-3' : ''} flex-shrink-0`}>
+              <div className={`w-8 h-8 bg-mkc-blue rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0 ${isExpanded ? 'mr-3' : ''}`}>
                 {profile?.full_name?.charAt(0)?.toUpperCase() || 'A'}
               </div>
             )}
@@ -519,45 +563,55 @@ const Sidebar = memo(({
             )}
           </motion.button>
 
-          {/* Profile dropdown - only show when expanded */}
-          {isExpanded && (
-            <AnimatePresence>
-              {isProfileMenuOpen && (
-                <motion.div 
-                  className={`absolute bottom-full left-0 w-full mb-2 rounded-lg shadow-lg border py-2 z-50 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.2 }}
+          <AnimatePresence>
+            {isProfileMenuOpen && (
+              <motion.div 
+                className={`absolute ${isCollapsedDesktop ? 'left-full bottom-0 ml-2 w-60 origin-bottom-left' : 'bottom-full left-0 w-full'} mb-2 rounded-lg shadow-lg border py-2 z-50 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <motion.button 
+                  whileHover={{ x: 5 }}
+                  className={`w-full px-4 py-2 text-left text-sm flex items-center transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700 hover:text-white' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}
+                  onClick={() => {
+                    onProfileClick();
+                    setIsProfileMenuOpen(false);
+                  }}
                 >
-                  <motion.button 
-                    whileHover={{ x: 5 }}
-                    className={`w-full px-4 py-2 text-left text-sm flex items-center transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700 hover:text-white' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}
-                    onClick={() => {
-                      onProfileClick();
-                      setIsProfileMenuOpen(false);
-                    }}
+                  <User size={16} className="mr-2" />
+                  Profile and settings
+                </motion.button>
+                <div className={`w-full px-4 py-2 flex items-center justify-between transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}>
+                  <span className="text-sm">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                  <button
+                    type="button"
+                    onClick={toggleDarkMode}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
+                      isDarkMode ? 'bg-mkc-blue' : 'bg-gray-300'
+                    }`}
+                    aria-label="Toggle dark mode"
                   >
-                    <User size={16} className="mr-2" />
-                    Profile and settings
-                  </motion.button>
-                  <div className={`w-full px-4 py-2 flex items-center transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}>
-                    <AnimatedThemeToggle className="mr-2" />
-                    <span className="text-sm">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                  </div>
-                  <div className={`border-t my-2 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}></div>
-                  <motion.button 
-                    whileHover={{ x: 5 }}
-                    onClick={handleSignOut}
-                    className={`w-full px-4 py-2 text-left text-sm text-[#ED1C24] flex items-center transition-colors duration-300 ${isDarkMode ? 'hover:bg-red-900/30' : 'hover:bg-red-50'}`}
-                  >
-                    <LogOut size={16} className="mr-2" />
-                    Sign Out
-                  </motion.button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          )}
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
+                        isDarkMode ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                <div className={`border-t my-2 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}></div>
+                <motion.button 
+                  whileHover={{ x: 5 }}
+                  onClick={handleSignOut}
+                  className={`w-full px-4 py-2 text-left text-sm text-[#ED1C24] flex items-center transition-colors duration-300 ${isDarkMode ? 'hover:bg-red-900/30' : 'hover:bg-red-50'}`}
+                >
+                  <LogOut size={16} className="mr-2" />
+                  Sign Out
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </motion.aside>
@@ -608,7 +662,7 @@ const MobileHeader = memo(({
 
   return (
     <>
-      <header className="md:hidden bg-petron-blue border-b border-white/20 px-4 py-3 flex justify-between items-center z-20">
+      <header className="md:hidden bg-mkc-blue border-b border-white/20 px-4 py-3 flex justify-between items-center z-20">
         <motion.div 
           className="flex items-center min-w-0 flex-1"
           initial={{ x: -20, opacity: 0 }}
@@ -706,7 +760,7 @@ const MobileHeader = memo(({
                       className="w-10 h-10 rounded-lg object-cover mr-3 border border-gray-200"
                     />
                   ) : (
-                    <div className="w-10 h-10 bg-petron-blue rounded-lg flex items-center justify-center text-white font-bold mr-3">
+                    <div className="w-10 h-10 bg-mkc-blue rounded-lg flex items-center justify-center text-white font-bold mr-3">
                       {profile?.full_name?.charAt(0)?.toUpperCase() || 'A'}
                     </div>
                   )}
@@ -745,14 +799,13 @@ const MobileHeader = memo(({
                       </button>
                       <div className="flex items-center justify-between px-3 py-2 rounded-md">
                         <span className={`text-sm flex items-center ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
-                          <AnimatedThemeToggle className="mr-2" />
-                          {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                          Dark Mode
                         </span>
                         <button
                           type="button"
                           onClick={toggleDarkMode}
                           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
-                            isDarkMode ? 'bg-[#0033A0]' : 'bg-gray-300'
+                            isDarkMode ? 'bg-mkc-blue' : 'bg-gray-300'
                           }`}
                           aria-label="Toggle dark mode"
                         >
@@ -790,7 +843,8 @@ MobileHeader.displayName = 'MobileHeader';
 // Main Layout Component
 export default function Layout() {
   const { user, profile, signOut } = useAuth();
-  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { isDarkMode } = useTheme();
+  const isDesktopViewport = useIsDesktopViewport();
   const {
     notifications,
     unreadCount,
@@ -815,12 +869,16 @@ export default function Layout() {
 
   // Save sidebar state to localStorage
   const handleToggleCollapse = useCallback(() => {
+    if (!isDesktopViewport) {
+      return;
+    }
+
     setIsSidebarCollapsed(prev => {
       const newState = !prev;
       localStorage.setItem('mkc-sidebar-collapsed', JSON.stringify(newState));
       return newState;
     });
-  }, []);
+  }, [isDesktopViewport]);
 
   const handleSignOut = useCallback(async () => {
     await signOut();
@@ -918,25 +976,28 @@ export default function Layout() {
 
   return (
     <div className={`flex h-screen transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-gray-100 text-gray-900'}`}>
-      <Sidebar 
-        profile={profile} 
-        handleSignOut={handleSignOut}
-        isActive={isActive}
-        handleNavigation={handleNavigation}
-        setSlideDirection={setSlideDirection}
-        onSettingsClick={() => setIsSettingsModalOpen(true)}
-        onProfileClick={handleProfileClick}
-        notifications={notifications}
-        unreadCount={unreadCount}
-        markAsRead={markAsRead}
-        markAllAsRead={markAllAsRead}
-        removeNotification={removeNotification}
-        clearAll={clearAll}
-        requestNotificationPermission={requestNotificationPermission}
-        onNotificationClick={handleNotificationClick}
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={handleToggleCollapse}
-      />
+      {isDesktopViewport && (
+        <Sidebar 
+          profile={profile} 
+          handleSignOut={handleSignOut}
+          isActive={isActive}
+          handleNavigation={handleNavigation}
+          setSlideDirection={setSlideDirection}
+          onSettingsClick={() => setIsSettingsModalOpen(true)}
+          onProfileClick={handleProfileClick}
+          notifications={notifications}
+          unreadCount={unreadCount}
+          markAsRead={markAsRead}
+          markAllAsRead={markAllAsRead}
+          removeNotification={removeNotification}
+          clearAll={clearAll}
+          requestNotificationPermission={requestNotificationPermission}
+          onNotificationClick={handleNotificationClick}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={handleToggleCollapse}
+          isDesktopViewport={isDesktopViewport}
+        />
+      )}
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <MobileHeader 
