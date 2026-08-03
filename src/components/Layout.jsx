@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import mkcLogo from '../assets/images/mkc-logo.png';
+import DarkModeToggle from './DarkModeToggle';
 import PageTransition from './PageTransition';
 import SettingsModal from './SettingsModal';
 import FloatingChatBubble from './common/FloatingChatBubble';
@@ -363,7 +364,7 @@ const Sidebar = memo(({
   onToggleCollapse,
   isDesktopViewport
 }) => {
-  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { isDarkMode } = useTheme();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const isExpanded = !isDesktopViewport || !isCollapsed;
   const isCollapsedDesktop = isDesktopViewport && isCollapsed;
@@ -585,20 +586,7 @@ const Sidebar = memo(({
                 </motion.button>
                 <div className={`w-full px-4 py-2 flex items-center justify-between transition-colors duration-300 ${isDarkMode ? 'text-slate-200 hover:bg-slate-700' : 'text-gray-700 hover:bg-[#E5EEFF] hover:text-[#0033A0]'}`}>
                   <span className="text-sm">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                  <button
-                    type="button"
-                    onClick={toggleDarkMode}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
-                      isDarkMode ? 'bg-mkc-blue' : 'bg-gray-300'
-                    }`}
-                    aria-label="Toggle dark mode"
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
-                        isDarkMode ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
+                  <DarkModeToggle className="shrink-0" />
                 </div>
                 <div className={`border-t my-2 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}></div>
                 <motion.button 
@@ -638,7 +626,7 @@ const MobileHeader = memo(({
   onProfileClick, 
   onNotificationClick 
 }) => {
-  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { isDarkMode } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileProfileMenuOpen, setIsMobileProfileMenuOpen] = useState(false);
 
@@ -801,20 +789,7 @@ const MobileHeader = memo(({
                         <span className={`text-sm flex items-center ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>
                           Dark Mode
                         </span>
-                        <button
-                          type="button"
-                          onClick={toggleDarkMode}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
-                            isDarkMode ? 'bg-mkc-blue' : 'bg-gray-300'
-                          }`}
-                          aria-label="Toggle dark mode"
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
-                              isDarkMode ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
+                        <DarkModeToggle className="shrink-0" />
                       </div>
                     </motion.div>
                   )}
