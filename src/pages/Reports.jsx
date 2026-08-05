@@ -123,6 +123,20 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
           <button
             onClick={() => {
               setIsOpen(false);
+              onExport('csv');
+            }}
+            className="w-full px-4 py-2.5 text-left hover:bg-blue-50 flex items-center gap-3 transition-colors border-t border-gray-100"
+          >
+            <FileText size={18} className="text-blue-600" />
+            <div>
+              <p className="text-sm font-medium text-slate-100">CSV Raw Data (.csv)</p>
+              <p className="text-xs text-slate-400">Download raw comma-separated data</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => {
+              setIsOpen(false);
               onExport('pdf');
             }}
             className="w-full px-4 py-2.5 text-left hover:bg-blue-50 flex items-center gap-3 transition-colors border-t border-gray-100"

@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
-import { Settings as SettingsIcon, Bell, BellOff, Save, User, BookOpen, Search, ChevronDown, ChevronUp } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, BellOff, Save, User, BookOpen, Search, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 import ErrorAlert from '../components/common/ErrorAlert';
 import { notifySuccess } from '../utils/successNotifier';
 import { pushNotificationService } from '../services/pushNotificationService';
+import { settingsService } from '../services/settingsService';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../context/ThemeContext';
 import DarkModeToggle from '../components/DarkModeToggle';
@@ -122,10 +123,14 @@ export default function Settings() {
     phone_number: '',
     avatar_url: '',
   });
+  const [autoDispatchEnabled, setAutoDispatchEnabled] = useState(true);
+  const [autoDispatchMaxOrders, setAutoDispatchMaxOrders] = useState(3);
+  const [savingDispatch, setSavingDispatch] = useState(false);
   const avatarInputRef = useRef(null);
 
   useEffect(() => {
     fetchNotificationSettings();
+    fetchDispatchSettings();
   }, []);
 
   useEffect(() => {
@@ -148,6 +153,37 @@ export default function Settings() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isAvatarPreviewOpen]);
+
+  const fetchDispatchSettings = async () => {
+    try {
+      const config = await settingsService.getAutoDispatchSettings();
+      setAutoDispatchEnabled(config.enabled);
+      setAutoDispatchMaxOrders(config.maxOrders);
+    } catch (err) {
+      console.error('Error fetching dispatch settings:', err);
+    }
+  };
+
+  const handleSaveDispatchSettings = async () => {
+    try {
+      setSavingDispatch(true);
+      setError(null);
+      const success = await settingsService.updateAutoDispatchSettings({
+        enabled: autoDispatchEnabled,
+        maxOrders: autoDispatchMaxOrders
+      });
+      if (success) {
+        notifySuccess('Dispatch settings saved successfully.');
+      } else {
+        setError('Failed to update dispatch settings.');
+      }
+    } catch (err) {
+      console.error('Error updating dispatch settings:', err);
+      setError(err.message || 'Failed to update dispatch settings.');
+    } finally {
+      setSavingDispatch(false);
+    }
+  };
 
   const fetchNotificationSettings = async () => {
     try {
@@ -452,6 +488,69 @@ export default function Settings() {
                 >
                   <Save size={16} />
                   {savingProfile ? 'Saving...' : 'Save Profile'}
+                </button>
+              </div>
+            </div>
+
+            {/* Dispatch & Operations Section */}
+            <div className="border-b border-theme pb-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-theme-primary flex items-center gap-2">
+                    <Zap size={18} className="text-amber-500" />
+                    Auto-Dispatch & Rider Capacity
+                  </h2>
+                  <p className="text-sm text-theme-secondary mt-1">
+                    Configure automatic rider assignment for new incoming food orders.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-4 rounded-lg border border-theme bg-theme-secondary flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-sm text-theme-primary">Auto-Dispatch Engine</p>
+                    <p className="text-xs text-theme-secondary mt-0.5">
+                      {autoDispatchEnabled ? 'Automatically assign nearest available rider' : 'Orders stay Pending for manual assignment'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAutoDispatchEnabled(!autoDispatchEnabled)}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoDispatchEnabled ? 'bg-emerald-500' : 'bg-slate-600'}`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoDispatchEnabled ? 'translate-x-5' : 'translate-x-0'}`}
+                    />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-theme-primary mb-1">
+                    Max Active Orders Per Rider
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={autoDispatchMaxOrders}
+                    onChange={(e) => setAutoDispatchMaxOrders(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-full px-4 py-2 border border-theme bg-theme-input text-theme-primary rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                  />
+                  <p className="text-xs text-theme-secondary mt-1">
+                    Riders at or above this active order limit will be skipped by auto-dispatch.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={handleSaveDispatchSettings}
+                  disabled={savingDispatch}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save size={16} />
+                  {savingDispatch ? 'Saving...' : 'Save Dispatch Settings'}
                 </button>
               </div>
             </div>

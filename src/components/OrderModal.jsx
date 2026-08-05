@@ -1,6 +1,6 @@
 // src/components/OrderModal.jsx
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { X, MapPin, Phone, User, CreditCard, Package, Calendar, Store, Image as ImageIcon, Truck } from 'lucide-react';
+import { X, MapPin, Phone, User, CreditCard, Package, Calendar, Store, Image as ImageIcon, Truck, CheckCircle2 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ORDER_STATUS, ORDER_STATUS_COLORS } from '../utils/constants';
@@ -508,7 +508,12 @@ export default function OrderModal({ isOpen, onClose, order, onStatusChange }) {
                       <div key={proof.id} className={`border rounded-lg p-4 transition-colors duration-300 ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-gray-200 bg-gray-50'}`}>
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <p className="text-sm font-semibold text-theme-primary">Proof #{index + 1}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-semibold text-theme-primary">Proof #{index + 1}</p>
+                              <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/40">
+                                <CheckCircle2 size={12} /> Verified
+                              </span>
+                            </div>
                             <p className="text-xs text-theme-secondary">
                               {formatDate(proof.delivered_at)}
                             </p>
