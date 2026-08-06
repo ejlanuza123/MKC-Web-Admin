@@ -5,7 +5,16 @@ import { useTheme } from '../context/ThemeContext';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
-export default function AdminLogsViewer({ entityType = 'all', entityId = '', startDate = '', endDate = '', limit = 50 }) {
+export default function AdminLogsViewer({ 
+  entityType = 'all', 
+  actionType = 'all',
+  adminId = 'all',
+  searchQuery = '',
+  entityId = '', 
+  startDate = '', 
+  endDate = '', 
+  limit = 50 
+}) {
   const { isDarkMode } = useTheme();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +31,7 @@ export default function AdminLogsViewer({ entityType = 'all', entityId = '', sta
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [entityType, entityId, startDate, endDate, safeLimit]);
+  }, [entityType, actionType, adminId, searchQuery, entityId, startDate, endDate, safeLimit]);
 
   useEffect(() => {
     let isMounted = true;
@@ -43,6 +52,14 @@ export default function AdminLogsViewer({ entityType = 'all', entityId = '', sta
           baseQuery = baseQuery.eq('entity_type', entityType);
         }
 
+        if (actionType && actionType !== 'all') {
+          baseQuery = baseQuery.ilike('action', `%${actionType}%`);
+        }
+
+        if (adminId && adminId !== 'all') {
+          baseQuery = baseQuery.eq('admin_id', adminId);
+        }
+
         if (entityId && entityId.trim() !== '') {
           baseQuery = baseQuery.eq('entity_id', entityId.trim());
         }
@@ -55,6 +72,11 @@ export default function AdminLogsViewer({ entityType = 'all', entityId = '', sta
           baseQuery = baseQuery.lte('created_at', endDateIso);
         }
 
+        if (searchQuery && searchQuery.trim() !== '') {
+          const q = searchQuery.trim();
+          baseQuery = baseQuery.or(`action.ilike.%${q}%,entity_id.ilike.%${q}%`);
+        }
+
         const { count, error: countError } = await baseQuery;
         if (countError) throw countError;
 
@@ -62,7 +84,7 @@ export default function AdminLogsViewer({ entityType = 'all', entityId = '', sta
           setTotalCount(count || 0);
         }
 
-        // Build row query dynamically so both filters work together
+        // Build row query dynamically so all filters work together
         let rowQuery = supabase
           .from('admin_logs')
           .select(`
@@ -80,6 +102,14 @@ export default function AdminLogsViewer({ entityType = 'all', entityId = '', sta
           rowQuery = rowQuery.eq('entity_type', entityType);
         }
 
+        if (actionType && actionType !== 'all') {
+          rowQuery = rowQuery.ilike('action', `%${actionType}%`);
+        }
+
+        if (adminId && adminId !== 'all') {
+          rowQuery = rowQuery.eq('admin_id', adminId);
+        }
+
         if (entityId && entityId.trim() !== '') {
           rowQuery = rowQuery.eq('entity_id', entityId.trim());
         }
@@ -90,6 +120,11 @@ export default function AdminLogsViewer({ entityType = 'all', entityId = '', sta
 
         if (endDateIso) {
           rowQuery = rowQuery.lte('created_at', endDateIso);
+        }
+
+        if (searchQuery && searchQuery.trim() !== '') {
+          const q = searchQuery.trim();
+          rowQuery = rowQuery.or(`action.ilike.%${q}%,entity_id.ilike.%${q}%`);
         }
 
         const { data, error } = await rowQuery;
@@ -119,7 +154,7 @@ export default function AdminLogsViewer({ entityType = 'all', entityId = '', sta
       isMounted = false;
       channel.unsubscribe();
     };
-  }, [entityType, entityId, startDate, endDate, safeLimit, currentPage]);
+  }, [entityType, actionType, adminId, searchQuery, entityId, startDate, endDate, safeLimit, currentPage]);
 
   // Resolve rider names for logs that contain rider ids in `details` OR as the entity itself
   useEffect(() => {
@@ -340,6 +375,14 @@ export default function AdminLogsViewer({ entityType = 'all', entityId = '', sta
         exportQuery = exportQuery.eq('entity_type', entityType);
       }
 
+      if (actionType && actionType !== 'all') {
+        exportQuery = exportQuery.ilike('action', `%${actionType}%`);
+      }
+
+      if (adminId && adminId !== 'all') {
+        exportQuery = exportQuery.eq('admin_id', adminId);
+      }
+
       if (entityId && entityId.trim() !== '') {
         exportQuery = exportQuery.eq('entity_id', entityId.trim());
       }
@@ -350,6 +393,11 @@ export default function AdminLogsViewer({ entityType = 'all', entityId = '', sta
 
       if (endDateIso) {
         exportQuery = exportQuery.lte('created_at', endDateIso);
+      }
+
+      if (searchQuery && searchQuery.trim() !== '') {
+        const q = searchQuery.trim();
+        exportQuery = exportQuery.or(`action.ilike.%${q}%,entity_id.ilike.%${q}%`);
       }
 
       const { data, error } = await exportQuery;
