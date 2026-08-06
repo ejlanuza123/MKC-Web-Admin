@@ -1,6 +1,6 @@
 // src/pages/Riders.jsx
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Truck, MapPin, Phone, Edit2, Plus, X, CheckCircle, Eye, EyeOff, Calendar, Package, Clock, Navigation, MessageCircle, TrendingUp, Award, DollarSign, BarChart2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Truck, MapPin, Phone, Edit2, Plus, X, CheckCircle, Eye, EyeOff, Calendar, Package, Clock, Navigation, MessageCircle, TrendingUp, Award, DollarSign, BarChart2, ChevronDown, ChevronUp, Star } from 'lucide-react';
 import ErrorAlert from '../components/common/ErrorAlert';
 import SearchBar from '../components/common/SearchBar';
 import RiderLiveTrackingModal from '../components/RiderLiveTrackingModal';
@@ -959,9 +959,9 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
               </h5>
               <div className="grid grid-cols-3 gap-3 mb-4">
                 <div className={`rounded-lg p-3 text-center ${isDarkMode ? 'bg-slate-700' : 'bg-white'}`}>
-                  <DollarSign size={16} className="text-green-500 mx-auto mb-1" />
-                  <p className={`text-xs mb-0.5 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>Lifetime Earnings</p>
-                  <p className="font-bold text-green-600 text-sm">₱{perfStats.earnings.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <Star size={16} className="text-amber-400 fill-amber-400 mx-auto mb-1" />
+                  <p className={`text-xs mb-0.5 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>Rating</p>
+                  <p className="font-bold text-amber-500 text-sm">{perfStats.avgRating > 0 ? `${perfStats.avgRating} ★` : '—'}</p>
                 </div>
                 <div className={`rounded-lg p-3 text-center ${isDarkMode ? 'bg-slate-700' : 'bg-white'}`}>
                   <CheckCircle size={16} className="text-mkc-blue mx-auto mb-1" />
@@ -1195,6 +1195,7 @@ const PerformanceDashboard = React.memo(({ isDarkMode }) => {
                   <th className={`text-left px-4 py-2.5 font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>Rider</th>
                   <th className={`text-center px-3 py-2.5 font-medium cursor-pointer select-none ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`} onClick={() => toggleSort('total')}>Deliveries<SortIcon col="total" /></th>
                   <th className={`text-center px-3 py-2.5 font-medium cursor-pointer select-none ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`} onClick={() => toggleSort('rate')}>Rate<SortIcon col="rate" /></th>
+                  <th className={`text-center px-3 py-2.5 font-medium cursor-pointer select-none ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`} onClick={() => toggleSort('rating')}>Rating<SortIcon col="rating" /></th>
                   <th className={`text-center px-3 py-2.5 font-medium cursor-pointer select-none ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`} onClick={() => toggleSort('time')}>Avg Time<SortIcon col="time" /></th>
                   <th className={`text-right px-4 py-2.5 font-medium cursor-pointer select-none ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`} onClick={() => toggleSort('earnings')}>Earnings<SortIcon col="earnings" /></th>
                   <th className={`text-center px-3 py-2.5 font-medium cursor-pointer select-none ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`} onClick={() => toggleSort('score')}>Score<SortIcon col="score" /></th>
@@ -1247,6 +1248,12 @@ const PerformanceDashboard = React.memo(({ isDarkMode }) => {
                             stats.completionRate >= 70 ? (isDarkMode ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-700') :
                             (isDarkMode ? 'bg-red-900/50 text-red-300' : 'bg-red-100 text-red-700')
                           }`}>{stats.completionRate}%</span>
+                        </td>
+                        <td className="px-3 py-3 text-center">
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 inline-flex items-center gap-1">
+                            <Star size={11} className="fill-amber-400 text-amber-400" />
+                            {stats.avgRating > 0 ? stats.avgRating : '—'}
+                          </span>
                         </td>
                         <td className={`px-3 py-3 text-center ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                           {stats.avgDeliveryTime !== null ? `${stats.avgDeliveryTime} min` : '—'}
