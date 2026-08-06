@@ -125,6 +125,9 @@ export default function Settings() {
   });
   const [autoDispatchEnabled, setAutoDispatchEnabled] = useState(true);
   const [autoDispatchMaxOrders, setAutoDispatchMaxOrders] = useState(3);
+  const [autoDispatchRadiusKm, setAutoDispatchRadiusKm] = useState(10);
+  const [autoDispatchTimeoutMins, setAutoDispatchTimeoutMins] = useState(5);
+  const [autoDispatchStrategy, setAutoDispatchStrategy] = useState('nearest');
   const [savingDispatch, setSavingDispatch] = useState(false);
   const avatarInputRef = useRef(null);
 
@@ -159,6 +162,9 @@ export default function Settings() {
       const config = await settingsService.getAutoDispatchSettings();
       setAutoDispatchEnabled(config.enabled);
       setAutoDispatchMaxOrders(config.maxOrders);
+      setAutoDispatchRadiusKm(config.radiusKm);
+      setAutoDispatchTimeoutMins(config.timeoutMins);
+      setAutoDispatchStrategy(config.strategy);
     } catch (err) {
       console.error('Error fetching dispatch settings:', err);
     }
@@ -170,7 +176,10 @@ export default function Settings() {
       setError(null);
       const success = await settingsService.updateAutoDispatchSettings({
         enabled: autoDispatchEnabled,
-        maxOrders: autoDispatchMaxOrders
+        maxOrders: autoDispatchMaxOrders,
+        radiusKm: autoDispatchRadiusKm,
+        timeoutMins: autoDispatchTimeoutMins,
+        strategy: autoDispatchStrategy,
       });
       if (success) {
         notifySuccess('Dispatch settings saved successfully.');
@@ -507,17 +516,17 @@ export default function Settings() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-4 rounded-lg border border-theme bg-theme-secondary flex items-center justify-between">
+                <div className={`p-4 rounded-lg border flex items-center justify-between transition-colors duration-300 md:col-span-2 ${isDarkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-gray-50 border-gray-200'}`}>
                   <div>
-                    <p className="font-semibold text-sm text-theme-primary">Auto-Dispatch Engine</p>
-                    <p className="text-xs text-theme-secondary mt-0.5">
-                      {autoDispatchEnabled ? 'Automatically assign nearest available rider' : 'Orders stay Pending for manual assignment'}
+                    <p className={`font-semibold text-sm transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Auto-Dispatch Engine Status</p>
+                    <p className={`text-xs mt-0.5 transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {autoDispatchEnabled ? 'Automatically assign eligible riders when new orders are placed' : 'Orders stay Pending until assigned manually'}
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setAutoDispatchEnabled(!autoDispatchEnabled)}
-                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoDispatchEnabled ? 'bg-emerald-500' : 'bg-slate-600'}`}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoDispatchEnabled ? 'bg-emerald-500' : isDarkMode ? 'bg-slate-600' : 'bg-gray-300'}`}
                   >
                     <span
                       className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoDispatchEnabled ? 'translate-x-5' : 'translate-x-0'}`}
@@ -526,7 +535,25 @@ export default function Settings() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-theme-primary mb-1">
+                  <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Priority Assignment Strategy
+                  </label>
+                  <select
+                    value={autoDispatchStrategy}
+                    onChange={(e) => setAutoDispatchStrategy(e.target.value)}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                  >
+                    <option value="nearest">Nearest Active Rider (Proximity First)</option>
+                    <option value="highest_score">Top Performance Score First</option>
+                    <option value="round_robin">Round Robin Workload Balancing</option>
+                  </select>
+                  <p className={`text-xs mt-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Criteria used to sort candidate riders for auto-assignment.
+                  </p>
+                </div>
+
+                <div>
+                  <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Max Active Orders Per Rider
                   </label>
                   <input
@@ -535,10 +562,44 @@ export default function Settings() {
                     max="10"
                     value={autoDispatchMaxOrders}
                     onChange={(e) => setAutoDispatchMaxOrders(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full px-4 py-2 border border-theme bg-theme-input text-theme-primary rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                   />
-                  <p className="text-xs text-theme-secondary mt-1">
-                    Riders at or above this active order limit will be skipped by auto-dispatch.
+                  <p className={`text-xs mt-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Riders at or above this active order capacity limit will be skipped.
+                  </p>
+                </div>
+
+                <div>
+                  <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Maximum Dispatch Radius (km)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={autoDispatchRadiusKm}
+                    onChange={(e) => setAutoDispatchRadiusKm(Math.max(1, parseFloat(e.target.value) || 1))}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                  />
+                  <p className={`text-xs mt-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Riders further than this distance from pickup store location will be excluded.
+                  </p>
+                </div>
+
+                <div>
+                  <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Assignment Response Timeout (mins)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="30"
+                    value={autoDispatchTimeoutMins}
+                    onChange={(e) => setAutoDispatchTimeoutMins(Math.max(1, parseInt(e.target.value) || 1))}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                  />
+                  <p className={`text-xs mt-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Unaccepted assignments re-dispatch to the next available rider after this window.
                   </p>
                 </div>
               </div>
@@ -547,7 +608,7 @@ export default function Settings() {
                 <button
                   onClick={handleSaveDispatchSettings}
                   disabled={savingDispatch}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   <Save size={16} />
                   {savingDispatch ? 'Saving...' : 'Save Dispatch Settings'}
