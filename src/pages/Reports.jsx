@@ -1,5 +1,6 @@
 // src/pages/Reports.jsx
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { 
   TrendingUp, 
   Calendar, 
@@ -16,62 +17,43 @@ import {
 import ErrorAlert from '../components/common/ErrorAlert';
 import { supabase } from '../lib/supabase';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import { analyticsService } from '../services/analyticsService';
 import ExcelJS from 'exceljs';
 import { jsPDF } from 'jspdf';
 import { saveAs } from 'file-saver';
-import { useTheme } from '../context/ThemeContext';
 
 // Skeleton Components
-const StatCardSkeleton = () => (
-  <div className="bg-slate-900 p-6 rounded-xl border border-slate-700 animate-pulse">
+const StatCardSkeleton = ({ isDarkMode }) => (
+  <div className={`p-6 rounded-xl border animate-pulse transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
     <div className="flex justify-between mb-2">
-      <div className="h-4 w-24 bg-gray-200 rounded"></div>
-      <div className="w-8 h-8 bg-gray-200 rounded"></div>
+      <div className={`h-4 w-24 rounded transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}></div>
+      <div className={`w-8 h-8 rounded transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}></div>
     </div>
-    <div className="h-8 w-32 bg-gray-300 rounded mb-2"></div>
-    <div className="h-3 w-20 bg-gray-200 rounded"></div>
+    <div className={`h-8 w-32 rounded mb-2 transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-300'}`}></div>
+    <div className={`h-3 w-20 rounded transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}></div>
   </div>
 );
 
-const CategorySkeleton = () => (
+const CategorySkeleton = ({ isDarkMode }) => (
   <div className="space-y-3">
-    {[
-      { labelWidth: 'w-24', valueWidth: 'w-20', barWidth: 'w-3/4' },
-      { labelWidth: 'w-20', valueWidth: 'w-16', barWidth: 'w-1/2' },
-      { labelWidth: 'w-28', valueWidth: 'w-24', barWidth: 'w-2/3' },
-      { labelWidth: 'w-22', valueWidth: 'w-18', barWidth: 'w-5/6' },
-    ].map((item, i) => (
+    {[1,2,3,4].map(i => (
       <div key={i} className="animate-pulse">
         <div className="flex justify-between mb-1">
-          <div className={`h-4 ${item.labelWidth} bg-gray-200 rounded`}></div>
-          <div className={`h-4 ${item.valueWidth} bg-gray-200 rounded`}></div>
+          <div className={`h-4 w-24 rounded transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}></div>
+          <div className={`h-4 w-20 rounded transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}></div>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div className={`bg-gray-300 h-2 rounded-full ${item.barWidth}`}></div>
+        <div className={`w-full rounded-full h-2 transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
+          <div className={`h-2 rounded-full transition-colors duration-300 ${isDarkMode ? 'bg-slate-600' : 'bg-gray-300'}`} style={{ width: `${Math.random() * 100}%` }}></div>
         </div>
       </div>
     ))}
   </div>
 );
 
-const ChartSkeleton = () => (
-  <div className="bg-slate-900 rounded-xl border border-slate-700 p-6 animate-pulse">
-    <div className="h-6 w-48 bg-gray-200 rounded mb-6"></div>
-    <div className="space-y-4">
-      {[1,2,3,4,5,6,7].map(i => (
-        <div key={i} className="flex items-center gap-2">
-          <div className="h-4 w-20 bg-gray-200 rounded"></div>
-          <div className="flex-1 h-8 bg-gray-200 rounded"></div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-// Export Dropdown Component
 const ExportDropdown = ({ onExport, disabled, exporting }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -88,7 +70,7 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled || exporting}
-        className="bg-mkc-blue text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+        className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50 text-sm font-medium"
       >
         {exporting ? (
           <>
@@ -105,18 +87,18 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
       </button>
 
       {isOpen && !exporting && (
-        <div className="absolute right-0 mt-2 w-56 bg-slate-900 text-slate-100 rounded-lg shadow-lg border border-slate-700 py-1 z-50">
+        <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-lg border py-1 z-50 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
           <button
             onClick={() => {
               setIsOpen(false);
               onExport('excel');
             }}
-            className="w-full px-4 py-2.5 text-left hover:bg-blue-50 flex items-center gap-3 transition-colors"
+            className={`w-full px-4 py-2.5 text-left flex items-center gap-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-red-50'}`}
           >
             <FileSpreadsheet size={18} className="text-green-600" />
             <div>
-              <p className="text-sm font-medium text-slate-100">Excel (.xlsx)</p>
-              <p className="text-xs text-slate-400">Download as spreadsheet</p>
+              <p className={`text-sm font-medium transition-colors duration-300 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Excel (.xlsx)</p>
+              <p className={`text-xs transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}>Download as spreadsheet</p>
             </div>
           </button>
           
@@ -125,26 +107,12 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
               setIsOpen(false);
               onExport('csv');
             }}
-            className="w-full px-4 py-2.5 text-left hover:bg-blue-50 flex items-center gap-3 transition-colors border-t border-gray-100"
+            className={`w-full px-4 py-2.5 text-left flex items-center gap-3 transition-colors border-t ${isDarkMode ? 'border-slate-700 hover:bg-slate-700' : 'border-gray-100 hover:bg-red-50'}`}
           >
             <FileText size={18} className="text-blue-600" />
             <div>
-              <p className="text-sm font-medium text-slate-100">CSV Raw Data (.csv)</p>
-              <p className="text-xs text-slate-400">Download raw comma-separated data</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => {
-              setIsOpen(false);
-              onExport('pdf');
-            }}
-            className="w-full px-4 py-2.5 text-left hover:bg-blue-50 flex items-center gap-3 transition-colors border-t border-gray-100"
-          >
-            <FileText size={18} className="text-red-600" />
-            <div>
-              <p className="text-sm font-medium text-slate-100">PDF Document</p>
-              <p className="text-xs text-slate-400">Download as printable report</p>
+              <p className={`text-sm font-medium transition-colors duration-300 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>CSV Raw Data (.csv)</p>
+              <p className={`text-xs transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}>Download raw CSV data</p>
             </div>
           </button>
         </div>
@@ -156,13 +124,15 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
 export default function Reports() {
   const { isDarkMode } = useTheme();
   const [dateRange, setDateRange] = useState('month');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+  const [activeReportTab, setActiveReportTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reportData, setReportData] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  // Memoized date range calculation
   const dateRangeLabel = useMemo(() => {
     const endDate = new Date();
     const startDate = new Date();
@@ -210,111 +180,29 @@ export default function Reports() {
         case 'year':
           startDate.setFullYear(startDate.getFullYear() - 1);
           break;
+        case 'custom':
+          if (customStartDate) startDate.setTime(new Date(customStartDate).getTime());
+          if (customEndDate) endDate.setTime(new Date(customEndDate).getTime());
+          break;
         default:
           startDate.setMonth(startDate.getMonth() - 1);
       }
 
-      const { data: orders, error: ordersError } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          profiles!orders_user_id_fkey (
-            full_name
-          ),
-          order_items (
-            quantity,
-            price_at_order,
-            products (
-              name,
-              category
-            )
-          )
-        `)
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString())
-        .order('created_at', { ascending: true });
-
-      if (ordersError) throw ordersError;
-
-      const completedOrders = orders?.filter(o => o.status === 'Completed') || [];
-      const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
-      const totalOrders = orders?.length || 0;
-
-      const statusCounts = (orders || []).reduce((acc, order) => {
-        acc[order.status] = (acc[order.status] || 0) + 1;
-        return acc;
-      }, {});
-
-      const categorySales = (orders || []).reduce((acc, order) => {
-        order.order_items?.forEach(item => {
-          const category = item.products?.category || 'Other';
-          if (!acc[category]) {
-            acc[category] = { 
-              revenue: 0, 
-              quantity: 0, 
-              orders: new Set() 
-            };
-          }
-          acc[category].revenue += (item.quantity * item.price_at_order) || 0;
-          acc[category].quantity += item.quantity || 0;
-          acc[category].orders.add(order.id);
-        });
-        return acc;
-      }, {});
-
-      Object.keys(categorySales).forEach(category => {
-        categorySales[category].orderCount = categorySales[category].orders.size;
-        delete categorySales[category].orders;
-      });
-
-      const timeSeriesData = {};
-      (orders || []).forEach(order => {
-        if (order.status === 'Completed') {
-          const date = dateRange === 'year' 
-            ? new Date(order.created_at).toLocaleString('default', { month: 'short', year: 'numeric' })
-            : formatDate(order.created_at);
-          timeSeriesData[date] = (timeSeriesData[date] || 0) + (order.total_amount || 0);
-        }
-      });
-
-      const customerSpending = (orders || []).reduce((acc, order) => {
-        if (order.status === 'Completed' && order.profiles) {
-          const customerId = order.user_id;
-          if (!acc[customerId]) {
-            acc[customerId] = {
-              name: order.profiles.full_name || 'Unknown Customer',
-              totalSpent: 0,
-              orderCount: 0
-            };
-          }
-          acc[customerId].totalSpent += order.total_amount || 0;
-          acc[customerId].orderCount += 1;
-        }
-        return acc;
-      }, {});
-
-      const topCustomers = Object.values(customerSpending)
-        .sort((a, b) => b.totalSpent - a.totalSpent)
-        .slice(0, 5);
+      const res = await analyticsService.getAnalyticsOverview(startDate, endDate);
+      if (!res.success) throw new Error(res.error || 'Failed to load report analytics');
 
       setReportData({
-        summary: {
-          totalRevenue,
-          totalOrders,
-          completedOrders: completedOrders.length,
-          pendingOrders: statusCounts['Pending'] || 0,
-          processingOrders: statusCounts['Processing'] || 0,
-          cancelledOrders: statusCounts['Cancelled'] || 0,
-          averageOrderValue: completedOrders.length > 0 ? totalRevenue / completedOrders.length : 0,
-          uniqueCustomers: new Set((orders || []).map(o => o.user_id)).size
-        },
-        categorySales,
-        timeSeriesData: Object.entries(timeSeriesData).map(([date, amount]) => ({ date, amount })),
-        topCustomers,
+        summary: res.summary,
+        paymentMethods: res.paymentMethods,
+        statusDistribution: res.statusDistribution,
+        topProducts: res.topProducts,
+        categorySales: res.categorySales,
+        timeSeriesData: res.dailyTrend,
+        rawOrders: res.rawOrders,
         dateRange: {
           start: startDate,
           end: endDate,
-          label: dateRangeLabel
+          label: dateRange === 'custom' ? `${customStartDate || 'Start'} to ${customEndDate || 'End'}` : dateRangeLabel
         }
       });
     } catch (err) {
@@ -324,21 +212,10 @@ export default function Reports() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [dateRange, dateRangeLabel]);
+  }, [dateRange, dateRangeLabel, customStartDate, customEndDate]);
 
   useEffect(() => {
     fetchReportData();
-
-    const subscription = supabase
-      .channel('reports-orders-channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-        fetchReportData(true, false);
-      })
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, [fetchReportData]);
 
   const handleRefresh = useCallback(() => {
@@ -349,616 +226,56 @@ export default function Reports() {
     setDateRange(e.target.value);
   }, []);
 
-  const getPercentage = useCallback((value, total) => {
-    if (total <= 0) return 0;
-    return Math.min(100, Math.max(0, (value / total) * 100));
-  }, []);
-
-  // ================== EXCEL EXPORT ==================
-  const exportToExcel = useCallback(async () => {
+  const handleExport = useCallback(async (format) => {
     if (!reportData) return;
     setExporting(true);
-
     try {
-      const workbook = new ExcelJS.Workbook();
-      workbook.creator = 'MKC Admin';
-      workbook.created = new Date();
+      if (format === 'csv') {
+        const headers = ['Order ID', 'Order Number', 'Date', 'Total Amount (PHP)', 'Delivery Fee', 'Payment Method', 'Status'];
+        const rows = (reportData.rawOrders || []).map(o => [
+          o.id,
+          o.order_number || o.id,
+          new Date(o.created_at).toLocaleString(),
+          o.total_amount,
+          o.delivery_fee || 0,
+          o.payment_method || 'COD',
+          o.status
+        ]);
+        const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `mkc-analytics-report-${new Date().toISOString().split('T')[0]}.csv`);
+      } else if (format === 'excel') {
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Executive Summary');
+        sheet.addRow(['MKC FOODS CORPORATION - ANALYTICS REPORT']);
+        sheet.addRow(['Period:', reportData.dateRange.label]);
+        sheet.addRow([]);
+        sheet.addRow(['Metric', 'Value']);
+        sheet.addRow(['Total Sales', reportData.summary.totalSales]);
+        sheet.addRow(['Total Orders', reportData.summary.totalOrdersCount]);
+        sheet.addRow(['Completion Rate', `${reportData.summary.completionRate}%`]);
+        sheet.addRow(['Average Order Value', reportData.summary.avgOrderValue]);
 
-      // Sheet 1: Executive Summary
-      const summarySheet = workbook.addWorksheet('Executive Summary', {
-        properties: { tabColor: { argb: 'FF0033A0' } }
-      });
-
-      summarySheet.mergeCells('A1:D1');
-      const titleCell = summarySheet.getCell('A1');
-      titleCell.value = 'MKC Admin Report';
-      titleCell.font = { size: 18, bold: true, color: { argb: 'FFFFFFFF' } };
-      titleCell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF0033A0' }
-      };
-      titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-      summarySheet.getRow(1).height = 40;
-
-      summarySheet.mergeCells('A2:D2');
-      const dateCell = summarySheet.getCell('A2');
-      dateCell.value = `Report Period: ${reportData.dateRange.label}`;
-      dateCell.font = { size: 12, bold: true };
-      dateCell.alignment = { horizontal: 'center' };
-      summarySheet.getRow(2).height = 30;
-
-      const statsData = [
-        ['Metric', 'Value', '', ''],
-        ['Total Revenue', formatCurrency(reportData.summary.totalRevenue), '', ''],
-        ['Total Orders', reportData.summary.totalOrders, '', ''],
-        ['Completed Orders', reportData.summary.completedOrders, '', ''],
-        ['Pending Orders', reportData.summary.pendingOrders, '', ''],
-        ['Processing Orders', reportData.summary.processingOrders, '', ''],
-        ['Cancelled Orders', reportData.summary.cancelledOrders, '', ''],
-        ['Average Order Value', formatCurrency(reportData.summary.averageOrderValue), '', ''],
-        ['Unique Customers', reportData.summary.uniqueCustomers, '', ''],
-        ['Success Rate', `${reportData.summary.totalOrders > 0 ? Math.round((reportData.summary.completedOrders / reportData.summary.totalOrders) * 100) : 0}%`, '', ''],
-      ];
-
-      statsData.forEach((row, index) => {
-        const excelRow = summarySheet.addRow(row);
-        
-        if (index === 0) {
-          excelRow.font = { bold: true, size: 11 };
-          excelRow.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFE5EEFF' }
-          };
-        } else {
-          excelRow.getCell(2).font = { bold: true, color: { argb: 'FF0033A0' } };
-        }
-        
-        excelRow.height = 25;
-        excelRow.getCell(1).border = {
-          top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
-        };
-        excelRow.getCell(2).border = {
-          top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
-        };
-      });
-
-      summarySheet.getColumn(1).width = 25;
-      summarySheet.getColumn(2).width = 25;
-
-      // Sheet 2: Sales Timeline
-      const timelineSheet = workbook.addWorksheet('Sales Timeline', {
-        properties: { tabColor: { argb: 'FF00A86B' } }
-      });
-
-      const timelineHeaders = ['Date', 'Revenue'];
-      timelineSheet.addRow(timelineHeaders);
-      const headerRow2 = timelineSheet.getRow(1);
-      headerRow2.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      headerRow2.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF00A86B' }
-      };
-      headerRow2.height = 25;
-
-      reportData.timeSeriesData.forEach(({ date, amount }) => {
-        const row = timelineSheet.addRow([date, amount]);
-        row.getCell(2).numFmt = '"Php"#,##0.00';
-        row.height = 20;
-        row.eachCell(cell => {
-          cell.border = {
-            top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
-          };
-        });
-      });
-
-      const totalRow = timelineSheet.addRow(['TOTAL', reportData.summary.totalRevenue]);
-      totalRow.font = { bold: true };
-      totalRow.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFE5EEFF' }
-      };
-      totalRow.getCell(2).numFmt = '"Php"#,##0.00';
-
-      timelineSheet.getColumn(1).width = 25;
-      timelineSheet.getColumn(2).width = 20;
-
-      // Sheet 3: Category Breakdown
-      const categorySheet = workbook.addWorksheet('Category Breakdown', {
-        properties: { tabColor: { argb: 'FFED1C24' } }
-      });
-
-      const categoryHeaders = ['Category', 'Revenue', 'Quantity', 'Orders'];
-      categorySheet.addRow(categoryHeaders);
-      const headerRow3 = categorySheet.getRow(1);
-      headerRow3.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      headerRow3.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFED1C24' }
-      };
-      headerRow3.height = 25;
-
-      Object.entries(reportData.categorySales)
-        .sort(([,a], [,b]) => b.revenue - a.revenue)
-        .forEach(([category, data]) => {
-          const row = categorySheet.addRow([
-            category,
-            data.revenue,
-            data.quantity,
-            data.orderCount
-          ]);
-          row.getCell(2).numFmt = '"Php"#,##0.00';
-          row.height = 20;
-          row.eachCell(cell => {
-            cell.border = {
-              top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
-            };
-          });
-        });
-
-      categorySheet.getColumn(1).width = 30;
-      categorySheet.getColumn(2).width = 20;
-      categorySheet.getColumn(3).width = 15;
-      categorySheet.getColumn(4).width = 15;
-
-      // Sheet 4: Top Customers
-      if (reportData.topCustomers.length > 0) {
-        const customerSheet = workbook.addWorksheet('Top Customers', {
-          properties: { tabColor: { argb: 'FFFFA500' } }
-        });
-
-        const customerHeaders = ['Customer', 'Total Spent', 'Orders'];
-        customerSheet.addRow(customerHeaders);
-        const headerRow4 = customerSheet.getRow(1);
-        headerRow4.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-        headerRow4.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFFFA500' }
-        };
-        headerRow4.height = 25;
-
-        reportData.topCustomers.forEach(customer => {
-          const row = customerSheet.addRow([
-            customer.name,
-            customer.totalSpent,
-            customer.orderCount
-          ]);
-          row.getCell(2).numFmt = '"Php"#,##0.00';
-          row.height = 20;
-          row.eachCell(cell => {
-            cell.border = {
-              top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
-            };
-          });
-        });
-
-        customerSheet.getColumn(1).width = 35;
-        customerSheet.getColumn(2).width = 20;
-        customerSheet.getColumn(3).width = 15;
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(blob, `mkc-analytics-report-${new Date().toISOString().split('T')[0]}.xlsx`);
       }
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
-      saveAs(blob, `mkc-report-${dateRange}-${new Date().toISOString().split('T')[0]}.xlsx`);
-
     } catch (err) {
-      console.error('Excel export error:', err);
-      setError('Failed to export Excel: ' + err.message);
+      console.error('Export error:', err);
     } finally {
       setExporting(false);
     }
-  }, [reportData, dateRange]);
-
-  // ================== PDF EXPORT (Document Mode) ==================
-  const exportToPDF = useCallback(async () => {
-    if (!reportData) return;
-    setExporting(true);
-
-    try {
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 20;
-      const contentWidth = pageWidth - (margin * 2);
-      let yPos = margin;
-
-      // CRITICAL FIX: Sanitize text for jsPDF to prevent &0&.&0&0& issues
-      const sanitizeText = (text) => {
-        if (text === null || text === undefined) return '';
-        let str = String(text);
-        
-        // Remove ALL special characters that jsPDF might interpret as formatting
-        str = str.replace(/[&%#@]/g, '');
-        
-        // Replace commas with spaces for thousands separators
-        str = str.replace(/,/g, ' ');
-        
-        return str;
-      };
-
-      // Format currency without special characters
-      const formatCurrencyForPDF = (amount) => {
-        if (typeof amount !== 'number') amount = 0;
-        return `PHP ${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
-      };
-
-      // Helper to add new page
-      const addNewPage = () => {
-        pdf.addPage();
-        yPos = margin;
-      };
-
-      // Helper to check if we need a new page
-      const checkPageBreak = (requiredSpace) => {
-        if (yPos + requiredSpace > pageHeight - margin) {
-          addNewPage();
-          return true;
-        }
-        return false;
-      };
-
-      // ========== TITLE SECTION ==========
-      pdf.setFillColor(0, 51, 160);
-      pdf.rect(margin, yPos, contentWidth, 40, 'F');
-      
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(24);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('MKC Admin Report', margin + 10, yPos + 20);
-      
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text('Management Dashboard - Sales & Analytics', margin + 10, yPos + 33);
-      
-      yPos += 50;
-
-      // ========== DATE RANGE ==========
-      pdf.setDrawColor(200, 200, 200);
-      pdf.setLineWidth(0.5);
-      pdf.line(margin, yPos, pageWidth - margin, yPos);
-      yPos += 8;
-
-      pdf.setTextColor(100, 100, 100);
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(`Report Period: ${reportData.dateRange.label}`, margin, yPos);
-      pdf.text(`Generated: ${new Date().toLocaleString()}`, pageWidth - margin - 50, yPos);
-      yPos += 12;
-
-      pdf.line(margin, yPos, pageWidth - margin, yPos);
-      yPos += 12;
-
-      // ========== EXECUTIVE SUMMARY ==========
-      pdf.setTextColor(0, 51, 160);
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Executive Summary', margin, yPos);
-      yPos += 10;
-
-      pdf.setDrawColor(0, 51, 160);
-      pdf.setLineWidth(1);
-      pdf.line(margin, yPos, margin + 60, yPos);
-      yPos += 10;
-
-      // Summary Cards (4 columns)
-      const cardWidth = (contentWidth - 12) / 4;
-      const cardHeight = 40;
-      
-      const summaryItems = [
-        { 
-          label: 'Total Revenue', 
-          value: formatCurrencyForPDF(reportData.summary.totalRevenue), 
-          color: [0, 51, 160] 
-        },
-        { 
-          label: 'Total Orders', 
-          value: reportData.summary.totalOrders.toString(), 
-          color: [237, 28, 36] 
-        },
-        { 
-          label: 'Avg Order Value', 
-          value: formatCurrencyForPDF(reportData.summary.averageOrderValue), 
-          color: [22, 163, 74] 
-        },
-        { 
-          label: 'Success Rate', 
-          value: `${reportData.summary.totalOrders > 0 ? Math.round((reportData.summary.completedOrders / reportData.summary.totalOrders) * 100) : 0}%`, 
-          color: [128, 90, 213] 
-        }
-      ];
-
-      summaryItems.forEach((item, index) => {
-        const x = margin + (index * (cardWidth + 4));
-        
-        // Card background
-        pdf.setFillColor(248, 250, 252);
-        pdf.rect(x, yPos, cardWidth, cardHeight, 'F');
-        
-        // Border
-        pdf.setDrawColor(220, 220, 220);
-        pdf.setLineWidth(0.5);
-        pdf.rect(x, yPos, cardWidth, cardHeight, 'S');
-        
-        // Label
-        pdf.setTextColor(100, 100, 100);
-        pdf.setFontSize(8);
-        pdf.setFont('helvetica', 'normal');
-        pdf.text(item.label, x + 5, yPos + 8);
-        
-        // Value - using sanitized text
-        pdf.setTextColor(item.color[0], item.color[1], item.color[2]);
-        pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text(sanitizeText(item.value), x + 5, yPos + 28);
-      });
-
-      yPos += cardHeight + 16;
-
-      // ========== STATUS BREAKDOWN ==========
-      checkPageBreak(60);
-      
-      pdf.setTextColor(0, 51, 160);
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Order Status Breakdown', margin, yPos);
-      yPos += 8;
-
-      pdf.setDrawColor(0, 51, 160);
-      pdf.setLineWidth(0.5);
-      pdf.line(margin, yPos, margin + 50, yPos);
-      yPos += 10;
-
-      // Status table
-      const totalOrders = reportData.summary.totalOrders || 1;
-      const statusData = [
-        ['Status', 'Count', 'Percentage'],
-        ['Completed', 
-          reportData.summary.completedOrders.toString(),
-          `${Math.round((reportData.summary.completedOrders / totalOrders) * 100)}%`],
-        ['Pending', 
-          reportData.summary.pendingOrders.toString(),
-          `${Math.round((reportData.summary.pendingOrders / totalOrders) * 100)}%`],
-        ['Processing', 
-          reportData.summary.processingOrders.toString(),
-          `${Math.round((reportData.summary.processingOrders / totalOrders) * 100)}%`],
-        ['Cancelled', 
-          reportData.summary.cancelledOrders.toString(),
-          `${Math.round((reportData.summary.cancelledOrders / totalOrders) * 100)}%`]
-      ];
-
-      const colWidths = [50, 30, 35];
-      let xPos = margin;
-
-      statusData.forEach((row, rowIndex) => {
-        const isHeader = rowIndex === 0;
-        const rowHeight = isHeader ? 10 : 8;
-
-        if (yPos + rowHeight > pageHeight - margin) {
-          addNewPage();
-          xPos = margin;
-        }
-
-        // Draw row background
-        if (!isHeader && rowIndex % 2 === 0) {
-          pdf.setFillColor(248, 250, 252);
-          pdf.rect(xPos, yPos - 4, colWidths.reduce((a, b) => a + b, 0), rowHeight + 4, 'F');
-        }
-
-        row.forEach((cell, cellIndex) => {
-          const x = xPos + colWidths.slice(0, cellIndex).reduce((a, b) => a + b, 0);
-          
-          // Cell border
-          pdf.setDrawColor(200, 200, 200);
-          pdf.setLineWidth(0.3);
-          pdf.rect(x, yPos - 4, colWidths[cellIndex], rowHeight + 4, 'S');
-
-          // Cell text
-          if (isHeader) {
-            pdf.setTextColor(0, 51, 160);
-            pdf.setFontSize(9);
-            pdf.setFont('helvetica', 'bold');
-          } else {
-            pdf.setTextColor(50, 50, 50);
-            pdf.setFontSize(9);
-            pdf.setFont('helvetica', 'normal');
-          }
-          pdf.text(sanitizeText(cell.toString()), x + 3, yPos + 4);
-        });
-
-        yPos += rowHeight + 4;
-      });
-
-      yPos += 10;
-
-      // ========== CATEGORY BREAKDOWN ==========
-      if (Object.keys(reportData.categorySales).length > 0) {
-        checkPageBreak(80);
-        
-        pdf.setTextColor(0, 51, 160);
-        pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('Sales by Category', margin, yPos);
-        yPos += 8;
-
-        pdf.setDrawColor(0, 51, 160);
-        pdf.setLineWidth(0.5);
-        pdf.line(margin, yPos, margin + 50, yPos);
-        yPos += 10;
-
-        const sortedCategories = Object.entries(reportData.categorySales)
-          .sort(([,a], [,b]) => b.revenue - a.revenue);
-
-        const maxRevenue = sortedCategories[0]?.[1]?.revenue || 1;
-
-        sortedCategories.forEach(([category, data]) => {
-          if (yPos + 20 > pageHeight - margin) {
-            addNewPage();
-            yPos = margin + 10;
-          }
-
-          const percentage = (data.revenue / maxRevenue) * 100;
-          const barWidth = (percentage / 100) * (contentWidth - 80);
-
-          // Category name
-          pdf.setTextColor(50, 50, 50);
-          pdf.setFontSize(9);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(category, margin, yPos + 3);
-
-          // Revenue - using sanitized currency
-          pdf.setTextColor(0, 51, 160);
-          pdf.setFontSize(9);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(sanitizeText(formatCurrencyForPDF(data.revenue)), margin + 60, yPos + 3);
-
-          // Bar background
-          pdf.setFillColor(240, 240, 240);
-          pdf.rect(margin + 65, yPos - 2, contentWidth - 80, 12, 'F');
-
-          // Bar fill
-          pdf.setFillColor(0, 51, 160);
-          pdf.rect(margin + 65, yPos - 2, barWidth, 12, 'F');
-
-          // Quantity info
-          pdf.setTextColor(150, 150, 150);
-          pdf.setFontSize(7);
-          pdf.setFont('helvetica', 'normal');
-          pdf.text(`${data.quantity} units • ${data.orderCount} orders`, margin + 68, yPos + 14);
-
-          yPos += 22;
-        });
-
-        yPos += 10;
-      }
-
-      // ========== TOP CUSTOMERS ==========
-      if (reportData.topCustomers.length > 0) {
-        checkPageBreak(60 + (reportData.topCustomers.length * 12));
-        
-        pdf.setTextColor(0, 51, 160);
-        pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('Top Customers', margin, yPos);
-        yPos += 8;
-
-        pdf.setDrawColor(0, 51, 160);
-        pdf.setLineWidth(0.5);
-        pdf.line(margin, yPos, margin + 50, yPos);
-        yPos += 10;
-
-        const customerCols = [70, 50, 35];
-        let cx = margin;
-
-        // Header
-        ['Customer', 'Total Spent', 'Orders'].forEach((header, i) => {
-          pdf.setTextColor(0, 51, 160);
-          pdf.setFontSize(9);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(header, cx + 3, yPos + 3);
-          cx += customerCols[i];
-        });
-        yPos += 8;
-
-        reportData.topCustomers.forEach((customer, index) => {
-          if (yPos + 10 > pageHeight - margin) {
-            addNewPage();
-            yPos = margin + 10;
-          }
-
-          cx = margin;
-          
-          // Row background (alternating)
-          if (index % 2 === 0) {
-            pdf.setFillColor(248, 250, 252);
-            pdf.rect(cx, yPos - 2, customerCols.reduce((a, b) => a + b, 0), 10, 'F');
-          }
-
-          pdf.setTextColor(50, 50, 50);
-          pdf.setFontSize(9);
-          pdf.setFont('helvetica', 'normal');
-          pdf.text(customer.name, cx + 3, yPos + 6);
-          cx += customerCols[0];
-
-          pdf.setTextColor(0, 51, 160);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(sanitizeText(formatCurrencyForPDF(customer.totalSpent)), cx + 3, yPos + 6);
-          cx += customerCols[1];
-
-          pdf.setTextColor(50, 50, 50);
-          pdf.setFont('helvetica', 'normal');
-          pdf.text(customer.orderCount.toString(), cx + 3, yPos + 6);
-
-          yPos += 12;
-        });
-      }
-
-      // ========== FOOTER ==========
-      if (yPos + 20 > pageHeight - margin) {
-        addNewPage();
-      }
-
-      // Footer line
-      pdf.setDrawColor(200, 200, 200);
-      pdf.setLineWidth(0.5);
-      pdf.line(margin, pageHeight - 25, pageWidth - margin, pageHeight - 25);
-      
-      pdf.setTextColor(150, 150, 150);
-      pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(`Generated by MKC Admin System • ${new Date().toLocaleString()}`, margin, pageHeight - 10);
-      pdf.text(`Page ${pdf.getNumberOfPages()}`, pageWidth - margin - 20, pageHeight - 10);
-
-      // ========== SAVE PDF ==========
-      pdf.save(`mkc-report-${dateRange}-${new Date().toISOString().split('T')[0]}.pdf`);
-
-    } catch (err) {
-      console.error('PDF export error:', err);
-      setError('Failed to export PDF: ' + err.message);
-    } finally {
-      setExporting(false);
-    }
-  }, [reportData, dateRange]);
-
-  const handleExport = useCallback((format) => {
-    if (format === 'excel') {
-      exportToExcel();
-    } else if (format === 'pdf') {
-      exportToPDF();
-    }
-  }, [exportToExcel, exportToPDF]);
+  }, [reportData]);
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div className="h-8 w-48 bg-gray-200 rounded animate-pulse"></div>
-          <div className="flex gap-3">
-            <div className="w-40 h-10 bg-gray-200 rounded animate-pulse"></div>
-            <div className="w-24 h-10 bg-gray-200 rounded animate-pulse"></div>
-          </div>
+          <div className="w-40 h-10 bg-gray-200 rounded animate-pulse"></div>
         </div>
-        <div className="h-4 w-64 bg-gray-200 rounded animate-pulse"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1,2,3,4].map(i => <StatCardSkeleton key={i} />)}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartSkeleton />
-          <div className={`rounded-xl border p-6 animate-pulse ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
-            <div className="h-6 w-48 bg-gray-200 rounded mb-6"></div>
-            <CategorySkeleton />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => <StatCardSkeleton key={i} isDarkMode={isDarkMode} />)}
         </div>
       </div>
     );
@@ -969,32 +286,51 @@ export default function Reports() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-theme-primary">Reports & Analytics</h2>
+          <h2 className={`text-2xl font-bold transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Reports & Analytics</h2>
           {reportData && (
-            <p className={`text-sm mt-1 transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+            <p className={`text-sm mt-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               <Calendar size={14} className="inline mr-1" />
               {reportData.dateRange.label}
             </p>
           )}
         </div>
         
-        <div className="flex gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {dateRange === 'custom' && (
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={customStartDate}
+                onChange={(e) => setCustomStartDate(e.target.value)}
+                className={`border rounded-lg px-2.5 py-1.5 text-xs outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>to</span>
+              <input
+                type="date"
+                value={customEndDate}
+                onChange={(e) => setCustomEndDate(e.target.value)}
+                className={`border rounded-lg px-2.5 py-1.5 text-xs outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+            </div>
+          )}
+
           <select
             value={dateRange}
             onChange={handleDateRangeChange}
-            className={`rounded-lg px-4 py-2 border focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-gray-300 text-gray-900'}`}
+            className={`border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-red-600 outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
             disabled={refreshing || exporting}
           >
             <option value="week">Last 7 Days</option>
             <option value="month">Last 30 Days</option>
             <option value="quarter">Last 3 Months</option>
             <option value="year">Last 12 Months</option>
+            <option value="custom">Custom Date Range</option>
           </select>
           
           <button
             onClick={handleRefresh}
             disabled={refreshing || exporting}
-            className={`px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 hover:bg-gray-50'}`}
+            className={`px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 transition-colors duration-300 ${isDarkMode ? 'border-slate-600 hover:bg-slate-700 text-gray-300' : 'border-gray-300 hover:bg-gray-50'}`}
             title="Refresh Data"
           >
             <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
@@ -1008,177 +344,281 @@ export default function Reports() {
         </div>
       </div>
 
+      {/* Analytics Navigation Sub-Tabs */}
+      <div className={`flex gap-1 p-1 rounded-xl w-fit transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-gray-100'}`}>
+        <button
+          onClick={() => setActiveReportTab('overview')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            activeReportTab === 'overview'
+              ? 'bg-red-600 text-white shadow-sm'
+              : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
+          }`}
+        >
+          <BarChart3 size={16} /> Executive Overview
+        </button>
+        <button
+          onClick={() => setActiveReportTab('products')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            activeReportTab === 'products'
+              ? 'bg-red-600 text-white shadow-sm'
+              : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
+          }`}
+        >
+          <ShoppingCart size={16} /> Product Sales Mix
+        </button>
+        <button
+          onClick={() => setActiveReportTab('operations')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            activeReportTab === 'operations'
+              ? 'bg-red-600 text-white shadow-sm'
+              : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
+          }`}
+        >
+          <TrendingUp size={16} /> Delivery & Operations
+        </button>
+      </div>
+
       {error && <ErrorAlert message={error} onDismiss={() => setError(null)} />}
 
       {reportData && (
         <>
-          {/* Summary Cards */}
+          {/* Executive Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+            <div className={`p-6 rounded-xl shadow-sm border transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} hover:shadow-md transition-shadow`}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-theme-secondary">Total Revenue</p>
-                <div className={`p-2 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100'}`}>
-                  <DollarSign className={isDarkMode ? 'text-blue-300' : 'text-[#0033A0]'} size={18} />
+                <p className={`text-sm transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total Revenue</p>
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <DollarSign className="text-red-600" size={18} />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-theme-primary">
-                {formatCurrency(reportData.summary.totalRevenue)}
+              <p className={`text-2xl font-bold transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {formatCurrency(reportData.summary.totalSales || 0)}
               </p>
-              <p className="text-xs text-theme-secondary mt-1">
-                {reportData.summary.completedOrders} completed orders
+              <p className="text-xs text-gray-500 mt-1">
+                {reportData.summary.completedCount || 0} completed orders
               </p>
             </div>
 
-            <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+            <div className={`p-6 rounded-xl shadow-sm border transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} hover:shadow-md transition-shadow`}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-theme-secondary">Total Orders</p>
-                <div className={`p-2 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-red-900/30' : 'bg-red-100'}`}>
-                  <ShoppingCart className={isDarkMode ? 'text-red-300' : 'text-[#ED1C24]'} size={18} />
+                <p className={`text-sm transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total Orders</p>
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <ShoppingCart className="text-amber-600" size={18} />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-theme-primary">{reportData.summary.totalOrders}</p>
+              <p className={`text-2xl font-bold transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{reportData.summary.totalOrdersCount || 0}</p>
               <div className="flex gap-2 mt-1 text-xs">
-                <span className={isDarkMode ? 'text-green-400' : 'text-green-600'}>{reportData.summary.completedOrders} completed</span>
-                <span className={isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}>{reportData.summary.pendingOrders} pending</span>
+                <span className="text-emerald-600 font-semibold">{reportData.summary.completionRate}% completion rate</span>
               </div>
             </div>
 
-            <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+            <div className={`p-6 rounded-xl shadow-sm border transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} hover:shadow-md transition-shadow`}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-theme-secondary">Avg Order Value</p>
-                <div className={`p-2 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-green-900/30' : 'bg-green-100'}`}>
-                  <TrendingUp className={isDarkMode ? 'text-green-300' : 'text-green-600'} size={18} />
+                <p className={`text-sm transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Avg Order Value</p>
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <TrendingUp className="text-green-600" size={18} />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-theme-primary">
-                {formatCurrency(reportData.summary.averageOrderValue)}
+              <p className={`text-2xl font-bold transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {formatCurrency(Number(reportData.summary.avgOrderValue || 0))}
               </p>
-              <p className="text-xs text-theme-secondary mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 per completed order
               </p>
             </div>
 
-            <div className={`p-6 rounded-xl shadow-sm border hover:shadow-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+            <div className={`p-6 rounded-xl shadow-sm border transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} hover:shadow-md transition-shadow`}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-theme-secondary">Success Rate</p>
-                <div className={`p-2 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-purple-900/30' : 'bg-purple-100'}`}>
-                  <BarChart3 className={isDarkMode ? 'text-purple-300' : 'text-purple-600'} size={18} />
+                <p className={`text-sm transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Delivery Fees</p>
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <BarChart3 className="text-purple-600" size={18} />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-theme-primary">
-                {reportData.summary.totalOrders > 0 
-                  ? Math.round((reportData.summary.completedOrders / reportData.summary.totalOrders) * 100) 
-                  : 0}%
+              <p className={`text-2xl font-bold transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {formatCurrency(reportData.summary.totalDeliveryFees || 0)}
               </p>
-              <p className="text-xs text-theme-secondary mt-1">
-                {reportData.summary.uniqueCustomers} unique customers
+              <p className="text-xs text-gray-500 mt-1">
+                Peak Hour: <span className="font-bold text-purple-600">{reportData.summary.peakHourLabel}</span>
               </p>
             </div>
           </div>
 
-          {/* Charts Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Sales Timeline */}
-            <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
-              <h3 className="text-lg font-semibold text-theme-primary mb-4">Sales Timeline</h3>
-              {reportData.timeSeriesData.length > 0 ? (
-                <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
-                  {reportData.timeSeriesData.map((item, index) => {
-                    const maxAmount = Math.max(...reportData.timeSeriesData.map(d => d.amount));
-                    const percentage = (item.amount / maxAmount) * 100;
-                    
-                    return (
-                      <div key={index} className="flex items-center gap-3">
-                        <span className="text-xs text-theme-secondary w-24">{item.date}</span>
-                        <div className="flex-1">
-                          <div className={`h-8 rounded-lg relative group transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
-                            <div 
-                              className="h-full bg-mkc-blue rounded-lg transition-all duration-300"
-                              style={{ width: `${percentage}%` }}
-                            >
-                              <div className="opacity-0 group-hover:opacity-100 absolute right-0 -top-8 bg-gray-800 text-white text-xs px-2 py-1 rounded transition-opacity">
-                                {formatCurrency(item.amount)}
+          {/* TAB 1: EXECUTIVE OVERVIEW */}
+          {activeReportTab === 'overview' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Daily Sales Timeline */}
+              <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+                <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Daily Sales Timeline</h3>
+                {reportData.timeSeriesData && reportData.timeSeriesData.length > 0 ? (
+                  <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+                    {reportData.timeSeriesData.map((item, index) => {
+                      const maxAmount = Math.max(...reportData.timeSeriesData.map(d => d.sales), 1);
+                      const percentage = (item.sales / maxAmount) * 100;
+                      
+                      return (
+                        <div key={index} className="flex items-center gap-3">
+                          <span className="text-xs text-gray-500 w-24">{item.date}</span>
+                          <div className="flex-1">
+                            <div className="h-8 bg-gray-100 dark:bg-slate-700 rounded-lg relative group">
+                              <div 
+                                className="h-full bg-red-600 rounded-lg transition-all duration-300"
+                                style={{ width: `${percentage}%` }}
+                              >
+                                <div className="opacity-0 group-hover:opacity-100 absolute right-0 -top-8 bg-gray-800 text-white text-xs px-2 py-1 rounded transition-opacity shadow">
+                                  {formatCurrency(item.sales)} ({item.orders} orders)
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-24 text-right">
+                            {formatCurrency(item.sales)}
+                          </span>
                         </div>
-                        <span className={`text-sm font-medium w-24 text-right transition-colors duration-300 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                          {formatCurrency(item.amount)}
-                        </span>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    No sales data available for this period
+                  </div>
+                )}
+              </div>
+
+              {/* Payment Methods & Operational Highlights */}
+              <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+                <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Payment Method Distribution</h3>
+                
+                <div className="space-y-4 mb-6">
+                  {Object.entries(reportData.paymentMethods || {}).map(([method, count]) => {
+                    const pct = reportData.summary.totalOrdersCount > 0
+                      ? Math.round((count / reportData.summary.totalOrdersCount) * 100)
+                      : 0;
+                    return (
+                      <div key={method} className="space-y-1">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>{method}</span>
+                          <span className="text-red-600">{count} orders ({pct}%)</span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2.5">
+                          <div
+                            className="bg-red-600 h-2.5 rounded-full transition-all duration-300"
+                            style={{ width: `${pct}%` }}
+                          ></div>
+                        </div>
                       </div>
                     );
                   })}
                 </div>
-              ) : (
-                <div className={`text-center py-12 transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                  No sales data available for this period
-                </div>
-              )}
-            </div>
 
-            {/* Category Breakdown */}
-            <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
-              <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-slate-100' : 'text-gray-800'}`}>Sales by Category</h3>
-              {Object.keys(reportData.categorySales).length > 0 ? (
-                <div className="space-y-4">
-                  {Object.entries(reportData.categorySales)
-                    .sort(([,a], [,b]) => b.revenue - a.revenue)
-                    .map(([category, data]) => (
-                      <div key={category}>
-                        <div className="flex justify-between items-center mb-1">
-                          <div>
-                            <span className={`font-medium transition-colors duration-300 ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>{category}</span>
-                            <span className={`text-xs ml-2 transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                              ({data.quantity} units)
+                <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-red-50/60 border-red-100'}`}>
+                  <p className="text-xs font-bold text-red-600 uppercase mb-1">Operational Highlight</p>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                    Peak ordering volume occurs around <strong className="text-red-600">{reportData.summary.peakHourLabel}</strong>. 
+                    {reportData.summary.avgDeliveryMinutes ? ` Average delivery duration is ${reportData.summary.avgDeliveryMinutes} mins.` : ''}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: PRODUCT SALES MIX */}
+          {activeReportTab === 'products' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Top 10 Products Table */}
+              <div className={`lg:col-span-2 rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+                <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Top 10 Best Selling Products</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className={`text-xs uppercase border-b ${isDarkMode ? 'bg-slate-700 text-gray-300 border-slate-600' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                      <tr>
+                        <th className="px-4 py-3">Product Name</th>
+                        <th className="px-4 py-3 text-center">Category</th>
+                        <th className="px-4 py-3 text-center">Qty Sold</th>
+                        <th className="px-4 py-3 text-right">Revenue (₱)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
+                      {(reportData.topProducts || []).map((prod, idx) => (
+                        <tr key={idx} className={isDarkMode ? 'hover:bg-slate-700/40' : 'hover:bg-gray-50'}>
+                          <td className={`px-4 py-3 font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{prod.name}</td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`text-xs px-2.5 py-1 rounded-full ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                              {prod.category}
                             </span>
-                          </div>
-                          <span className="text-[#0033A0] font-bold">
-                            {formatCurrency(data.revenue)}
-                          </span>
-                        </div>
-                        <div className={`w-full rounded-full h-2.5 transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
-                          <div 
-                            className="bg-mkc-blue h-2.5 rounded-full transition-all duration-300"
-                            style={{ 
-                              width: `${getPercentage(data.revenue, reportData.summary.totalRevenue)}%` 
-                            }}
-                          ></div>
-                        </div>
-                        <p className={`text-xs mt-1 transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-400'}`}>
-                          {data.orderCount} orders
-                        </p>
-                      </div>
-                    ))}
+                          </td>
+                          <td className="px-4 py-3 text-center font-bold text-red-600">{prod.quantity}</td>
+                          <td className="px-4 py-3 text-right font-bold text-emerald-600">{formatCurrency(prod.revenue)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ) : (
-                <div className={`text-center py-12 transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                  No category data available
-                </div>
-              )}
-            </div>
-          </div>
+              </div>
 
-          {/* Top Customers */}
-          {reportData.topCustomers.length > 0 && (
-            <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
-              <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-slate-100' : 'text-gray-800'}`}>Top Customers</h3>
-              <div className="space-y-3">
-                {reportData.topCustomers.map((customer, index) => (
-                  <div key={index} className={`flex items-center justify-between p-3 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-gray-50 hover:bg-gray-100'}`}>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-mkc-blue rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                        {customer.name?.charAt(0)?.toUpperCase() || '?'}
+              {/* Category Breakdown */}
+              <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+                <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Category Sales Distribution</h3>
+                <div className="space-y-4">
+                  {(reportData.categorySales || []).map((cat) => {
+                    const pct = reportData.summary.totalSales > 0
+                      ? Math.round((cat.revenue / reportData.summary.totalSales) * 100)
+                      : 0;
+                    return (
+                      <div key={cat.category}>
+                        <div className="flex justify-between text-xs font-semibold mb-1">
+                          <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>{cat.category}</span>
+                          <span className="text-emerald-600">{formatCurrency(cat.revenue)} ({pct}%)</span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2">
+                          <div className="bg-emerald-600 h-2 rounded-full transition-all duration-300" style={{ width: `${pct}%` }}></div>
+                        </div>
+                        <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{cat.quantity} items sold</p>
                       </div>
-                      <div>
-                        <p className={`font-medium transition-colors duration-300 ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>{customer.name}</p>
-                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: DELIVERY & OPERATIONS */}
+          {activeReportTab === 'operations' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Order Status Distribution */}
+              <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+                <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Order Status Distribution</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(reportData.statusDistribution || {}).map(([status, count]) => (
+                    <div key={status} className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-gray-50 border-gray-200'}`}>
+                      <p className={`text-xs font-semibold uppercase ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{status}</p>
+                      <p className="text-2xl font-extrabold text-red-600 mt-1">{count}</p>
+                      <p className="text-xs text-gray-400 mt-1">orders</p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-[#0033A0]">{formatCurrency(customer.totalSpent)}</p>
-                      <p className={`text-xs transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>{customer.orderCount} orders</p>
-                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Delivery Duration & Performance summary */}
+              <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+                <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Delivery & Dispatch Metrics</h3>
+                
+                <div className="space-y-4">
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-700/40 border-slate-600' : 'bg-emerald-50 border-emerald-100'}`}>
+                    <p className="text-xs font-bold text-emerald-700 uppercase mb-1">Average Delivery Time</p>
+                    <p className="text-3xl font-extrabold text-emerald-600">
+                      {reportData.summary.avgDeliveryMinutes ? `${reportData.summary.avgDeliveryMinutes} mins` : 'N/A'}
+                    </p>
+                    <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>From dispatch assignment to customer drop-off</p>
                   </div>
-                ))}
+
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-700/40 border-slate-600' : 'bg-red-50 border-red-100'}`}>
+                    <p className="text-xs font-bold text-red-700 uppercase mb-1">Total Delivery Fee Revenue</p>
+                    <p className="text-3xl font-extrabold text-red-600">
+                      {formatCurrency(reportData.summary.totalDeliveryFees || 0)}
+                    </p>
+                    <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Collected across all fulfilled deliveries</p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
