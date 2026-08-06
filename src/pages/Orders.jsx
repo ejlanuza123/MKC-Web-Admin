@@ -13,7 +13,10 @@ import {
   Filter,
   RefreshCw,
   AlertCircle,
-  UserPlus
+  UserPlus,
+  Download,
+  FileSpreadsheet,
+  FileText
 } from 'lucide-react';
 import OrderModal from '../components/OrderModal';
 import AssignRiderModal from '../components/AssignRiderModal';
@@ -33,6 +36,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { settingsService } from '../services/settingsService';
 import { notifySuccess } from '../utils/successNotifier';
 import { useTheme } from '../context/ThemeContext';
+import { exportOrdersData } from '../utils/exportUtils';
 
 // Skeleton Components
 const TableRowSkeleton = () => (
@@ -494,17 +498,35 @@ export default function Orders() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-theme-primary">Order Management</h2>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => exportOrdersData(filteredOrders, 'csv')}
+            className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm transition-colors shadow-sm"
+            title="Export filtered orders to CSV"
+          >
+            <Download size={16} />
+            <span>Export CSV</span>
+          </button>
+
+          <button
+            onClick={() => exportOrdersData(filteredOrders, 'excel')}
+            className="flex items-center gap-1.5 px-3 py-2 bg-green-700 hover:bg-green-800 text-white font-medium rounded-lg text-sm transition-colors shadow-sm"
+            title="Export filtered orders to Excel (.xlsx)"
+          >
+            <FileSpreadsheet size={16} />
+            <span>Export Excel</span>
+          </button>
+
           <button
             onClick={openDefaultFeeDialog}
-            className="flex items-center gap-2 px-4 py-2 bg-[#0033A0] text-white rounded-lg hover:bg-[#00297d] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#0033A0] text-white rounded-lg hover:bg-[#00297d] transition-colors text-sm"
           >
             Delivery Fee: {formatCurrency(defaultDeliveryFee)}
           </button>
 
           <button
             onClick={() => window.location.reload()}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${isDarkMode ? 'bg-slate-800 text-slate-100 hover:bg-slate-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${isDarkMode ? 'bg-slate-800 text-slate-100 hover:bg-slate-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
           >
             <RefreshCw size={18} />
             Refresh
