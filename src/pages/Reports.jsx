@@ -34,22 +34,6 @@ const StatCardSkeleton = ({ isDarkMode }) => (
   </div>
 );
 
-const CategorySkeleton = ({ isDarkMode }) => (
-  <div className="space-y-3">
-    {[1,2,3,4].map(i => (
-      <div key={i} className="animate-pulse">
-        <div className="flex justify-between mb-1">
-          <div className={`h-4 w-24 rounded transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}></div>
-          <div className={`h-4 w-20 rounded transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}></div>
-        </div>
-        <div className={`w-full rounded-full h-2 transition-colors duration-300 ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
-          <div className={`h-2 rounded-full transition-colors duration-300 ${isDarkMode ? 'bg-slate-600' : 'bg-gray-300'}`} style={{ width: `${Math.random() * 100}%` }}></div>
-        </div>
-      </div>
-    ))}
-  </div>
-);
-
 const ExportDropdown = ({ onExport, disabled, exporting }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -70,7 +54,7 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled || exporting}
-        className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50 text-sm font-medium"
+        className="bg-[#0033A0] hover:bg-blue-800 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-opacity disabled:opacity-50 text-sm font-medium shadow-sm"
       >
         {exporting ? (
           <>
@@ -93,7 +77,7 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
               setIsOpen(false);
               onExport('excel');
             }}
-            className={`w-full px-4 py-2.5 text-left flex items-center gap-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-red-50'}`}
+            className={`w-full px-4 py-2.5 text-left flex items-center gap-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-blue-50'}`}
           >
             <FileSpreadsheet size={18} className="text-green-600" />
             <div>
@@ -107,7 +91,7 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
               setIsOpen(false);
               onExport('csv');
             }}
-            className={`w-full px-4 py-2.5 text-left flex items-center gap-3 transition-colors border-t ${isDarkMode ? 'border-slate-700 hover:bg-slate-700' : 'border-gray-100 hover:bg-red-50'}`}
+            className={`w-full px-4 py-2.5 text-left flex items-center gap-3 transition-colors border-t ${isDarkMode ? 'border-slate-700 hover:bg-slate-700' : 'border-gray-100 hover:bg-blue-50'}`}
           >
             <FileText size={18} className="text-blue-600" />
             <div>
@@ -317,7 +301,7 @@ export default function Reports() {
           <select
             value={dateRange}
             onChange={handleDateRangeChange}
-            className={`border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-red-600 outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
+            className={`border rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#0033A0] outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300'}`}
             disabled={refreshing || exporting}
           >
             <option value="week">Last 7 Days</option>
@@ -350,7 +334,7 @@ export default function Reports() {
           onClick={() => setActiveReportTab('overview')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
             activeReportTab === 'overview'
-              ? 'bg-red-600 text-white shadow-sm'
+              ? 'bg-[#0033A0] text-white shadow-sm'
               : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
           }`}
         >
@@ -360,7 +344,7 @@ export default function Reports() {
           onClick={() => setActiveReportTab('products')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
             activeReportTab === 'products'
-              ? 'bg-red-600 text-white shadow-sm'
+              ? 'bg-[#0033A0] text-white shadow-sm'
               : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
           }`}
         >
@@ -370,7 +354,7 @@ export default function Reports() {
           onClick={() => setActiveReportTab('operations')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
             activeReportTab === 'operations'
-              ? 'bg-red-600 text-white shadow-sm'
+              ? 'bg-[#0033A0] text-white shadow-sm'
               : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
           }`}
         >
@@ -387,8 +371,8 @@ export default function Reports() {
             <div className={`p-6 rounded-xl shadow-sm border transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} hover:shadow-md transition-shadow`}>
               <div className="flex items-center justify-between mb-2">
                 <p className={`text-sm transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total Revenue</p>
-                <div className="p-2 bg-red-100 rounded-lg">
-                  <DollarSign className="text-red-600" size={18} />
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <DollarSign className="text-[#0033A0]" size={18} />
                 </div>
               </div>
               <p className={`text-2xl font-bold transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -461,7 +445,7 @@ export default function Reports() {
                           <div className="flex-1">
                             <div className="h-8 bg-gray-100 dark:bg-slate-700 rounded-lg relative group">
                               <div 
-                                className="h-full bg-red-600 rounded-lg transition-all duration-300"
+                                className="h-full bg-[#0033A0] rounded-lg transition-all duration-300"
                                 style={{ width: `${percentage}%` }}
                               >
                                 <div className="opacity-0 group-hover:opacity-100 absolute right-0 -top-8 bg-gray-800 text-white text-xs px-2 py-1 rounded transition-opacity shadow">
@@ -497,11 +481,11 @@ export default function Reports() {
                       <div key={method} className="space-y-1">
                         <div className="flex justify-between text-xs font-semibold">
                           <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>{method}</span>
-                          <span className="text-red-600">{count} orders ({pct}%)</span>
+                          <span className="text-blue-600">{count} orders ({pct}%)</span>
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2.5">
                           <div
-                            className="bg-red-600 h-2.5 rounded-full transition-all duration-300"
+                            className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
                             style={{ width: `${pct}%` }}
                           ></div>
                         </div>
@@ -510,10 +494,10 @@ export default function Reports() {
                   })}
                 </div>
 
-                <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-red-50/60 border-red-100'}`}>
-                  <p className="text-xs font-bold text-red-600 uppercase mb-1">Operational Highlight</p>
+                <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-blue-50/60 border-blue-100'}`}>
+                  <p className="text-xs font-bold text-blue-600 uppercase mb-1">Operational Highlight</p>
                   <p className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                    Peak ordering volume occurs around <strong className="text-red-600">{reportData.summary.peakHourLabel}</strong>. 
+                    Peak ordering volume occurs around <strong className="text-blue-600">{reportData.summary.peakHourLabel}</strong>. 
                     {reportData.summary.avgDeliveryMinutes ? ` Average delivery duration is ${reportData.summary.avgDeliveryMinutes} mins.` : ''}
                   </p>
                 </div>
@@ -546,7 +530,7 @@ export default function Reports() {
                               {prod.category}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-center font-bold text-red-600">{prod.quantity}</td>
+                          <td className="px-4 py-3 text-center font-bold text-blue-600">{prod.quantity}</td>
                           <td className="px-4 py-3 text-right font-bold text-emerald-600">{formatCurrency(prod.revenue)}</td>
                         </tr>
                       ))}
@@ -591,7 +575,7 @@ export default function Reports() {
                   {Object.entries(reportData.statusDistribution || {}).map(([status, count]) => (
                     <div key={status} className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-gray-50 border-gray-200'}`}>
                       <p className={`text-xs font-semibold uppercase ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{status}</p>
-                      <p className="text-2xl font-extrabold text-red-600 mt-1">{count}</p>
+                      <p className="text-2xl font-extrabold text-blue-600 mt-1">{count}</p>
                       <p className="text-xs text-gray-400 mt-1">orders</p>
                     </div>
                   ))}
@@ -611,9 +595,9 @@ export default function Reports() {
                     <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>From dispatch assignment to customer drop-off</p>
                   </div>
 
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-700/40 border-slate-600' : 'bg-red-50 border-red-100'}`}>
-                    <p className="text-xs font-bold text-red-700 uppercase mb-1">Total Delivery Fee Revenue</p>
-                    <p className="text-3xl font-extrabold text-red-600">
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-700/40 border-slate-600' : 'bg-blue-50 border-blue-100'}`}>
+                    <p className="text-xs font-bold text-blue-700 uppercase mb-1">Total Delivery Fee Revenue</p>
+                    <p className="text-3xl font-extrabold text-blue-600">
                       {formatCurrency(reportData.summary.totalDeliveryFees || 0)}
                     </p>
                     <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Collected across all fulfilled deliveries</p>
