@@ -1692,6 +1692,7 @@ export default function Riders() {
               <BarChart2 size={14} /> Performance
             </button>
           </div>
+        </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => {
