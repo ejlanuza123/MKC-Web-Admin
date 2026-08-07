@@ -115,10 +115,10 @@ export default function FleetLiveMap({ isDarkMode, onSelectOrder }) {
 
   // Generate Leaflet HTML String for iframe map rendering
   const mapHtml = useMemo(() => {
-    const defaultCenter = { lat: 14.36, lng: 121.05 }; // San Pedro, Laguna default center
+    const defaultCenter = { lat: 14.3589376, lng: 120.979456 }; // MKC Puerto Princesa City Branch
     
-    // Store origin
-    const storePin = { lat: 14.3601, lng: 121.0512, name: 'MKC Store Hub' };
+    // Store origin pin
+    const storePin = { lat: 14.3589376, lng: 120.979456, name: 'MKC Foods Corp - Puerto Princesa Branch' };
 
     // Format riders data for Leaflet
     const riderMarkers = filteredRiders
