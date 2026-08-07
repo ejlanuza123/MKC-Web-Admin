@@ -813,6 +813,8 @@ export default function Orders() {
           )}
         </>
       )}
+    </>
+  )}
 
       {/* Modals */}
       <OrderModal 
