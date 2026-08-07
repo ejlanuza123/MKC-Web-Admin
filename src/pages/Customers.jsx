@@ -393,6 +393,7 @@ export default function Customers() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
