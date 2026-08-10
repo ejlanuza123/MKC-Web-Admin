@@ -12,6 +12,7 @@ import { useProducts } from '../hooks/useProducts';
 import { PRODUCT_CATEGORIES } from '../utils/constants';
 import { formatCurrency } from '../utils/formatters';
 import { useTheme } from '../context/ThemeContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { settingsService } from '../services/settingsService';
 import { lowStockAlertService } from '../services/lowStockAlertService';
 import { notifySuccess } from '../utils/successNotifier';
