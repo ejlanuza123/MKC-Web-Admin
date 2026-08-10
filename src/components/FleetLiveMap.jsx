@@ -115,10 +115,10 @@ export default function FleetLiveMap({ isDarkMode, onSelectOrder }) {
 
   // Generate Leaflet HTML String for iframe map rendering
   const mapHtml = useMemo(() => {
-    const defaultCenter = { lat: 14.3589376, lng: 120.979456 }; // MKC Puerto Princesa City Branch
+    const defaultCenter = { lat: 9.7395463, lng: 118.7386649 }; // MKC Foods Corporation - Puerto Princesa Branch
     
     // Store origin pin
-    const storePin = { lat: 14.3589376, lng: 120.979456, name: 'MKC Foods Corp - Puerto Princesa Branch' };
+    const storePin = { lat: 9.7395463, lng: 118.7386649, name: 'MKC Foods Corp - Puerto Branch' };
 
     // Format riders data for Leaflet
     const riderMarkers = filteredRiders
