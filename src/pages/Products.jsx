@@ -12,10 +12,9 @@ import { useProducts } from '../hooks/useProducts';
 import { PRODUCT_CATEGORIES } from '../utils/constants';
 import { formatCurrency } from '../utils/formatters';
 import { useTheme } from '../context/ThemeContext';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { settingsService } from '../services/settingsService';
 import { lowStockAlertService } from '../services/lowStockAlertService';
-import { notifySuccess, notifyError } from '../utils/notifications';
+import { notifySuccess } from '../utils/successNotifier';
 
 // Skeleton Components
 const ProductCardSkeleton = () => (
@@ -238,7 +237,7 @@ export default function Products() {
   const handleSaveThreshold = useCallback(async () => {
     const val = parseInt(thresholdInput, 10);
     if (Number.isNaN(val) || val < 1) {
-      notifyError('Threshold must be a valid positive number');
+      alert('Threshold must be a valid positive number');
       return;
     }
     try {
@@ -249,7 +248,7 @@ export default function Products() {
         setShowThresholdModal(false);
         notifySuccess(`Low stock threshold updated to ${val} units`);
       } else {
-        notifyError('Failed to update low stock threshold');
+        alert('Failed to update low stock threshold');
       }
     } finally {
       setSavingThreshold(false);
@@ -261,7 +260,7 @@ export default function Products() {
     const currentQty = Number(quickRestockProduct.stock_quantity) || 0;
     const addVal = Number(addedQty || restockAmount) || 0;
     if (addVal <= 0) {
-      notifyError('Restock quantity must be greater than 0');
+      alert('Restock quantity must be greater than 0');
       return;
     }
     const newQty = currentQty + addVal;
@@ -275,7 +274,7 @@ export default function Products() {
       setQuickRestockProduct(null);
       setRestockAmount('10');
     } catch (err) {
-      notifyError('Failed to restock product');
+      alert('Failed to restock product');
     } finally {
       setSavingRestock(false);
     }
