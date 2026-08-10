@@ -34,6 +34,7 @@ import DarkModeToggle from './DarkModeToggle';
 import PageTransition from './PageTransition';
 import SettingsModal from './SettingsModal';
 import FloatingChatBubble from './common/FloatingChatBubble';
+import OrderAlertBanner from './OrderAlertBanner';
 
 // Animated NavItem with scale and slide effects
 const NavItem = memo(({ to, icon: Icon, label, isActive, onClick, isCollapsed }) => {
@@ -1056,6 +1057,7 @@ export default function Layout() {
       />
 
       <FloatingChatBubble userId={user?.id} />
+      <OrderAlertBanner storeName="MKC FOODS CORPORATION" />
     </div>
   );
 }
