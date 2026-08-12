@@ -1612,7 +1612,8 @@ export default function Riders() {
             order_id,
             orders (
               id,
-              status
+              status,
+              delivery_fee
             )
           )
         `)
