@@ -423,18 +423,6 @@ export default function Login() {
               'Sign In'
             )}
           </button>
-
-          <div className="text-center mt-6">
-            <p className="text-sm text-white/80">
-              Need an admin account?{' '}
-              <Link 
-                to="/register" 
-                className="text-mkc-red font-bold hover:text-white hover:underline transition-colors duration-200"
-              >
-                Register here
-              </Link>
-            </p>
-          </div>
         </form>
       </div>
 
