@@ -54,6 +54,7 @@ export default function SuperAdminPortal() {
     email: '',
     full_name: '',
     password: '',
+    confirm_password: '',
     role: 'admin'
   });
   const [formErrors, setFormErrors] = useState({});
@@ -154,6 +155,7 @@ export default function SuperAdminPortal() {
     if (!formData.email) errors.email = 'Email is required';
     if (!formData.full_name) errors.full_name = 'Full Name is required';
     if (!formData.password || formData.password.length < 6) errors.password = 'Password must be at least 6 characters';
+    if (formData.password !== formData.confirm_password) errors.confirm_password = 'Passwords do not match';
     
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -167,7 +169,7 @@ export default function SuperAdminPortal() {
       await adminService.createAdminAccount(formData);
       setSuccessMessage(`Registered new ${formData.role === 'superadmin' ? 'Super Admin' : 'Admin'} account for ${formData.email}.`);
       setIsModalOpen(false);
-      setFormData({ email: '', full_name: '', password: '', role: 'admin' });
+      setFormData({ email: '', full_name: '', password: '', confirm_password: '', role: 'admin' });
       setFormErrors({});
       loadData();
     } catch (err) {
@@ -674,6 +676,20 @@ export default function SuperAdminPortal() {
                   }`}
                 />
                 {formErrors.password && <p className="text-xs text-red-500 mt-1">{formErrors.password}</p>}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">Confirm Password</label>
+                <input
+                  type="password"
+                  value={formData.confirm_password}
+                  onChange={(e) => setFormData(prev => ({ ...prev, confirm_password: e.target.value }))}
+                  placeholder="Re-enter password"
+                  className={`w-full px-3.5 py-2 border rounded-xl text-sm outline-none transition ${
+                    isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+                {formErrors.confirm_password && <p className="text-xs text-red-500 mt-1">{formErrors.confirm_password}</p>}
               </div>
 
               <div>
