@@ -1,11 +1,11 @@
 // src/pages/Reports.jsx
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { 
-  TrendingUp, 
-  Calendar, 
-  Download, 
-  BarChart3, 
+import {
+  TrendingUp,
+  Calendar,
+  Download,
+  BarChart3,
   DollarSign,
   ShoppingCart,
   Users,
@@ -85,7 +85,7 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
               <p className={`text-xs transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}>Download as spreadsheet</p>
             </div>
           </button>
-          
+
           <button
             onClick={() => {
               setIsOpen(false);
@@ -97,6 +97,20 @@ const ExportDropdown = ({ onExport, disabled, exporting }) => {
             <div>
               <p className={`text-sm font-medium transition-colors duration-300 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>CSV Raw Data (.csv)</p>
               <p className={`text-xs transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}>Download raw CSV data</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              onExport('pdf');
+            }}
+            className={`w-full px-4 py-2.5 text-left flex items-center gap-3 transition-colors border-t ${isDarkMode ? 'border-slate-700 hover:bg-slate-700' : 'border-gray-100 hover:bg-blue-50'}`}
+          >
+            <FileText size={18} className="text-red-600" />
+            <div>
+              <p className={`text-sm font-medium transition-colors duration-300 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>PDF Document</p>
+              <p className={`text-xs transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}>Download as printable report</p>
             </div>
           </button>
         </div>
@@ -120,8 +134,8 @@ export default function Reports() {
   const dateRangeLabel = useMemo(() => {
     const endDate = new Date();
     const startDate = new Date();
-    
-    switch(dateRange) {
+
+    switch (dateRange) {
       case 'week':
         startDate.setDate(startDate.getDate() - 7);
         return `${formatDate(startDate)} - ${formatDate(endDate)}`;
@@ -147,11 +161,11 @@ export default function Reports() {
         setLoading(true);
       }
       setError(null);
-      
+
       const endDate = new Date();
       const startDate = new Date();
-      
-      switch(dateRange) {
+
+      switch (dateRange) {
         case 'week':
           startDate.setDate(startDate.getDate() - 7);
           break;
@@ -243,9 +257,94 @@ export default function Reports() {
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         saveAs(blob, `mkc-analytics-report-${new Date().toISOString().split('T')[0]}.xlsx`);
+      } else if (format === 'pdf') {
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 20;
+        const contentWidth = pageWidth - (margin * 2);
+        let yPos = margin;
+
+        const safeStr = (val, fallback = '0') => {
+          if (val === null || val === undefined) return fallback;
+          return String(val);
+        };
+
+        const sanitizeText = (text) => {
+          if (text === null || text === undefined) return '';
+          let str = typeof text === 'string' ? text : String(text);
+          return str.replace(/[&%#@]/g, '').replace(/,/g, ' ');
+        };
+
+        const formatCurrencyForPDF = (amount) => {
+          const num = typeof amount === 'number' && !isNaN(amount) ? amount : 0;
+          return `PHP ${num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
+        };
+
+        // Title Section
+        pdf.setFillColor(0, 51, 160);
+        pdf.rect(margin, yPos, contentWidth, 35, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(22);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('MKC Foods Corporation Report', margin + 10, yPos + 18);
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text('Management Dashboard - Analytics & Performance', margin + 10, yPos + 28);
+        yPos += 45;
+
+        // Date Range
+        pdf.setTextColor(100, 100, 100);
+        pdf.setFontSize(10);
+        pdf.text(`Report Period: ${sanitizeText(reportData.dateRange?.label || 'All Time')}`, margin, yPos);
+        pdf.text(`Generated: ${new Date().toLocaleString()}`, pageWidth - margin - 55, yPos);
+        yPos += 12;
+
+        // Executive Summary
+        pdf.setTextColor(0, 51, 160);
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Executive Summary', margin, yPos);
+        yPos += 10;
+
+        const cardWidth = (contentWidth - 12) / 4;
+        const cardHeight = 35;
+        const summaryItems = [
+          { label: 'Total Revenue', value: formatCurrencyForPDF(reportData.summary?.totalSales || 0), color: [0, 51, 160] },
+          { label: 'Total Orders', value: safeStr(reportData.summary?.totalOrdersCount || 0), color: [237, 28, 36] },
+          { label: 'Avg Order Value', value: formatCurrencyForPDF(reportData.summary?.avgOrderValue || 0), color: [22, 163, 74] },
+          { label: 'Completion Rate', value: `${reportData.summary?.completionRate || 0}%`, color: [128, 90, 213] }
+        ];
+
+        summaryItems.forEach((item, index) => {
+          const x = margin + (index * (cardWidth + 4));
+          pdf.setFillColor(248, 250, 252);
+          pdf.rect(x, yPos, cardWidth, cardHeight, 'F');
+          pdf.setDrawColor(220, 220, 220);
+          pdf.rect(x, yPos, cardWidth, cardHeight, 'S');
+          pdf.setTextColor(100, 100, 100);
+          pdf.setFontSize(8);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(item.label, x + 4, yPos + 8);
+          pdf.setTextColor(item.color[0], item.color[1], item.color[2]);
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(sanitizeText(item.value), x + 4, yPos + 24);
+        });
+
+        yPos += cardHeight + 15;
+
+        // Save PDF
+        pdf.save(`mkc-analytics-report-${new Date().toISOString().split('T')[0]}.pdf`);
       }
     } catch (err) {
       console.error('Export error:', err);
+      setError('Failed to export PDF: ' + err.message);
     } finally {
       setExporting(false);
     }
@@ -259,7 +358,7 @@ export default function Reports() {
           <div className="w-40 h-10 bg-gray-200 rounded animate-pulse"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[1,2,3,4].map(i => <StatCardSkeleton key={i} isDarkMode={isDarkMode} />)}
+          {[1, 2, 3, 4].map(i => <StatCardSkeleton key={i} isDarkMode={isDarkMode} />)}
         </div>
       </div>
     );
@@ -278,7 +377,7 @@ export default function Reports() {
             </p>
           )}
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-3">
           {dateRange === 'custom' && (
             <div className="flex items-center gap-2">
@@ -310,7 +409,7 @@ export default function Reports() {
             <option value="year">Last 12 Months</option>
             <option value="custom">Custom Date Range</option>
           </select>
-          
+
           <button
             onClick={handleRefresh}
             disabled={refreshing || exporting}
@@ -319,8 +418,8 @@ export default function Reports() {
           >
             <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
           </button>
-          
-          <ExportDropdown 
+
+          <ExportDropdown
             onExport={handleExport}
             disabled={!reportData}
             exporting={exporting}
@@ -332,31 +431,28 @@ export default function Reports() {
       <div className={`flex gap-1 p-1 rounded-xl w-fit transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border border-slate-700' : 'bg-gray-100'}`}>
         <button
           onClick={() => setActiveReportTab('overview')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            activeReportTab === 'overview'
-              ? 'bg-[#0033A0] text-white shadow-sm'
-              : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeReportTab === 'overview'
+            ? 'bg-[#0033A0] text-white shadow-sm'
+            : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
+            }`}
         >
           <BarChart3 size={16} /> Executive Overview
         </button>
         <button
           onClick={() => setActiveReportTab('products')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            activeReportTab === 'products'
-              ? 'bg-[#0033A0] text-white shadow-sm'
-              : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeReportTab === 'products'
+            ? 'bg-[#0033A0] text-white shadow-sm'
+            : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
+            }`}
         >
           <ShoppingCart size={16} /> Product Sales Mix
         </button>
         <button
           onClick={() => setActiveReportTab('operations')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-            activeReportTab === 'operations'
-              ? 'bg-[#0033A0] text-white shadow-sm'
-              : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeReportTab === 'operations'
+            ? 'bg-[#0033A0] text-white shadow-sm'
+            : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
+            }`}
         >
           <TrendingUp size={16} /> Delivery & Operations
         </button>
@@ -438,13 +534,13 @@ export default function Reports() {
                     {reportData.timeSeriesData.map((item, index) => {
                       const maxAmount = Math.max(...reportData.timeSeriesData.map(d => d.sales), 1);
                       const percentage = (item.sales / maxAmount) * 100;
-                      
+
                       return (
                         <div key={index} className="flex items-center gap-3">
                           <span className="text-xs text-gray-500 w-24">{item.date}</span>
                           <div className="flex-1">
                             <div className="h-8 bg-gray-100 dark:bg-slate-700 rounded-lg relative group">
-                              <div 
+                              <div
                                 className="h-full bg-[#0033A0] rounded-lg transition-all duration-300"
                                 style={{ width: `${percentage}%` }}
                               >
@@ -471,7 +567,7 @@ export default function Reports() {
               {/* Payment Methods & Operational Highlights */}
               <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Payment Method Distribution</h3>
-                
+
                 <div className="space-y-4 mb-6">
                   {Object.entries(reportData.paymentMethods || {}).map(([method, count]) => {
                     const pct = reportData.summary.totalOrdersCount > 0
@@ -497,7 +593,7 @@ export default function Reports() {
                 <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-blue-50/60 border-blue-100'}`}>
                   <p className="text-xs font-bold text-blue-600 uppercase mb-1">Operational Highlight</p>
                   <p className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                    Peak ordering volume occurs around <strong className="text-blue-600">{reportData.summary.peakHourLabel}</strong>. 
+                    Peak ordering volume occurs around <strong className="text-blue-600">{reportData.summary.peakHourLabel}</strong>.
                     {reportData.summary.avgDeliveryMinutes ? ` Average delivery duration is ${reportData.summary.avgDeliveryMinutes} mins.` : ''}
                   </p>
                 </div>
@@ -585,7 +681,7 @@ export default function Reports() {
               {/* Delivery Duration & Performance summary */}
               <div className={`rounded-xl shadow-sm border p-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
                 <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Delivery & Dispatch Metrics</h3>
-                
+
                 <div className="space-y-4">
                   <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-700/40 border-slate-600' : 'bg-emerald-50 border-emerald-100'}`}>
                     <p className="text-xs font-bold text-emerald-700 uppercase mb-1">Average Delivery Time</p>

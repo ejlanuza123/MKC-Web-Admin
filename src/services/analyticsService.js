@@ -287,7 +287,7 @@ export const analyticsService = {
 
       const allOrders = orders || [];
       const completedOrders = allOrders.filter(o => o.status === 'Completed' || o.status === 'delivered');
-      
+
       const totalSales = completedOrders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
       const totalDeliveryFees = completedOrders.reduce((sum, o) => sum + Number(o.delivery_fee || 0), 0);
       const totalOrdersCount = allOrders.length;
