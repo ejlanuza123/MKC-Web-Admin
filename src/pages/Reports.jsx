@@ -249,10 +249,10 @@ export default function Reports() {
         sheet.addRow(['Period:', reportData.dateRange.label]);
         sheet.addRow([]);
         sheet.addRow(['Metric', 'Value']);
-        sheet.addRow(['Total Sales', reportData.summary.totalSales]);
-        sheet.addRow(['Total Orders', reportData.summary.totalOrdersCount]);
-        sheet.addRow(['Completion Rate', `${reportData.summary.completionRate}%`]);
-        sheet.addRow(['Average Order Value', reportData.summary.avgOrderValue]);
+        sheet.addRow(['Total Sales', reportData.summary?.totalSales || 0]);
+        sheet.addRow(['Total Orders', reportData.summary?.totalOrdersCount || 0]);
+        sheet.addRow(['Completion Rate', `${reportData.summary?.completionRate || 0}%`]);
+        sheet.addRow(['Average Order Value', reportData.summary?.avgOrderValue || 0]);
 
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
