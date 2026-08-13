@@ -11,6 +11,7 @@ import { adminService } from '../services/adminService';
 import { supabase } from '../lib/supabase';
 import SearchBar from '../components/common/SearchBar';
 import { formatDate } from '../utils/formatters';
+import mkcLogo from '../assets/images/mkc-logo.png';
 import '../styles/SuperAdminPortal.css';
 
 const SUPERADMIN_PASSCODE = import.meta.env.VITE_SUPERADMIN_VERIFICATION_CODE || import.meta.env.VITE_ADMIN_VERIFICATION_CODE || 'SUPER2026';
@@ -293,6 +294,9 @@ export default function SuperAdminPortal() {
           isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-gray-200 text-slate-900'
         }`}>
           <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-white rounded-xl mx-auto mb-3 flex items-center justify-center p-2 shadow-md border border-gray-100">
+              <img src={mkcLogo} alt="MKC Foods Logo" className="w-full h-full object-contain" />
+            </div>
             <h2 className="text-2xl font-extrabold">MKC Super Admin Portal</h2>
             <p className={`text-xs mt-1 ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}>Sign in with Super Admin credentials</p>
           </div>
