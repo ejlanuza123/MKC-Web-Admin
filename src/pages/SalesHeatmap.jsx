@@ -34,49 +34,49 @@ import ErrorAlert from '../components/common/ErrorAlert';
 // Comprehensive official list of Barangays in Puerto Princesa City, Palawan with centroid coordinates
 const PUERTO_PRINCESA_BARANGAYS = [
   // Core Urban / Commercial & High-Density Hubs
-  { name: 'San Pedro', aliases: ['san pedro', 'san pedro national highway'], lat: 9.7535, lng: 118.7479 },
-  { name: 'San Miguel', aliases: ['san miguel', 'airport', 'rizal ave', 'miguel'], lat: 9.7460, lng: 118.7520 },
-  { name: 'San Jose', aliases: ['san jose', 'new market', 'terminal', 'san jose terminal'], lat: 9.7750, lng: 118.7480 },
-  { name: 'Tiniguiban', aliases: ['tiniguiban', 'psu', 'coliseum', 'palawan state'], lat: 9.7680, lng: 118.7420 },
-  { name: 'San Manuel', aliases: ['san manuel', 'manuel', 'bm road'], lat: 9.7610, lng: 118.7620 },
-  { name: 'Santa Monica', aliases: ['santa monica', 'sta. monica', 'sta monica', 'mitra', 'city hall'], lat: 9.7890, lng: 118.7360 },
-  { name: 'Bancao-Bancao', aliases: ['bancao-bancao', 'bancao bancao', 'bancao', 'pristine beach'], lat: 9.7320, lng: 118.7450 },
-  { name: 'Mandaragat', aliases: ['mandaragat', 'lacao', 'manalo'], lat: 9.7430, lng: 118.7370 },
-  { name: 'Sicsican', aliases: ['sicsican', 'fariñas'], lat: 9.8050, lng: 118.7200 },
-  { name: 'Irawan', aliases: ['irawan', 'chattoc', 'flora and fauna'], lat: 9.8150, lng: 118.6850 },
-  { name: 'Tagburos', aliases: ['tagburos', 'fisheries'], lat: 9.8250, lng: 118.7480 },
-  { name: 'Santa Lourdes', aliases: ['santa lourdes', 'sta. lourdes', 'sta lourdes', 'honda bay', 'honda bay wharf'], lat: 9.8450, lng: 118.7350 },
+  { name: 'San Pedro', aliases: ['san pedro', 'san pedro national highway'], lat: 9.754820, lng: 118.748890 },
+  { name: 'San Miguel', aliases: ['san miguel', 'airport', 'rizal ave', 'miguel', 'malvar'], lat: 9.743330, lng: 118.739730 },
+  { name: 'San Jose', aliases: ['san jose', 'new market', 'terminal', 'san jose terminal'], lat: 9.775000, lng: 118.748000 },
+  { name: 'Tiniguiban', aliases: ['tiniguiban', 'psu', 'coliseum', 'palawan state'], lat: 9.768000, lng: 118.742000 },
+  { name: 'San Manuel', aliases: ['san manuel', 'manuel', 'bm road', 'robinsons'], lat: 9.767098, lng: 118.748170 },
+  { name: 'Santa Monica', aliases: ['santa monica', 'sta. monica', 'sta monica', 'mitra', 'city hall', 'capitol'], lat: 9.789000, lng: 118.736000 },
+  { name: 'Bancao-Bancao', aliases: ['bancao-bancao', 'bancao bancao', 'bancao', 'pristine beach'], lat: 9.732000, lng: 118.745000 },
+  { name: 'Mandaragat', aliases: ['mandaragat', 'manalo'], lat: 9.743000, lng: 118.737000 },
+  { name: 'Sicsican', aliases: ['sicsican', 'fariñas'], lat: 9.805000, lng: 118.720000 },
+  { name: 'Irawan', aliases: ['irawan', 'chattoc', 'flora and fauna', 'crocodile farm'], lat: 9.799230, lng: 118.693720 },
+  { name: 'Tagburos', aliases: ['tagburos', 'fisheries'], lat: 9.825000, lng: 118.748000 },
+  { name: 'Santa Lourdes', aliases: ['santa lourdes', 'sta. lourdes', 'sta lourdes', 'honda bay', 'honda bay wharf'], lat: 9.845000, lng: 118.735000 },
 
   // Poblacion / Downtown Districts
-  { name: 'Bagong Silang', aliases: ['bagong silang'], lat: 9.7400, lng: 118.7380 },
-  { name: 'Bagong Sikat', aliases: ['bagong sikat'], lat: 9.7390, lng: 118.7320 },
-  { name: 'Bagong Pag-asa', aliases: ['bagong pag-asa', 'bagong pagasa'], lat: 9.7420, lng: 118.7350 },
-  { name: 'Pagkakaisa', aliases: ['pagkakaisa', 'baywalk', 'port'], lat: 9.7410, lng: 118.7300 },
-  { name: 'Mabuhay', aliases: ['mabuhay'], lat: 9.7440, lng: 118.7340 },
-  { name: 'Model', aliases: ['model', 'barracks'], lat: 9.7450, lng: 118.7390 },
-  { name: 'Milagrosa', aliases: ['milagrosa'], lat: 9.7470, lng: 118.7430 },
-  { name: 'Maningning', aliases: ['maningning'], lat: 9.7450, lng: 118.7410 },
-  { name: 'Maunlad', aliases: ['maunlad'], lat: 9.7460, lng: 118.7370 },
-  { name: 'Manggahan', aliases: ['manggahan'], lat: 9.7480, lng: 118.7380 },
-  { name: 'Masipag', aliases: ['masipag'], lat: 9.7490, lng: 118.7390 },
-  { name: 'Matiyaga', aliases: ['matiyaga'], lat: 9.7470, lng: 118.7360 },
-  { name: 'Princesa', aliases: ['princesa', 'cathedral'], lat: 9.7430, lng: 118.7290 },
-  { name: 'Tagumpay', aliases: ['tagumpay'], lat: 9.7440, lng: 118.7310 },
-  { name: 'Liwanag', aliases: ['liwanag'], lat: 9.7400, lng: 118.7330 },
-  { name: 'Tanglaw', aliases: ['tanglaw'], lat: 9.7390, lng: 118.7350 },
-  { name: 'Maligaya', aliases: ['maligaya'], lat: 9.7430, lng: 118.7360 },
+  { name: 'Tagumpay', aliases: ['tagumpay', 'lacao', 'public market', 'nccc mall', 'mca market'], lat: 9.739197, lng: 118.741160 },
+  { name: 'Model', aliases: ['model', 'barracks', 'mendoza park', 'wwii museum'], lat: 9.740040, lng: 118.737270 },
+  { name: 'Mabuhay', aliases: ['mabuhay', 'plaza cuartel', 'taft st'], lat: 9.739924, lng: 118.729580 },
+  { name: 'Matiyaga', aliases: ['matiyaga', 'baywalk', 'sandoval st'], lat: 9.743914, lng: 118.731650 },
+  { name: 'Tanglaw', aliases: ['tanglaw', 'palawan museum', 'valencia st'], lat: 9.739670, lng: 118.736970 },
+  { name: 'Maligaya', aliases: ['maligaya', 'cathedral', 'onp'], lat: 9.740400, lng: 118.729900 },
+  { name: 'Liwanag', aliases: ['liwanag', 'eulalia park'], lat: 9.740000, lng: 118.733000 },
+  { name: 'Bagong Silang', aliases: ['bagong silang'], lat: 9.740000, lng: 118.738000 },
+  { name: 'Bagong Sikat', aliases: ['bagong sikat'], lat: 9.739000, lng: 118.732000 },
+  { name: 'Bagong Pag-asa', aliases: ['bagong pag-asa', 'bagong pagasa'], lat: 9.742000, lng: 118.735000 },
+  { name: 'Pagkakaisa', aliases: ['pagkakaisa', 'port', 'pier'], lat: 9.741000, lng: 118.730000 },
+  { name: 'Milagrosa', aliases: ['milagrosa'], lat: 9.747000, lng: 118.743000 },
+  { name: 'Maningning', aliases: ['maningning'], lat: 9.745000, lng: 118.741000 },
+  { name: 'Maunlad', aliases: ['maunlad'], lat: 9.746000, lng: 118.737000 },
+  { name: 'Manggahan', aliases: ['manggahan'], lat: 9.748000, lng: 118.738000 },
+  { name: 'Masipag', aliases: ['masipag'], lat: 9.749000, lng: 118.739000 },
+  { name: 'Princesa', aliases: ['princesa'], lat: 9.743000, lng: 118.729000 },
 
   // South & North City Corridors
-  { name: 'Iwahig', aliases: ['iwahig', 'penal colony'], lat: 9.7420, lng: 118.6700 },
-  { name: 'Montible', aliases: ['montible'], lat: 9.7150, lng: 118.6400 },
-  { name: 'Luzviminda', aliases: ['luzviminda'], lat: 9.6650, lng: 118.6780 },
-  { name: 'Mangingisda', aliases: ['mangingisda'], lat: 9.7020, lng: 118.7180 },
-  { name: 'Santa Cruz', aliases: ['santa cruz', 'sta. cruz', 'sta cruz'], lat: 9.6350, lng: 118.6650 },
-  { name: 'Bacungan', aliases: ['bacungan', 'nagtabon'], lat: 9.9050, lng: 118.7050 },
-  { name: 'San Rafael', aliases: ['san rafael', 'rafael'], lat: 9.9650, lng: 118.7800 },
-  { name: 'Cabayugan', aliases: ['cabayugan', 'sabang', 'underground river'], lat: 10.1950, lng: 118.8950 },
-  { name: 'Inagawan', aliases: ['inagawan'], lat: 9.5500, lng: 118.6200 },
-  { name: 'Other / Puerto Princesa Proper', aliases: ['puerto princesa', 'palawan', 'ppc'], lat: 9.7535, lng: 118.7479 }
+  { name: 'Iwahig', aliases: ['iwahig', 'penal colony'], lat: 9.742000, lng: 118.670000 },
+  { name: 'Montible', aliases: ['montible'], lat: 9.715000, lng: 118.640000 },
+  { name: 'Luzviminda', aliases: ['luzviminda'], lat: 9.665000, lng: 118.678000 },
+  { name: 'Mangingisda', aliases: ['mangingisda'], lat: 9.702000, lng: 118.718000 },
+  { name: 'Santa Cruz', aliases: ['santa cruz', 'sta. cruz', 'sta cruz'], lat: 9.635000, lng: 118.665000 },
+  { name: 'Bacungan', aliases: ['bacungan', 'nagtabon'], lat: 9.905000, lng: 118.705000 },
+  { name: 'San Rafael', aliases: ['san rafael', 'rafael'], lat: 9.965000, lng: 118.780000 },
+  { name: 'Cabayugan', aliases: ['cabayugan', 'sabang', 'underground river'], lat: 10.180000, lng: 118.930000 },
+  { name: 'Inagawan', aliases: ['inagawan'], lat: 9.550000, lng: 118.620000 },
+  { name: 'Other / Puerto Princesa Proper', aliases: ['puerto princesa', 'palawan', 'ppc'], lat: 9.7395476, lng: 118.7407811 }
 ];
 
 // Helper to detect barangay from delivery address string and coordinates in Puerto Princesa City
@@ -115,7 +115,7 @@ function generateHeatmapHtml({ points, markers, isDarkMode, heatMode, heatRadius
     ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
     : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
-  const defaultCenter = focusLocation || { lat: 9.7535, lng: 118.7479, zoom: 14 };
+  const defaultCenter = focusLocation || { lat: 9.7395476, lng: 118.7407811, zoom: 14 };
 
   const pointsJson = JSON.stringify(points || []);
   const markersJson = JSON.stringify(markers || []);
@@ -132,18 +132,18 @@ function generateHeatmapHtml({ points, markers, isDarkMode, heatMode, heatRadius
   <style>
     html, body, #map { height: 100%; width: 100%; margin: 0; padding: 0; background: ${isDark ? '#0f172a' : '#f8fafc'}; }
     .store-pin {
-      width: 32px;
-      height: 32px;
-      background: #0033A0;
+      width: 36px;
+      height: 36px;
+      background: #16a34a;
       border: 3px solid #ffffff;
-      border-radius: 50%;
-      box-shadow: 0 4px 12px rgba(0,51,160,0.5);
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(22,163,74,0.5);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-weight: 800;
-      font-size: 14px;
+      font-size: 16px;
       font-family: sans-serif;
     }
     .custom-popup .leaflet-popup-content-wrapper {
@@ -188,17 +188,17 @@ function generateHeatmapHtml({ points, markers, isDarkMode, heatMode, heatRadius
       subdomains: 'abcd'
     }).addTo(map);
 
-    // Add MKC Hub Marker (Puerto Princesa City)
+    // Add MKC Hub Marker (Puerto Princesa City - matching FleetLiveMap)
     const storeIcon = L.divIcon({
-      html: '<div class="store-pin">🍽️</div>',
+      html: '<div class="store-pin">🏬</div>',
       className: '',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
     });
 
-    L.marker([9.7535, 118.7479], { icon: storeIcon, zIndexOffset: 2000 })
+    L.marker([9.7395476, 118.7407811], { icon: storeIcon, zIndexOffset: 2000 })
       .addTo(map)
-      .bindPopup('<div class="custom-popup" style="font-size:13px;line-height:1.4"><b>📍 MKC Foods Central Kitchen</b><br/><span style="color:#64748b">Puerto Princesa City Hub</span></div>');
+      .bindPopup('<div class="custom-popup" style="font-size:13px;line-height:1.4"><b>📍 MKC Foods Corp - Puerto Branch</b><br/><span style="color:#64748b">Central Hub Dispatch (Rizal Ave / Lacao St)</span></div>');
 
     // Heatmap Layer
     let heatLayer = null;
