@@ -404,14 +404,14 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
             )}
           </div>
 
-          <div className={`w-full md:w-96 overflow-y-auto transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700 md:border-l' : 'bg-white border-gray-200 border-t md:border-t-0 md:border-l'}`}>
+          <div className={`w-full md:w-96 overflow-y-auto custom-scrollbar transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700 md:border-l' : 'bg-white border-gray-200 border-t md:border-t-0 md:border-l'}`}>
             <div className="p-4 space-y-4">
               {lastUpdated && (
                 <div className={`text-xs text-center p-2 rounded ${isDarkMode ? 'text-slate-400 bg-slate-800' : 'text-gray-500 bg-gray-50'}`}>Last updated: {lastUpdated.toLocaleTimeString()}</div>
               )}
 
               <div className={`p-4 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-indigo-50'}`}>
-                <h4 className="font-semibold text-theme-primary mb-2 flex items-center"><Route size={16} className="mr-2 text-[#0033A0]" />Road Route Metrics</h4>
+                <h4 className="font-semibold text-theme-primary mb-2 flex items-center"><Route size={16} className={`mr-2 ${isDarkMode ? 'text-blue-400' : 'text-[#0033A0]'}`} />Road Route Metrics</h4>
                 <div className="text-sm text-theme-primary space-y-1">
                   <p>ETA: <span className="font-semibold">{routeEtaMinutes ? `${routeEtaMinutes} min` : 'Calculating...'}</span></p>
                   <p>Distance: <span className="font-semibold">{routeDistanceKm ? `${routeDistanceKm} km` : 'Calculating...'}</span></p>
@@ -420,7 +420,7 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
 
               {delivery?.rider && (
                 <div className={`p-4 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-blue-50'}`}>
-                  <h4 className="font-semibold text-theme-primary mb-3 flex items-center"><User size={16} className="mr-2 text-[#0033A0]" />Rider Information</h4>
+                  <h4 className="font-semibold text-theme-primary mb-3 flex items-center"><User size={16} className={`mr-2 ${isDarkMode ? 'text-blue-400' : 'text-[#0033A0]'}`} />Rider Information</h4>
                   <div className="space-y-2 text-sm">
                     <p><span className="font-medium text-theme-primary">Name:</span> {delivery.rider.full_name}</p>
                     <p><span className="font-medium text-theme-primary">Contact:</span> {delivery.rider.phone_number}</p>

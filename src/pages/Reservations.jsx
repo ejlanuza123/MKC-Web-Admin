@@ -164,7 +164,7 @@ export default function Reservations() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-theme-primary flex items-center gap-2">
-            <CalendarDays className="text-[#0033A0]" size={24} />
+            <CalendarDays className="text-[#0033A0] dark:text-blue-400" size={24} />
             Reservations
           </h1>
           <p className="text-sm text-theme-secondary">Read-only view of customer schedule submissions.</p>

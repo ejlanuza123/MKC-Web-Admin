@@ -209,7 +209,7 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
                 <p className="text-sm text-theme-secondary">{order?.delivery_address}</p>
                 <div className="flex justify-between mt-3 pt-3 border-t">
                   <span className="text-sm text-theme-secondary">Total Amount:</span>
-                  <span className="font-bold text-[#0033A0]">
+                  <span className={`font-bold ${isDarkMode ? 'text-blue-400' : 'text-mkc-blue'}`}>
                     ₱{order?.total_amount?.toFixed(2)}
                   </span>
                 </div>
@@ -236,13 +236,13 @@ export default function AssignRiderModal({ isOpen, onClose, order, onAssigned, a
                     <p className="text-theme-secondary">No active riders available</p>
                   </div>
                 ) : (
-                  <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                  <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                     {riders.map((rider) => (
                         <label
                           key={rider.id}
                           className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors ${
                             selectedRider === rider.id
-                              ? isDarkMode ? 'border-blue-500 bg-blue-900/20' : 'border-[#0033A0] bg-[#E5EEFF]'
+                              ? isDarkMode ? 'border-blue-500 bg-blue-950/50 ring-1 ring-blue-500' : 'border-mkc-blue bg-blue-50'
                               : isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'border-gray-200 hover:bg-gray-50'
                           }`}
                         >
