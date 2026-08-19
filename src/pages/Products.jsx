@@ -433,7 +433,7 @@ export default function Products() {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className={`p-4 rounded-lg border min-w-0 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
           <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>Total Products</p>
-          <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
+          <p className={`text-2xl font-bold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>{stats.total}</p>
         </div>
         <div 
           onClick={() => setStockFilter('low_stock')}
@@ -557,7 +557,7 @@ export default function Products() {
                     <div className="flex justify-between items-center mt-3">
                       <div>
                         <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-400'}`}>Price</p>
-                        <p className="font-bold text-blue-600 text-lg">
+                        <p className={`font-bold text-lg ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
                           {formatCurrency(product.current_price)}
                         </p>
                       </div>

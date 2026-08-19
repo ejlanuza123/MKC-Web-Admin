@@ -664,7 +664,7 @@ export default function Orders() {
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <div className={`p-4 rounded-lg border ${pageCardClass}`}>
           <p className={`text-sm ${mutedTextClass}`}>Total Orders</p>
-          <p className="text-2xl font-bold text-[#0033A0]">{stats.total}</p>
+          <p className={`text-2xl font-bold ${isDarkMode ? 'text-blue-400' : 'text-mkc-blue'}`}>{stats.total}</p>
         </div>
         <div className={`p-4 rounded-lg border ${pageCardClass}`}>
           <p className={`text-sm ${mutedTextClass}`}>Pending</p>

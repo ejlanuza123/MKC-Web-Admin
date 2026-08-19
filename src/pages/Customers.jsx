@@ -387,9 +387,9 @@ const CustomerDetailsModal = React.memo(({ customer, onClose, onAvatarClick, onN
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-blue-50 dark:bg-slate-800 p-3 rounded-lg text-center">
-                <Package size={20} className="text-[#0033A0] mx-auto mb-1" />
+                <Package size={20} className={`${isDarkMode ? 'text-blue-400' : 'text-[#0033A0]'} mx-auto mb-1`} />
                 <p className="text-sm text-gray-600 dark:text-gray-400">Total Orders</p>
-                <p className="font-bold text-[#0033A0]">{stats.totalOrders}</p>
+                <p className={`font-bold ${isDarkMode ? 'text-blue-400' : 'text-[#0033A0]'}`}>{stats.totalOrders}</p>
               </div>
               <div className="bg-green-50 dark:bg-slate-800 p-3 rounded-lg text-center">
                 <DollarSign size={20} className="text-green-600 mx-auto mb-1" />
@@ -458,7 +458,7 @@ const CustomerDetailsModal = React.memo(({ customer, onClose, onAvatarClick, onN
                         <p className="text-xs text-theme-secondary">{formatDate(order.created_at)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-[#0033A0]">{formatCurrency(order.total_amount)}</p>
+                        <p className={`font-bold ${isDarkMode ? 'text-blue-400' : 'text-[#0033A0]'}`}>{formatCurrency(order.total_amount)}</p>
                         <span className={`text-xs px-2 py-1 rounded-full ${
                           order.status === 'Completed' ? 'bg-green-100 text-green-700' :
                           order.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
@@ -886,7 +886,7 @@ export default function Customers() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
           <p className="text-sm text-theme-secondary">Total Customers</p>
-          <p className="text-2xl font-bold text-[#0033A0]">{summaryStats.total}</p>
+          <p className={`text-2xl font-bold ${isDarkMode ? 'text-blue-400' : 'text-[#0033A0]'}`}>{summaryStats.total}</p>
         </div>
         <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
           <p className="text-sm text-theme-secondary">Active This Month</p>
@@ -930,17 +930,24 @@ export default function Customers() {
                   <th className="px-6 py-4 text-left text-xs font-medium text-theme-secondary uppercase">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className={isDarkMode ? 'divide-y divide-slate-700' : 'divide-y divide-gray-200'}>
                 {paginatedCustomers.map((customer) => {
                   const stats = getCustomerStats(customer);
                   return (
-                    <tr key={customer.id} className="hover:bg-theme-secondary transition-colors duration-150">
+                    <tr 
+                      key={customer.id} 
+                      onClick={() => handleViewDetails(customer)}
+                      className={`cursor-pointer transition-colors duration-150 ${isDarkMode ? 'hover:bg-slate-800/80' : 'hover:bg-blue-50/60'}`}
+                    >
                       <td className="px-6 py-4">
                         <div className="flex items-center">
                           {customer.avatar_url ? (
                             <button
                               type="button"
-                              onClick={() => setPreviewImageUrl(customer.avatar_url)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewImageUrl(customer.avatar_url);
+                              }}
                               className="mr-3 rounded-lg"
                               title="View full image"
                             >
@@ -1011,7 +1018,7 @@ export default function Customers() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="font-bold text-[#0033A0]">{formatCurrency(stats.totalSpent)}</p>
+                        <p className={`font-bold ${isDarkMode ? 'text-blue-400' : 'text-[#0033A0]'}`}>{formatCurrency(stats.totalSpent)}</p>
                       </td>
                       <td className="px-6 py-4">
                         {stats.lastOrder ? (
@@ -1029,22 +1036,21 @@ export default function Customers() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex gap-1.5">
-                          <button
-                            onClick={() => handleViewDetails(customer)}
-                            className="p-2 text-[#0033A0] hover:bg-[#E5EEFF] rounded-lg transition-colors duration-150"
-                            title="View Details"
-                          >
-                            <Eye size={18} />
-                          </button>
                           <button 
-                            onClick={() => handleEditClick(customer)}
-                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-150"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditClick(customer);
+                            }}
+                            className="p-2 text-gray-600 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-slate-800 rounded-lg transition-colors duration-150"
                             title="Edit Customer"
                           >
                             <Edit2 size={18} />
                           </button>
                           <button
-                            onClick={() => handleToggleCustomerStatus(customer)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleCustomerStatus(customer);
+                            }}
                             className={`p-2 rounded-lg transition-colors duration-150 ${
                               stats.isActive 
                                 ? (isDarkMode ? 'hover:bg-red-950/50 text-red-400' : 'hover:bg-red-50 text-red-600')

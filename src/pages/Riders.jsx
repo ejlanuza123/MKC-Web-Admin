@@ -903,9 +903,9 @@ const RiderDetailsModal = React.memo(({ rider, onClose, onTrackLive, onChatRider
             {/* Quick Stats */}
             <div className="grid grid-cols-4 gap-3">
               <div className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-blue-50'}`}>
-                <Package size={18} className="text-[#0033A0] mx-auto mb-1" />
+                <Package size={18} className={`${isDarkMode ? 'text-blue-400' : 'text-mkc-blue'} mx-auto mb-1`} />
                 <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}>Total</p>
-                <p className="font-bold text-[#0033A0] text-lg">{stats.total}</p>
+                <p className={`font-bold text-lg ${isDarkMode ? 'text-blue-400' : 'text-mkc-blue'}`}>{stats.total}</p>
               </div>
               <div className={`p-3 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-green-50'}`}>
                 <CheckCircle size={18} className="text-green-600 mx-auto mb-1" />
@@ -1947,7 +1947,7 @@ export default function Riders() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
               <p className="text-sm text-theme-secondary">Total Riders</p>
-              <p className="text-2xl font-bold text-[#0033A0]">{stats.total}</p>
+              <p className={`text-2xl font-bold ${isDarkMode ? 'text-blue-400' : 'text-mkc-blue'}`}>{stats.total}</p>
             </div>
             <div className={`p-4 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
               <p className="text-sm text-theme-secondary">Active Riders</p>
@@ -2070,7 +2070,7 @@ export default function Riders() {
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   <div className={`p-2 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-blue-50'}`}>
                     <p className="text-xs text-theme-secondary">Total</p>
-                    <p className="font-bold text-[#0033A0] text-lg">{riderStats.total}</p>
+                    <p className={`font-bold text-lg ${isDarkMode ? 'text-blue-400' : 'text-mkc-blue'}`}>{riderStats.total}</p>
                   </div>
                   <div className={`p-2 rounded-lg text-center ${isDarkMode ? 'bg-slate-800' : 'bg-green-50'}`}>
                     <p className="text-xs text-theme-secondary">Completed</p>
