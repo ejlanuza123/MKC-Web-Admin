@@ -106,6 +106,75 @@ const ADMIN_MANUAL_SECTIONS = [
   },
 ];
 
+const MKC_STORE_PAUSE_PRESETS = {
+  emergency: [
+    {
+      id: 'severe_weather',
+      title: 'Severe Weather & Typhoon Advisory',
+      reason: 'Kitchen operations and deliveries are temporarily paused due to heavy rainfall and rider safety protocols in the area. Active in-progress orders are being completed safely.',
+    },
+    {
+      id: 'flooding',
+      title: 'Road Flooding / Route Safety Pause',
+      reason: 'Delivery routes in our coverage area are currently impassable due to localized flooding. Deliveries will resume as soon as roads are safe for our riders.',
+    },
+    {
+      id: 'power_outage',
+      title: 'Power Interruption & Kitchen Safety Pause',
+      reason: 'Our commissary is temporarily paused due to a local power interruption. Order preparation and deliveries will resume as soon as power is stabilized.',
+    },
+    {
+      id: 'water_interruption',
+      title: 'Water Service Interruption & Sanitation Hold',
+      reason: 'In compliance with strict food safety standards, kitchen prep is temporarily held during a scheduled utility service interruption. Reopening shortly!',
+    },
+  ],
+  holiday: [
+    {
+      id: 'holiday_closure',
+      title: 'Holiday Operations Notice',
+      reason: 'Our store is observing a scheduled holiday closure. We look forward to serving your food favorites upon reopening! Thank you for your support.',
+    },
+    {
+      id: 'christmas_newyear',
+      title: 'Christmas & New Year Holiday Break',
+      reason: 'Happy Holidays from MKC Foods! Our team is spending quality time with their loved ones. Deliveries will resume following our holiday break schedule.',
+    },
+    {
+      id: 'holy_week',
+      title: 'Holy Week Commissary Schedule',
+      reason: 'Our store is observing Holy Week break. Online ordering and food deliveries will resume promptly after the holiday on our regular schedule.',
+    },
+    {
+      id: 'all_saints_day',
+      title: 'Undas / All Saints’ Day Schedule',
+      reason: 'In observance of All Saints’ Day, kitchen deliveries are paused for the day. Scheduled pre-orders remain open where available.',
+    },
+    {
+      id: 'company_event',
+      title: 'Annual Company General Assembly',
+      reason: 'The MKC Foods team is attending our annual culinary excellence and service workshop. We look forward to cooking for you upon our return!',
+    },
+  ],
+  maintenance: [
+    {
+      id: 'kitchen_sanitation',
+      title: 'Scheduled Kitchen Sanitation & Deep Cleaning',
+      reason: 'We are conducting our periodic kitchen deep cleaning, equipment sanitation, and food safety audit to ensure the highest quality meals for you.',
+    },
+    {
+      id: 'inventory_audit',
+      title: 'Quarterly Inventory & Stock Count',
+      reason: 'Our commissary is currently performing scheduled raw material and ingredient inventory checks. Ordering will resume as soon as the audit concludes.',
+    },
+    {
+      id: 'system_upgrade',
+      title: 'POS & Order System Upgrades',
+      reason: 'We are performing scheduled cloud system maintenance to improve our ordering speed and dispatch performance. Ordering will reopen shortly.',
+    },
+  ],
+};
+
 export default function Settings() {
   const { isDarkMode } = useTheme();
   const { profile, updateProfile } = useAuth();
@@ -133,6 +202,7 @@ export default function Settings() {
   // Store Holiday / Emergency Pause state
   const [storePaused, setStorePaused] = useState(false);
   const [storePauseMode, setStorePauseMode] = useState('open'); // 'open' | 'emergency' | 'holiday' | 'maintenance'
+  const [storePausePresetId, setStorePausePresetId] = useState('');
   const [storePauseTitle, setStorePauseTitle] = useState('');
   const [storePauseReason, setStorePauseReason] = useState('');
   const [storeReopenAt, setStoreReopenAt] = useState('');
@@ -209,13 +279,23 @@ export default function Settings() {
   const fetchStorePauseSettings = async () => {
     try {
       const data = await settingsService.getStorePauseSettings();
+      const currentMode = data.isPaused ? data.mode : 'open';
       setStorePaused(data.isPaused);
-      setStorePauseMode(data.isPaused ? data.mode : 'open');
-      setStorePauseTitle(data.title);
-      setStorePauseReason(data.reason);
-      setStoreReopenAt(data.reopenAt);
-      setStoreAllowPreorders(data.allowPreorders);
-      setStoreAutoReopen(data.autoReopen);
+      setStorePauseMode(currentMode);
+      setStorePauseTitle(data.title || '');
+      setStorePauseReason(data.reason || '');
+      setStoreReopenAt(data.reopenAt || '');
+      setStoreAllowPreorders(data.allowPreorders || false);
+      setStoreAutoReopen(data.autoReopen !== undefined ? data.autoReopen : true);
+
+      if (currentMode !== 'open' && MKC_STORE_PAUSE_PRESETS[currentMode]) {
+        const matched = MKC_STORE_PAUSE_PRESETS[currentMode].find(
+          (p) => p.title === data.title
+        );
+        setStorePausePresetId(matched ? matched.id : 'custom');
+      } else {
+        setStorePausePresetId('');
+      }
     } catch (err) {
       console.error('Error fetching store pause settings:', err);
     }
@@ -225,22 +305,45 @@ export default function Settings() {
     setStorePauseMode(mode);
     if (mode === 'open') {
       setStorePaused(false);
+      setStorePausePresetId('');
       setStorePauseTitle('');
       setStorePauseReason('');
       setStoreReopenAt('');
-    } else if (mode === 'emergency') {
+    } else {
       setStorePaused(true);
-      if (!storePauseTitle) setStorePauseTitle('Severe Weather / Emergency Advisory');
-      if (!storePauseReason) setStorePauseReason('Deliveries are temporarily paused due to inclement weather and road safety conditions in San Pedro. All active in-progress deliveries will be fulfilled safely.');
-    } else if (mode === 'holiday') {
-      setStorePaused(true);
-      if (!storePauseTitle) setStorePauseTitle('Holiday Operations Notice');
-      if (!storePauseReason) setStorePauseReason('Our store is observing a scheduled holiday closure. We look forward to serving your favorites upon reopening!');
-    } else if (mode === 'maintenance') {
-      setStorePaused(true);
-      if (!storePauseTitle) setStorePauseTitle('Scheduled Kitchen & System Maintenance');
-      if (!storePauseReason) setStorePauseReason('We are currently conducting routine kitchen equipment sanitation and inventory counts.');
+      const presets = MKC_STORE_PAUSE_PRESETS[mode] || [];
+      const defaultPreset = presets[0];
+      if (defaultPreset) {
+        setStorePausePresetId(defaultPreset.id);
+        setStorePauseTitle(defaultPreset.title);
+        setStorePauseReason(defaultPreset.reason);
+      } else {
+        setStorePausePresetId('custom');
+      }
     }
+  };
+
+  const handleSelectPreset = (presetId) => {
+    setStorePausePresetId(presetId);
+    if (presetId === 'custom') return;
+
+    const presets = MKC_STORE_PAUSE_PRESETS[storePauseMode] || [];
+    const chosen = presets.find((p) => p.id === presetId);
+    if (chosen) {
+      setStorePauseTitle(chosen.title);
+      setStorePauseReason(chosen.reason);
+    }
+  };
+
+  const handleTitleChange = (val) => {
+    setStorePauseTitle(val);
+    const presets = MKC_STORE_PAUSE_PRESETS[storePauseMode] || [];
+    const matched = presets.find((p) => p.title === val);
+    setStorePausePresetId(matched ? matched.id : 'custom');
+  };
+
+  const handleReasonChange = (val) => {
+    setStorePauseReason(val);
   };
 
   const handleApplyReopenPreset = (hours) => {
@@ -798,14 +901,36 @@ export default function Settings() {
                     : isDarkMode ? 'bg-blue-950/30 border-blue-800/60' : 'bg-blue-50/80 border-blue-200'
                 }`}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Announcement Title Preset Dropdown */}
+                    <div className="md:col-span-2">
+                      <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                        Quick Situation / Announcement Preset
+                      </label>
+                      <select
+                        value={storePausePresetId}
+                        onChange={(e) => handleSelectPreset(e.target.value)}
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                      >
+                        {(MKC_STORE_PAUSE_PRESETS[storePauseMode] || []).map((preset) => (
+                          <option key={preset.id} value={preset.id}>
+                            {preset.title}
+                          </option>
+                        ))}
+                        <option value="custom">✏️ Custom Announcement (Edit Title & Reason Below)</option>
+                      </select>
+                      <p className={`text-xs mt-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        Selecting a preset automatically populates the title and reason below. You can still customize either field freely.
+                      </p>
+                    </div>
+
                     <div>
                       <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                        Announcement Title
+                        Announcement Title (Editable)
                       </label>
                       <input
                         type="text"
                         value={storePauseTitle}
-                        onChange={(e) => setStorePauseTitle(e.target.value)}
+                        onChange={(e) => handleTitleChange(e.target.value)}
                         placeholder="e.g. Severe Weather Closure Notice"
                         className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                       />
@@ -825,12 +950,12 @@ export default function Settings() {
 
                     <div className="md:col-span-2">
                       <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                        Customer Reason &amp; Operational Details (Displayed on Mobile App)
+                        Customer Reason &amp; Operational Details (Displayed on Mobile App, Editable)
                       </label>
                       <textarea
                         rows="3"
                         value={storePauseReason}
-                        onChange={(e) => setStorePauseReason(e.target.value)}
+                        onChange={(e) => handleReasonChange(e.target.value)}
                         placeholder="Explain why deliveries are paused and what customers can expect..."
                         className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                       />
