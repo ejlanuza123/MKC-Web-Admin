@@ -246,6 +246,11 @@ export const pushNotificationService = {
    */
   async markAsRead(notificationId) {
     try {
+      const idStr = String(notificationId || '').trim();
+      if (!notificationId || idStr.startsWith('order-alert-') || idStr.startsWith('local-') || idStr.startsWith('temp-')) {
+        return { success: true, localOnly: true };
+      }
+
       const { error } = await supabase
         .from('notifications')
         .update({ is_read: true })
@@ -283,6 +288,11 @@ export const pushNotificationService = {
    */
   async removeNotification(notificationId) {
     try {
+      const idStr = String(notificationId || '').trim();
+      if (!notificationId || idStr.startsWith('order-alert-') || idStr.startsWith('local-') || idStr.startsWith('temp-')) {
+        return { success: true, localOnly: true };
+      }
+
       const { error } = await supabase
         .from('notifications')
         .delete()
