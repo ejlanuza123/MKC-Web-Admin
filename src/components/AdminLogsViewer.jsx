@@ -795,9 +795,9 @@ export default function AdminLogsViewer({
 
             {/* Raw Metadata Details Dropdown */}
             {showSystemDetails && log.details && (
-              <div className={`mt-3 border p-3 rounded-lg overflow-x-auto ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                <p className={`font-semibold mb-2 uppercase tracking-wider text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Raw System Payload</p>
-                <pre className={`whitespace-pre-wrap ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+              <div className={`mt-3 text-xs border p-3 rounded-lg overflow-x-auto transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                <p className={`font-semibold mb-2 uppercase tracking-wider text-[10px] transition-colors duration-300 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Raw System Payload</p>
+                <pre className={`whitespace-pre-wrap font-mono text-[11px] transition-colors duration-300 ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
                   {JSON.stringify(log.details, null, 2)}
                 </pre>
               </div>
