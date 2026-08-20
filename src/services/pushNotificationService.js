@@ -246,6 +246,7 @@ export const pushNotificationService = {
    */
   async markAsRead(notificationId) {
     try {
+      // If notification is a local in-memory synthesized alert, resolve immediately
       const idStr = String(notificationId || '').trim();
       if (!notificationId || idStr.startsWith('order-alert-') || idStr.startsWith('local-') || idStr.startsWith('temp-')) {
         return { success: true, localOnly: true };
@@ -288,6 +289,7 @@ export const pushNotificationService = {
    */
   async removeNotification(notificationId) {
     try {
+      // If notification is a local in-memory synthesized alert, resolve immediately
       const idStr = String(notificationId || '').trim();
       if (!notificationId || idStr.startsWith('order-alert-') || idStr.startsWith('local-') || idStr.startsWith('temp-')) {
         return { success: true, localOnly: true };
