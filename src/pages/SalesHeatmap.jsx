@@ -76,7 +76,7 @@ const PUERTO_PRINCESA_BARANGAYS = [
   { name: 'San Rafael', aliases: ['san rafael', 'rafael'], lat: 9.965000, lng: 118.780000 },
   { name: 'Cabayugan', aliases: ['cabayugan', 'sabang', 'underground river'], lat: 10.180000, lng: 118.930000 },
   { name: 'Inagawan', aliases: ['inagawan'], lat: 9.550000, lng: 118.620000 },
-  { name: 'Other / Puerto Princesa Proper', aliases: ['puerto princesa', 'palawan', 'ppc'], lat: 9.7395476, lng: 118.7407811 }
+  { name: 'Other / Puerto Princesa Proper', aliases: ['puerto princesa', 'palawan', 'ppc'], lat: 9.73976834848973, lng: 118.7412934387447 }
 ];
 
 // Helper to detect barangay from delivery address string and coordinates in Puerto Princesa City
@@ -115,7 +115,7 @@ function generateHeatmapHtml({ points, markers, isDarkMode, heatMode, heatRadius
     ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
     : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
-  const defaultCenter = focusLocation || { lat: 9.7395476, lng: 118.7407811, zoom: 14 };
+  const defaultCenter = focusLocation || { lat: 9.73976834848973, lng: 118.7412934387447, zoom: 14 };
 
   const pointsJson = JSON.stringify(points || []);
   const markersJson = JSON.stringify(markers || []);
@@ -196,7 +196,7 @@ function generateHeatmapHtml({ points, markers, isDarkMode, heatMode, heatRadius
       iconAnchor: [18, 18]
     });
 
-    L.marker([9.7395476, 118.7407811], { icon: storeIcon, zIndexOffset: 2000 })
+    L.marker([9.73976834848973, 118.7412934387447], { icon: storeIcon, zIndexOffset: 2000 })
       .addTo(map)
       .bindPopup('<div class="custom-popup" style="font-size:13px;line-height:1.4"><b>📍 MKC Foods Corp - Puerto Branch</b><br/><span style="color:#64748b">Central Hub Dispatch (Rizal Ave / Lacao St)</span></div>');
 
