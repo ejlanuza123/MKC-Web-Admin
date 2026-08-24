@@ -1,15 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+// src/components/DeliveryTrackingMap.jsx
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { X, Navigation, Phone, MapPin, User, Clock, Route, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { formatDate, formatOrderNumber } from '../utils/formatters';
+import { formatDate, formatOrderNumber, formatCurrency, formatPhoneNumber } from '../utils/formatters';
 import { useTheme } from '../context/ThemeContext';
+import { PUERTO_PRINCESA_LANDMARKS, detectNearestLandmark } from '../utils/landmarks';
 
-export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
-  const { isDarkMode } = useTheme();
+export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId, isDarkMode: isDarkModeProp }) {
+  const { isDarkMode: themeDarkMode } = useTheme();
+  const isDarkMode = typeof isDarkModeProp === 'boolean' ? isDarkModeProp : !!themeDarkMode;
+
   const [loading, setLoading] = useState(true);
   const [delivery, setDelivery] = useState(null);
   const [riderLocation, setRiderLocation] = useState(null);
-  const [mapHtml, setMapHtml] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState('');
   const [routeEtaMinutes, setRouteEtaMinutes] = useState(null);
@@ -17,31 +20,38 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
   const iframeRef = useRef(null);
   const refreshInterval = useRef(null);
 
-  const fetchRiderLocation = useCallback(async (riderId = null) => {
-    const targetRiderId = riderId || delivery?.rider?.id;
-    if (!targetRiderId) return;
+  useEffect(() => {
+    if (!isOpen || !deliveryId) return;
 
-    try {
-      const { data, error: queryError } = await supabase
-        .from('profiles')
-        .select('address_lat, address_lng, updated_at')
-        .eq('id', targetRiderId)
-        .single();
+    fetchDeliveryDetails();
 
-      if (queryError) throw queryError;
-      if (!data?.address_lat || !data?.address_lng) return;
+    refreshInterval.current = setInterval(() => {
+      fetchRiderLocation();
+    }, 10000);
 
-      setRiderLocation({
-        lat: Number(data.address_lat),
-        lng: Number(data.address_lng),
-      });
-      setLastUpdated(new Date());
-    } catch (err) {
-      console.error('Error fetching rider location:', err);
-    }
-  }, [delivery?.rider?.id]);
+    return () => {
+      if (refreshInterval.current) clearInterval(refreshInterval.current);
+      setRouteEtaMinutes(null);
+      setRouteDistanceKm(null);
+    };
+  }, [isOpen, deliveryId]);
 
-  const fetchDeliveryDetails = useCallback(async () => {
+  useEffect(() => {
+    const onMessage = (event) => {
+      const payload = event.data;
+      if (!payload || payload.source !== 'DELIVERY_TRACKING_MAP') return;
+
+      if (payload.type === 'ROUTE_METRICS') {
+        setRouteEtaMinutes(typeof payload.etaMinutes === 'number' ? payload.etaMinutes : null);
+        setRouteDistanceKm(typeof payload.distanceKm === 'number' ? payload.distanceKm : null);
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
+
+  const fetchDeliveryDetails = async () => {
     try {
       setLoading(true);
       setError('');
@@ -83,57 +93,57 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
     } finally {
       setLoading(false);
     }
-  }, [deliveryId, fetchRiderLocation]);
+  };
 
-  useEffect(() => {
-    if (!isOpen || !deliveryId) return;
+  const fetchRiderLocation = async (riderId = null) => {
+    const targetRiderId = riderId || delivery?.rider?.id;
+    if (!targetRiderId) return;
 
-    fetchDeliveryDetails();
+    try {
+      const { data, error: queryError } = await supabase
+        .from('profiles')
+        .select('address_lat, address_lng, updated_at')
+        .eq('id', targetRiderId)
+        .single();
 
-    refreshInterval.current = setInterval(() => {
-      fetchRiderLocation();
-    }, 10000);
+      if (queryError) throw queryError;
+      if (!data?.address_lat || !data?.address_lng) return;
 
-    return () => {
-      if (refreshInterval.current) clearInterval(refreshInterval.current);
-      setRouteEtaMinutes(null);
-      setRouteDistanceKm(null);
-    };
-  }, [isOpen, deliveryId, fetchDeliveryDetails, fetchRiderLocation]);
+      setRiderLocation({
+        lat: Number(data.address_lat),
+        lng: Number(data.address_lng),
+      });
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Error fetching rider location:', err);
+    }
+  };
 
-  useEffect(() => {
-    const onMessage = (event) => {
-      const payload = event.data;
-      if (!payload || payload.source !== 'DELIVERY_TRACKING_MAP') return;
-
-      if (payload.type === 'ROUTE_METRICS') {
-        setRouteEtaMinutes(typeof payload.etaMinutes === 'number' ? payload.etaMinutes : null);
-        setRouteDistanceKm(typeof payload.distanceKm === 'number' ? payload.distanceKm : null);
-      }
-    };
-
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, []);
-
-  useEffect(() => {
-    if (!delivery || !riderLocation) return;
-    setMapHtml(generateMapHtml(delivery, riderLocation));
-  }, [delivery, riderLocation]);
-
-  useEffect(() => {
-    if (!iframeRef.current?.contentWindow || !riderLocation) return;
-
-    iframeRef.current.contentWindow.postMessage(
-      { type: 'UPDATE_LOCATION', lat: riderLocation.lat, lng: riderLocation.lng },
-      '*'
+  // Calculate nearest landmark for destination address
+  const destinationLandmark = useMemo(() => {
+    if (!delivery?.order?.delivery_lat || !delivery?.order?.delivery_lng) return null;
+    return detectNearestLandmark(
+      Number(delivery.order.delivery_lat),
+      Number(delivery.order.delivery_lng),
+      6.0
     );
-  }, [riderLocation, mapHtml]);
+  }, [delivery?.order?.delivery_lat, delivery?.order?.delivery_lng]);
 
-  const generateMapHtml = (deliveryData, currentLocation) => {
-    const destination = deliveryData?.order?.delivery_lat && deliveryData?.order?.delivery_lng
-      ? { lat: Number(deliveryData.order.delivery_lat), lng: Number(deliveryData.order.delivery_lng) }
+  const mapHtml = useMemo(() => {
+    if (!delivery || !riderLocation) return '';
+
+    const hubPin = {
+      lat: 9.7395463,
+      lng: 118.7386649,
+      name: 'MKC Foods Corporation (Puerto Branch)'
+    };
+
+    const destination = delivery?.order?.delivery_lat && delivery?.order?.delivery_lng
+      ? { lat: Number(delivery.order.delivery_lat), lng: Number(delivery.order.delivery_lng) }
       : { lat: 9.7395463, lng: 118.7386649 };
+
+    const landmarksJson = JSON.stringify(PUERTO_PRINCESA_LANDMARKS);
+    const orderNumber = delivery?.order?.order_number ? formatOrderNumber(delivery.order.order_number, delivery.order.id) : `#${delivery?.order_id || 'ORD'}`;
 
     return `
 <!DOCTYPE html>
@@ -143,27 +153,212 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    html, body, #map { height: 100%; width: 100%; margin: 0; }
-    body { font-family: 'Segoe UI', sans-serif; }
-    .rider { width: 16px; height: 16px; border-radius: 999px; background: #16a34a; border: 3px solid #fff; box-shadow: 0 0 0 7px rgba(22, 163, 74, 0.22); }
-    .dest { width: 16px; height: 16px; border-radius: 999px; background: #dc2626; border: 3px solid #fff; }
+    html, body, #map { height: 100%; width: 100%; margin: 0; padding: 0; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: ${isDarkMode ? '#0f172a' : '#f8fafc'};
+    }
+    .leaflet-container {
+      background: ${isDarkMode ? '#0f172a' : '#f8fafc'} !important;
+    }
+    .leaflet-popup-content-wrapper { 
+      background: ${isDarkMode ? '#1e293b' : '#ffffff'} !important;
+      color: ${isDarkMode ? '#f8fafc' : '#0f172a'} !important;
+      border: ${isDarkMode ? '1px solid #334155' : '1px solid #e2e8f0'} !important;
+      border-radius: 12px; 
+      padding: 4px; 
+      box-shadow: 0 10px 25px rgba(0,0,0,${isDarkMode ? '0.5' : '0.15'}); 
+    }
+    .leaflet-popup-tip {
+      background: ${isDarkMode ? '#1e293b' : '#ffffff'} !important;
+    }
+    .leaflet-popup-close-button {
+      color: ${isDarkMode ? '#94a3b8' : '#64748b'} !important;
+    }
+    .leaflet-control-zoom a {
+      background: ${isDarkMode ? '#1e293b' : '#ffffff'} !important;
+      color: ${isDarkMode ? '#f8fafc' : '#0f172a'} !important;
+      border-color: ${isDarkMode ? '#334155' : '#e2e8f0'} !important;
+    }
+    
+    /* Rider Pulse Pin */
+    .rider-pin { 
+      width: 32px; 
+      height: 32px; 
+      border-radius: 50%; 
+      background: #16a34a; 
+      border: 3px solid #ffffff; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: white; 
+      font-size: 16px; 
+      box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.3), 0 4px 10px rgba(0,0,0,0.3);
+      animation: pulse-ring 2s infinite ease-out;
+    }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6), 0 4px 10px rgba(0,0,0,0.3); }
+      70% { box-shadow: 0 0 0 12px rgba(22, 163, 74, 0), 0 4px 10px rgba(0,0,0,0.3); }
+      100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0), 0 4px 10px rgba(0,0,0,0.3); }
+    }
+
+    /* Destination Pin */
+    .dest-pin { 
+      width: 30px; 
+      height: 30px; 
+      border-radius: 50%; 
+      background: #dc2626; 
+      border: 3px solid #ffffff; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: white; 
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5);
+    }
+
+    /* Store Hub Pin */
+    .store-pin {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: #0033A0;
+      border: 2.5px solid #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(0, 51, 160, 0.5);
+    }
+
+    /* Landmark Category Pin */
+    .landmark-pin {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: ${isDarkMode ? '#334155' : '#f1f5f9'};
+      border: 2px solid ${isDarkMode ? '#64748b' : '#cbd5e1'};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      transition: transform 0.15s ease;
+    }
+    .landmark-pin:hover {
+      transform: scale(1.2);
+      z-index: 9999 !important;
+    }
+
+    /* Layer Control Pill */
+    .map-layer-control {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 1000;
+      background: ${isDarkMode ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.95)'};
+      backdrop-filter: blur(8px);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid ${isDarkMode ? '#334155' : '#e2e8f0'};
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    }
+    .map-layer-btn {
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: transparent;
+      color: ${isDarkMode ? '#94a3b8' : '#64748b'};
+      transition: all 0.2s ease;
+    }
+    .map-layer-btn:hover {
+      background: ${isDarkMode ? '#334155' : '#f1f5f9'};
+      color: ${isDarkMode ? '#f8fafc' : '#0f172a'};
+    }
+    .map-layer-btn.active {
+      background: #0033A0;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,51,160,0.4);
+    }
+    .landmark-toggle-btn {
+      margin-left: 4px;
+      border-left: 1px solid ${isDarkMode ? '#334155' : '#e2e8f0'};
+      padding-left: 8px;
+    }
   </style>
 </head>
 <body>
+  <div class="map-layer-control">
+    <button class="map-layer-btn ${!isDarkMode ? 'active' : ''}" data-layer="street" onclick="setLayer('street')">🗺️ Street</button>
+    <button class="map-layer-btn ${isDarkMode ? 'active' : ''}" data-layer="dark" onclick="setLayer('dark')">🌙 Dark</button>
+    <button class="map-layer-btn" data-layer="satellite" onclick="setLayer('satellite')">🛰️ Satellite</button>
+    <button class="map-layer-btn landmark-toggle-btn active" id="landmarkToggle" onclick="toggleLandmarks()">🏷️ Landmarks</button>
+  </div>
   <div id="map"></div>
   <script>
-    const rider = { lat: ${currentLocation.lat}, lng: ${currentLocation.lng} };
+    const isDark = ${isDarkMode};
+    const rider = { lat: ${riderLocation.lat}, lng: ${riderLocation.lng} };
     const destination = { lat: ${destination.lat}, lng: ${destination.lng} };
+    const store = ${JSON.stringify(hubPin)};
+    const landmarks = ${landmarksJson};
 
-    let map = L.map('map').setView([rider.lat, rider.lng], 14);
+    const map = L.map('map', { zoomControl: true }).setView([rider.lat, rider.lng], 14);
     let riderMarker = null;
     let destinationMarker = null;
+    let storeMarker = null;
+    let landmarkMarkers = [];
+    let showLandmarks = true;
     let routeLine = null;
     let routeArrows = [];
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '©OpenStreetMap, ©CartoDB', subdomains: 'abcd', maxZoom: 19,
-    }).addTo(map);
+    const tileLayers = {
+      street: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '©OpenStreetMap, ©CartoDB', subdomains: 'abcd', maxZoom: 19,
+      }),
+      dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '©OpenStreetMap, ©CartoDB', subdomains: 'abcd', maxZoom: 19,
+      }),
+      satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '©Esri', maxZoom: 19,
+      })
+    };
+
+    let currentLayerKey = isDark ? 'dark' : 'street';
+    let currentTileLayer = tileLayers[currentLayerKey];
+    currentTileLayer.addTo(map);
+
+    function setLayer(layerKey) {
+      if (currentTileLayer) {
+        map.removeLayer(currentTileLayer);
+      }
+      currentLayerKey = layerKey;
+      currentTileLayer = tileLayers[layerKey] || (isDark ? tileLayers.dark : tileLayers.street);
+      currentTileLayer.addTo(map);
+
+      document.querySelectorAll('.map-layer-btn:not(.landmark-toggle-btn)').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.layer === layerKey);
+      });
+    }
+
+    function toggleLandmarks() {
+      showLandmarks = !showLandmarks;
+      document.getElementById('landmarkToggle').classList.toggle('active', showLandmarks);
+      
+      landmarkMarkers.forEach(marker => {
+        if (showLandmarks) {
+          marker.addTo(map);
+        } else {
+          map.removeLayer(marker);
+        }
+      });
+    }
 
     function publishMetrics(distanceKm, etaMinutes) {
       window.parent.postMessage({
@@ -179,7 +374,6 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
         map.removeLayer(routeLine);
         routeLine = null;
       }
-
       if (routeArrows.length > 0) {
         routeArrows.forEach((arrow) => map.removeLayer(arrow));
         routeArrows = [];
@@ -196,9 +390,7 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
     }
 
     function drawRouteArrows(path) {
-      if (!Array.isArray(path) || path.length < 3) {
-        return;
-      }
+      if (!Array.isArray(path) || path.length < 3) return;
 
       if (routeArrows.length > 0) {
         routeArrows.forEach((arrow) => map.removeLayer(arrow));
@@ -218,14 +410,7 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
 
         const arrowIcon = L.divIcon({
           className: '',
-          html:
-            '<div style="' +
-            'transform: rotate(' + bearing + 'deg);' +
-            'color:#0033A0;' +
-            'font-size:14px;' +
-            'font-weight:700;' +
-            'text-shadow:0 0 2px rgba(255,255,255,0.9);' +
-            '">▲</div>',
+          html: '<div style="transform: rotate(' + bearing + 'deg); color:' + (isDark ? '#38bdf8' : '#0033A0') + '; font-size:14px; font-weight:bold; text-shadow:0 0 3px rgba(0,0,0,0.8);">▲</div>',
           iconSize: [14, 14],
           iconAnchor: [7, 7],
         });
@@ -244,15 +429,47 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
     function initMarkers() {
       if (riderMarker) map.removeLayer(riderMarker);
       if (destinationMarker) map.removeLayer(destinationMarker);
+      if (storeMarker) map.removeLayer(storeMarker);
 
+      // Rider Marker
       riderMarker = L.marker([rider.lat, rider.lng], {
-        icon: L.divIcon({ html: '<div class="rider"></div>', className: '', iconSize: [22, 22], iconAnchor: [11, 11] }),
+        icon: L.divIcon({ html: '<div class="rider-pin">🛵</div>', className: '', iconSize: [32, 32], iconAnchor: [16, 16] }),
         zIndexOffset: 1000,
-      }).addTo(map).bindPopup('<b>Rider current location</b>');
+      }).addTo(map).bindPopup('<b>🛵 Rider Live Location</b><br/>En route to customer drop-off');
 
+      // Destination Marker
       destinationMarker = L.marker([destination.lat, destination.lng], {
-        icon: L.divIcon({ html: '<div class="dest"></div>', className: '', iconSize: [22, 22], iconAnchor: [11, 11] }),
-      }).addTo(map).bindPopup('<b>Delivery destination</b>');
+        icon: L.divIcon({ html: '<div class="dest-pin">📍</div>', className: '', iconSize: [30, 30], iconAnchor: [15, 15] }),
+        zIndexOffset: 900,
+      }).addTo(map).bindPopup('<b>📍 Order ${orderNumber}</b><br/>Customer Drop-off Location');
+
+      // Store Hub Marker
+      storeMarker = L.marker([store.lat, store.lng], {
+        icon: L.divIcon({ html: '<div class="store-pin">🏬</div>', className: '', iconSize: [34, 34], iconAnchor: [17, 17] }),
+        zIndexOffset: 850,
+      }).addTo(map).bindPopup('<b>🏬 ' + store.name + '</b><br/>Origin Fulfillment Hub');
+
+      // Puerto Princesa Landmarks Markers
+      landmarkMarkers.forEach(m => map.removeLayer(m));
+      landmarkMarkers = [];
+
+      landmarks.forEach(lm => {
+        if (!lm.lat || !lm.lng) return;
+        const icon = L.divIcon({
+          className: 'landmark-pin',
+          html: lm.icon || '📍',
+          iconSize: [26, 26],
+          iconAnchor: [13, 13]
+        });
+
+        const marker = L.marker([lm.lat, lm.lng], { icon, zIndexOffset: 300 })
+          .bindPopup('<b>' + (lm.icon || '📍') + ' ' + lm.name + '</b><br/><span style="color:#64748b; font-size:11px;">' + lm.category + ' · Brgy. ' + lm.barangay + '</span>' + (lm.address ? '<br/><span style="font-size:11px;">' + lm.address + '</span>' : ''));
+
+        if (showLandmarks) {
+          marker.addTo(map);
+        }
+        landmarkMarkers.push(marker);
+      });
     }
 
     function countTurns(route) {
@@ -303,7 +520,7 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
         ];
 
         routeLine = L.polyline(fullPath, {
-          color: '#0033A0',
+          color: isDark ? '#38bdf8' : '#0033A0',
           weight: 5,
           opacity: 0.9,
           lineJoin: 'round',
@@ -317,11 +534,13 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
         const fallbackPath = [[rider.lat, rider.lng], [destination.lat, destination.lng]];
 
         routeLine = L.polyline([[rider.lat, rider.lng], [destination.lat, destination.lng]], {
-          color: '#0033A0', weight: 4, opacity: 0.7, dashArray: '8 8',
+          color: isDark ? '#38bdf8' : '#0033A0',
+          weight: 4,
+          opacity: 0.7,
+          dashArray: '8 8',
         }).addTo(map);
 
         drawRouteArrows(fallbackPath);
-
         publishMetrics(null, null);
         map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
       }
@@ -346,7 +565,15 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
   </script>
 </body>
 </html>`;
-  };
+  }, [delivery, riderLocation, isDarkMode]);
+
+  useEffect(() => {
+    if (!iframeRef.current?.contentWindow || !riderLocation) return;
+    iframeRef.current.contentWindow.postMessage(
+      { type: 'UPDATE_LOCATION', lat: riderLocation.lat, lng: riderLocation.lng },
+      '*'
+    );
+  }, [riderLocation, mapHtml]);
 
   const callRider = () => {
     if (delivery?.rider?.phone_number) {
@@ -357,9 +584,12 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div className={`rounded-xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-white text-gray-900'}`}>
-        <div className="bg-mkc-blue p-4 flex justify-between items-center">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <div className={`rounded-xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl transition-colors duration-300 ${
+        isDarkMode ? 'bg-slate-900 border border-slate-700' : 'bg-white'
+      }`}>
+        {/* Header */}
+        <div className="bg-petron-blue p-4 flex justify-between items-center">
           <div className="flex items-center">
             <Navigation className="text-white mr-2" size={24} />
             <div>
@@ -375,19 +605,20 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
         </div>
 
         <div className="flex flex-col md:flex-row h-[calc(90vh-80px)]">
-          <div className="flex-1 bg-gray-100 relative">
+          {/* Map Frame Area */}
+          <div className={`flex-1 relative ${isDarkMode ? 'bg-slate-950' : 'bg-gray-100'}`}>
             {loading ? (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0033A0] mx-auto mb-4"></div>
-                  <p className="text-theme-secondary">Loading map...</p>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0033A0] dark:border-blue-400 mx-auto mb-4"></div>
+                  <p className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>Loading live delivery map...</p>
                 </div>
               </div>
             ) : error ? (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center p-6">
                   <AlertCircle size={44} className="mx-auto text-red-500 mb-2" />
-                  <p className="text-red-600 mb-4">{error}</p>
+                  <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
                   <button onClick={fetchDeliveryDetails} className="px-4 py-2 bg-[#0033A0] text-white rounded-lg hover:bg-[#002277]">
                     Retry
                   </button>
@@ -404,55 +635,111 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId }) {
             )}
           </div>
 
-          <div className={`w-full md:w-96 overflow-y-auto custom-scrollbar transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-700 md:border-l' : 'bg-white border-gray-200 border-t md:border-t-0 md:border-l'}`}>
+          {/* Details Sidebar */}
+          <div className={`w-full md:w-96 border-t md:border-t-0 md:border-l overflow-y-auto custom-scrollbar transition-colors duration-300 ${
+            isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'
+          }`}>
             <div className="p-4 space-y-4">
               {lastUpdated && (
-                <div className={`text-xs text-center p-2 rounded ${isDarkMode ? 'text-slate-400 bg-slate-800' : 'text-gray-500 bg-gray-50'}`}>Last updated: {lastUpdated.toLocaleTimeString()}</div>
+                <div className={`text-xs text-center p-2 rounded transition-colors duration-300 ${
+                  isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-50 text-gray-500'
+                }`}>
+                  Last updated: {lastUpdated.toLocaleTimeString()}
+                </div>
               )}
 
-              <div className={`p-4 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-indigo-50'}`}>
-                <h4 className="font-semibold text-theme-primary mb-2 flex items-center"><Route size={16} className={`mr-2 ${isDarkMode ? 'text-blue-400' : 'text-[#0033A0]'}`} />Road Route Metrics</h4>
-                <div className="text-sm text-theme-primary space-y-1">
-                  <p>ETA: <span className="font-semibold">{routeEtaMinutes ? `${routeEtaMinutes} min` : 'Calculating...'}</span></p>
+              {/* ETA and Road Metrics Card */}
+              <div className={`p-4 rounded-lg border transition-colors duration-300 ${
+                isDarkMode ? 'bg-indigo-950/40 border-indigo-900/50' : 'bg-indigo-50 border-indigo-100'
+              }`}>
+                <h4 className={`font-semibold mb-2 flex items-center ${
+                  isDarkMode ? 'text-indigo-200' : 'text-gray-900'
+                }`}>
+                  <Route size={16} className="mr-2 text-[#0033A0] dark:text-indigo-400" />
+                  Live Route Metrics
+                </h4>
+                <div className={`text-sm space-y-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+                  <p>ETA: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{routeEtaMinutes ? `${routeEtaMinutes} min` : 'Calculating...'}</span></p>
                   <p>Distance: <span className="font-semibold">{routeDistanceKm ? `${routeDistanceKm} km` : 'Calculating...'}</span></p>
                 </div>
               </div>
 
+              {/* Rider Info Card */}
               {delivery?.rider && (
-                <div className={`p-4 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-blue-50'}`}>
-                  <h4 className="font-semibold text-theme-primary mb-3 flex items-center"><User size={16} className={`mr-2 ${isDarkMode ? 'text-blue-400' : 'text-[#0033A0]'}`} />Rider Information</h4>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-medium text-theme-primary">Name:</span> {delivery.rider.full_name}</p>
-                    <p><span className="font-medium text-theme-primary">Contact:</span> {delivery.rider.phone_number}</p>
+                <div className={`p-4 rounded-lg border transition-colors duration-300 ${
+                  isDarkMode ? 'bg-blue-950/30 border-blue-900/40' : 'bg-blue-50 border-blue-100'
+                }`}>
+                  <h4 className={`font-semibold mb-3 flex items-center ${
+                    isDarkMode ? 'text-blue-200' : 'text-gray-900'
+                  }`}>
+                    <User size={16} className="mr-2 text-[#0033A0] dark:text-blue-400" />
+                    Assigned Rider
+                  </h4>
+                  <div className={`space-y-2 text-sm ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+                    <p><span className="font-medium">Name:</span> {delivery.rider.full_name}</p>
+                    <p><span className="font-medium">Contact:</span> {formatPhoneNumber(delivery.rider.phone_number)}</p>
                     {delivery.rider.vehicle_type && (
-                      <p><span className="font-medium text-theme-primary">Vehicle:</span> {delivery.rider.vehicle_type} {delivery.rider.vehicle_plate ? `(${delivery.rider.vehicle_plate})` : ''}</p>
+                      <p><span className="font-medium">Vehicle:</span> {delivery.rider.vehicle_type} {delivery.rider.vehicle_plate ? `(${delivery.rider.vehicle_plate})` : ''}</p>
                     )}
                   </div>
                 </div>
               )}
 
+              {/* Destination Details & Landmark Proximity */}
               {delivery?.order && (
-                <div className={`p-4 rounded-lg transition-colors duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'}`}>
-                  <h4 className="font-semibold text-theme-primary mb-3 flex items-center"><MapPin size={16} className="mr-2 text-[#ED1C24]" />Delivery Details</h4>
-                  <p className="text-sm mb-2 text-theme-primary">{delivery.order.delivery_address}</p>
-                  <p className="text-sm"><span className="font-medium text-theme-primary">Amount:</span> ₱{parseFloat(delivery.order.total_amount || 0).toFixed(2)}</p>
+                <div className={`p-4 rounded-lg border transition-colors duration-300 ${
+                  isDarkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-gray-50 border-gray-200'
+                }`}>
+                  <h4 className={`font-semibold mb-3 flex items-center ${
+                    isDarkMode ? 'text-slate-100' : 'text-gray-900'
+                  }`}>
+                    <MapPin size={16} className="mr-2 text-[#ED1C24]" />
+                    Delivery Destination
+                  </h4>
+                  <p className={`text-sm mb-2 ${isDarkMode ? 'text-slate-300' : 'text-gray-800'}`}>
+                    {delivery.order.delivery_address}
+                  </p>
+                  
+                  {/* Nearest Landmark Badge */}
+                  {destinationLandmark && (
+                    <div className={`mt-2 p-2.5 rounded-lg border flex items-start gap-2 text-xs transition-colors duration-300 ${
+                      isDarkMode ? 'bg-slate-800 border-slate-600 text-slate-200' : 'bg-white border-blue-100 text-slate-700 shadow-sm'
+                    }`}>
+                      <span className="text-base">{destinationLandmark.icon || '📍'}</span>
+                      <div>
+                        <p className="font-bold">{destinationLandmark.name}</p>
+                        <p className={`text-[11px] ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                          {destinationLandmark.formattedDistance} away · Brgy. {destinationLandmark.barangay}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <p className={`text-sm mt-3 ${isDarkMode ? 'text-slate-300' : 'text-gray-800'}`}>
+                    <span className="font-medium">Amount:</span> {formatCurrency(delivery.order.total_amount || 0)}
+                  </p>
                 </div>
               )}
 
+              {/* Delivery Status Timeline */}
               {delivery && (
-                <div className={`border p-4 rounded-lg text-sm space-y-2 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
-                  <h4 className="font-semibold text-theme-primary">Delivery Status</h4>
-                  <p><span className="text-theme-secondary">Status:</span> <span className="font-medium text-theme-primary">{delivery.status}</span></p>
-                  {delivery.assigned_at && <p><span className="text-theme-secondary">Assigned:</span> {formatDate(delivery.assigned_at)}</p>}
-                  {delivery.picked_up_at && <p><span className="text-theme-secondary">Picked Up:</span> {formatDate(delivery.picked_up_at)}</p>}
-                  {delivery.delivered_at && <p><span className="text-theme-secondary">Delivered:</span> {formatDate(delivery.delivered_at)}</p>}
+                <div className={`p-4 rounded-lg border text-sm space-y-2 transition-colors duration-300 ${
+                  isDarkMode ? 'bg-slate-800/80 border-slate-700 text-slate-300' : 'bg-white border-gray-200 text-gray-700'
+                }`}>
+                  <h4 className={`font-semibold ${isDarkMode ? 'text-slate-100' : 'text-gray-900'}`}>Delivery Status</h4>
+                  <p><span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>Status:</span> <span className="font-semibold text-blue-600 dark:text-blue-400">{delivery.status}</span></p>
+                  {delivery.assigned_at && <p><span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>Assigned:</span> {formatDate(delivery.assigned_at)}</p>}
+                  {delivery.picked_up_at && <p><span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>Picked Up:</span> {formatDate(delivery.picked_up_at)}</p>}
+                  {delivery.delivered_at && <p><span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>Delivered:</span> {formatDate(delivery.delivered_at)}</p>}
                 </div>
               )}
 
               <button
                 onClick={callRider}
                 disabled={!delivery?.rider?.phone_number}
-                className={`w-full py-2.5 border rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${isDarkMode ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                className={`w-full py-2.5 rounded-lg border font-medium transition-colors duration-300 disabled:opacity-50 flex items-center justify-center gap-2 ${
+                  isDarkMode ? 'border-slate-600 text-slate-200 hover:bg-slate-800' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
               >
                 <Phone size={18} />
                 Call Rider
