@@ -389,6 +389,16 @@ export const PUERTO_PRINCESA_LANDMARKS = [
     barangay: 'Santa Lourdes', 
     lat: 9.890380, 
     lng: 118.808800 
+  },
+  { 
+    name: 'MKC Foods Corporation (Puerto Branch)', 
+    address: 'Puerto Princesa City',
+    aliases: ['mkc', 'mkc foods', 'mkc hub', 'mkc puerto'], 
+    category: 'Central Hub', 
+    icon: '🏬', 
+    barangay: 'Tagumpay', 
+    lat: 9.73976834848973, 
+    lng: 118.7412934387447 
   }
 ];
 

@@ -121,7 +121,7 @@ export default function FleetLiveMap({ isDarkMode: isDarkModeProp, onSelectOrder
   // Generate Leaflet HTML String for iframe map rendering with dark mode & tile layer support
   const mapHtml = useMemo(() => {
     // Store origin
-    const storePin = { lat: 9.7395463, lng: 118.7386649, name: 'MKC Foods Corporation (Puerto Branch)' };
+    const storePin = { lat: 9.73976834848973, lng: 118.7412934387447, name: 'MKC Foods Corporation (Puerto Branch)' };
 
     // Format riders data for Leaflet
     const riderMarkers = filteredRiders

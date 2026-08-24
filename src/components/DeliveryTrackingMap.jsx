@@ -133,14 +133,14 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId, isDar
     if (!delivery || !riderLocation) return '';
 
     const hubPin = {
-      lat: 9.7395463,
-      lng: 118.7386649,
+      lat: 9.73976834848973,
+      lng: 118.7412934387447,
       name: 'MKC Foods Corporation (Puerto Branch)'
     };
 
     const destination = delivery?.order?.delivery_lat && delivery?.order?.delivery_lng
       ? { lat: Number(delivery.order.delivery_lat), lng: Number(delivery.order.delivery_lng) }
-      : { lat: 9.7395463, lng: 118.7386649 };
+      : { lat: 9.73976834848973, lng: 118.7412934387447 };
 
     const landmarksJson = JSON.stringify(PUERTO_PRINCESA_LANDMARKS);
     const orderNumber = delivery?.order?.order_number ? formatOrderNumber(delivery.order.order_number, delivery.order.id) : `#${delivery?.order_id || 'ORD'}`;
