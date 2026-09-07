@@ -111,9 +111,6 @@ function detectBarangay(address, lat, lng) {
 // Generate Leaflet Heatmap HTML for MKC Foods
 function generateHeatmapHtml({ points, markers, isDarkMode, heatMode, heatRadius, heatBlur, focusLocation }) {
   const isDark = isDarkMode;
-  const tileUrl = isDark 
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
   const defaultCenter = focusLocation || { lat: 9.73976834848973, lng: 118.7412934387447, zoom: 14 };
 
@@ -131,6 +128,9 @@ function generateHeatmapHtml({ points, markers, isDarkMode, heatMode, heatRadius
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
   <style>
     html, body, #map { height: 100%; width: 100%; margin: 0; padding: 0; background: ${isDark ? '#0f172a' : '#f8fafc'}; }
+    .dark-tiles {
+      filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7) !important;
+    }
     .store-pin {
       width: 36px;
       height: 36px;
@@ -182,10 +182,10 @@ function generateHeatmapHtml({ points, markers, isDarkMode, heatMode, heatRadius
 
     const map = L.map('map', { zoomControl: true }).setView([defaultCenter.lat, defaultCenter.lng], defaultCenter.zoom || 14);
 
-    L.tileLayer('${tileUrl}', {
-      attribution: '© OpenStreetMap, © CartoDB',
-      maxZoom: 19,
-      subdomains: 'abcd'
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      className: ${isDark ? "'dark-tiles'" : "''"},
+      maxZoom: 19
     }).addTo(map);
 
     // Add MKC Hub Marker (Puerto Princesa City - matching FleetLiveMap)
