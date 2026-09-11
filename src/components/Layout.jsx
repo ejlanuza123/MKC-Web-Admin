@@ -27,7 +27,8 @@ import {
   Settings,
   Volume2,
   VolumeX,
-  Flame
+  Flame,
+  Radio
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import mkcLogo from '../assets/images/mkc-logo.png';
@@ -412,7 +413,7 @@ const Sidebar = memo(({
     const currentPath = location.pathname;
     const navItems = [
       '/', '/orders', '/reservations', '/products', 
-      '/customers', '/riders', '/reviews', '/reports', '/audit-logs'
+      '/customers', '/riders', '/reviews', '/reports', '/heatmap', '/broadcast', '/audit-logs'
     ];
     const currentIndex = navItems.findIndex(item => item === currentPath);
     const newIndex = navItems.findIndex(item => item === to);
@@ -445,6 +446,7 @@ const Sidebar = memo(({
     { to: '/reviews', icon: Star, label: 'Reviews' },
     { to: '/reports', icon: FileText, label: 'Reports' },
     { to: '/heatmap', icon: Flame, label: 'Sales Heatmap' },
+    { to: '/broadcast', icon: Radio, label: 'Broadcast' },
     { to: '/audit-logs', icon: FileText, label: 'Audit Logs' }
   ];
 
@@ -663,7 +665,7 @@ const MobileHeader = memo(({
 
   const onNavigate = (to) => {
     const currentPath = location.pathname;
-    const navItems = ['/', '/orders', '/reservations', '/products', '/customers', '/riders', '/reviews', '/reports', '/audit-logs', '/settings'];
+    const navItems = ['/', '/orders', '/reservations', '/products', '/customers', '/riders', '/reviews', '/reports', '/heatmap', '/broadcast', '/audit-logs', '/settings'];
     const currentIndex = navItems.indexOf(currentPath);
     const newIndex = navItems.indexOf(to);
     
