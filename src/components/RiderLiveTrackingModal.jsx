@@ -3,6 +3,7 @@ import { X, MapPin, Phone, User, Truck, AlertCircle, Navigation, Route, RefreshC
 import { supabase } from '../lib/supabase';
 import { retryAsync } from '../utils/retry';
 import { formatOrderNumber } from '../utils/formatters';
+import { MKC_CENTRAL_HUB_COORDINATES } from '../utils/landmarks';
 
 export default function RiderLiveTrackingModal({ isOpen, onClose, rider, isDarkMode }) {
   const [riderLocation, setRiderLocation] = useState(null);
@@ -78,8 +79,8 @@ export default function RiderLiveTrackingModal({ isOpen, onClose, rider, isDarkM
       if (!profileData) throw new Error('Rider profile not found');
 
       setRiderLocation({
-        lat: profileData.address_lat || 9.7534772,
-        lng: profileData.address_lng || 118.7478688,
+        lat: profileData.address_lat || MKC_CENTRAL_HUB_COORDINATES.lat,
+        lng: profileData.address_lng || MKC_CENTRAL_HUB_COORDINATES.lng,
         isOnline: profileData.is_online,
         lastSeen: profileData.last_seen,
       });

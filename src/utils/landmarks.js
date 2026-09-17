@@ -403,6 +403,18 @@ export const PUERTO_PRINCESA_LANDMARKS = [
 ];
 
 /**
+ * Standard Central Hub coordinates for MKC Foods Corporation (Puerto Branch)
+ */
+export const MKC_CENTRAL_HUB_COORDINATES = {
+  lat: 9.73976834848973,
+  lng: 118.7412934387447,
+  name: 'MKC Foods Corporation (Puerto Branch)',
+  category: 'Central Hub',
+  barangay: 'Tagumpay',
+  address: 'Puerto Princesa City'
+};
+
+/**
  * Calculate Haversine distance in kilometers between two GPS coordinates
  */
 export function calculateDistanceKm(lat1, lon1, lat2, lon2) {
