@@ -137,6 +137,32 @@ describe('BroadcastNotifications Page (MKC)', () => {
     });
   });
 
+  it('displays error banner when broadcast dispatch fails', async () => {
+    mocks.sendBroadcast.mockResolvedValueOnce({
+      success: false,
+      error: 'new row for relation "notifications" violates check constraint "notifications_type_check"'
+    });
+
+    render(<BroadcastNotifications />);
+
+    const titleInput = screen.getByPlaceholderText(/e.g. 🍗 Friday Special Promo/i);
+    const messageInput = screen.getByPlaceholderText(/Order now and get 10% off on all fried chicken platters/i);
+
+    fireEvent.change(titleInput, { target: { value: 'Failed Test' } });
+    fireEvent.change(messageInput, { target: { value: 'Testing error banner display' } });
+
+    const submitBtn = screen.getByText(/Review & Dispatch Broadcast/i);
+    fireEvent.click(submitBtn);
+
+    const confirmBtn = await screen.findByText('Yes, Dispatch Now');
+    fireEvent.click(confirmBtn);
+
+    const errorHeading = await screen.findByText('Failed to Dispatch Broadcast');
+    expect(errorHeading).toBeTruthy();
+    expect(screen.getByText(/violates check constraint "notifications_type_check"/i)).toBeTruthy();
+    expect(screen.getByText(/030_broadcast_notifications.sql/i)).toBeTruthy();
+  });
+
   it('switches to history tab and displays past broadcasts', async () => {
     render(<BroadcastNotifications />);
 

@@ -155,6 +155,7 @@ export default function BroadcastNotifications() {
           success: false,
           error: result.error || 'Failed to dispatch broadcast'
         });
+        setShowConfirmModal(false);
       }
     } catch (err) {
       console.error('Broadcast error:', err);
@@ -162,6 +163,7 @@ export default function BroadcastNotifications() {
         success: false,
         error: err?.message || 'Failed to send broadcast'
       });
+      setShowConfirmModal(false);
     } finally {
       setIsSending(false);
     }
@@ -248,6 +250,36 @@ export default function BroadcastNotifications() {
             <button 
               onClick={() => setSendResult(null)}
               className="p-1 rounded-lg hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+
+        {sendResult && !sendResult.success && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mb-6 p-4 rounded-xl bg-red-500/15 border border-red-500/30 text-red-600 dark:text-red-400 flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-sm">Failed to Dispatch Broadcast</p>
+                <p className="text-xs opacity-90">
+                  {sendResult.error}
+                </p>
+                {sendResult.error?.includes('notifications_type_check') && (
+                  <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400 mt-1">
+                    💡 Tip: Please run migration <code>030_broadcast_notifications.sql</code> in your Supabase SQL Editor to allow broadcast notification types.
+                  </p>
+                )}
+              </div>
+            </div>
+            <button 
+              onClick={() => setSendResult(null)}
+              className="p-1 rounded-lg hover:bg-red-500/20 text-red-700 dark:text-red-300"
             >
               <X className="w-4 h-4" />
             </button>

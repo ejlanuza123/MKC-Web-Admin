@@ -592,7 +592,7 @@ export default function DeliveryTrackingMap({ isOpen, onClose, deliveryId, isDar
         isDarkMode ? 'bg-slate-900 border border-slate-700' : 'bg-white'
       }`}>
         {/* Header */}
-        <div className="bg-petron-blue p-4 flex justify-between items-center">
+        <div className="bg-mkc-blue p-4 flex justify-between items-center">
           <div className="flex items-center">
             <Navigation className="text-white mr-2" size={24} />
             <div>

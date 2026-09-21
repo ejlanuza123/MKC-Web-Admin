@@ -98,7 +98,7 @@ export default function RiderTrackingModal({ isOpen, onClose, order, delivery })
       <div className={`rounded-xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-hidden transition-colors duration-300 ${
         isDarkMode ? 'bg-slate-900 border border-slate-700' : 'bg-white'
       }`}>
-        <div className="bg-petron-blue p-6 flex justify-between items-center">
+        <div className="bg-mkc-blue p-6 flex justify-between items-center">
           <h3 className="text-xl font-bold text-white flex items-center">
             <Navigation className="mr-2" size={24} />
             Track Delivery - Order {formatOrderNumber(order?.order_number, order?.id)}
