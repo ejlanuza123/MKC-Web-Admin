@@ -11,7 +11,7 @@ export const receiptService = {
   generateOfficialPDF(order, storeInfo = {}) {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const storeName = storeInfo.name || 'MKC FOODS CORPORATION';
-    const storeAddress = storeInfo.address || 'San Pedro Commercial District, Laguna';
+    const storeAddress = storeInfo.address || 'Rizal Ave cor. Lacao St, Brgy. Tagumpay, Puerto Princesa City, Palawan';
     const storePhone = storeInfo.phone || '+63 (02) 8888-5555';
     const storeTin = storeInfo.tin || 'TIN: 987-654-321-000 VAT Reg.';
     const isVatRegistered = storeInfo.isVatRegistered !== false; // Default true (12% VAT Inclusive)
@@ -167,7 +167,7 @@ export const receiptService = {
    */
   printThermalPOS(order, storeInfo = {}) {
     const storeName = storeInfo.name || 'MKC FOODS CORPORATION';
-    const storeAddress = storeInfo.address || 'San Pedro Commercial District, Laguna';
+    const storeAddress = storeInfo.address || 'Rizal Ave cor. Lacao St, Brgy. Tagumpay, Puerto Princesa City, Palawan';
     const storePhone = storeInfo.phone || '+63 (02) 8888-5555';
 
     const orderNum = String(order.order_number || order.id || '').slice(0, 10).toUpperCase();
