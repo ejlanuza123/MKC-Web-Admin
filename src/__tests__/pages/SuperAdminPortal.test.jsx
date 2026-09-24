@@ -65,12 +65,12 @@ describe('SuperAdminPortal (MKC)', () => {
     render(<SuperAdminPortal />);
 
     const mainDashboardBtn = screen.getByRole('button', { name: /main dashboard/i });
-    expect(mainDashboardBtn).toBeInTheDocument();
+    expect(mainDashboardBtn).toBeTruthy();
     fireEvent.click(mainDashboardBtn);
     expect(mocks.useNavigate).toHaveBeenCalledWith('/');
 
     const signOutBtn = screen.getByRole('button', { name: /sign out/i });
-    expect(signOutBtn).toBeInTheDocument();
+    expect(signOutBtn).toBeTruthy();
     fireEvent.click(signOutBtn);
     expect(mocks.signOut).toHaveBeenCalled();
   });

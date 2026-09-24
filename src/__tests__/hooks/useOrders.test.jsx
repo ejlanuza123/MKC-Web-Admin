@@ -72,6 +72,11 @@ describe('useOrders', () => {
   });
 
   it('handles realtime insert events', async () => {
+    mocks.orderService.getById.mockResolvedValueOnce({
+      id: 'o-2',
+      status: 'Processing',
+    });
+
     const { result } = renderHook(() => useOrders());
 
     await waitFor(() => {
@@ -79,8 +84,8 @@ describe('useOrders', () => {
       expect(typeof realtimeCallback).toBe('function');
     });
 
-    act(() => {
-      realtimeCallback({
+    await act(async () => {
+      await realtimeCallback({
         eventType: 'INSERT',
         new: { id: 'o-2', status: 'Processing' },
       });
@@ -102,8 +107,13 @@ describe('useOrders', () => {
     });
     expect(result.current.selectedOrder).toEqual({ id: 'o-1', status: 'Pending' });
 
-    act(() => {
-      realtimeCallback({
+    mocks.orderService.getById.mockResolvedValue({
+      id: 'o-1',
+      status: 'Completed',
+    });
+
+    await act(async () => {
+      await realtimeCallback({
         eventType: 'UPDATE',
         new: { id: 'o-1', status: 'Completed' },
       });
@@ -279,6 +289,11 @@ describe('useOrders', () => {
   });
 
   it('handles realtime INSERT event and prepends new order', async () => {
+    mocks.orderService.getById.mockResolvedValueOnce({
+      id: 'o-new',
+      status: 'Pending',
+    });
+
     const { result } = renderHook(() => useOrders());
 
     await waitFor(() => {
@@ -286,8 +301,8 @@ describe('useOrders', () => {
       expect(typeof realtimeCallback).toBe('function');
     });
 
-    act(() => {
-      realtimeCallback({
+    await act(async () => {
+      await realtimeCallback({
         eventType: 'INSERT',
         new: { id: 'o-new', status: 'Pending' },
       });

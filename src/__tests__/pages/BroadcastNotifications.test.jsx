@@ -146,7 +146,7 @@ describe('BroadcastNotifications Page (MKC)', () => {
     render(<BroadcastNotifications />);
 
     const titleInput = screen.getByPlaceholderText(/e.g. 🍗 Friday Special Promo/i);
-    const messageInput = screen.getByPlaceholderText(/Order now and get 10% off on all fried chicken platters/i);
+    const messageInput = screen.getByPlaceholderText(/Enjoy 15% off all MKC Platters/i);
 
     fireEvent.change(titleInput, { target: { value: 'Failed Test' } });
     fireEvent.change(messageInput, { target: { value: 'Testing error banner display' } });
